@@ -1,0 +1,20 @@
+{
+    "1" : {
+	"opcode" : 1,
+	"cmd" : 2,
+	"data" : "datablahblah"
+    },
+
+    "2" : {
+	"opcode" : 2,
+	"cmd" : 2,
+	"data2" : 100
+    },
+
+    "3" : {
+	"opcode" : 3,
+	"cmd" : 2,
+	"data3" : 3.14
+    }
+
+}

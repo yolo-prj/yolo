@@ -16,6 +16,7 @@ class YHeartbeatManager
 {
 public:
     YHeartbeatManager();
+    YHeartbeatManager(YNetworkManager* manager);
     ~YHeartbeatManager();
 
     inline void setConnectionLostListener(YConnectionLostListener* listener) {

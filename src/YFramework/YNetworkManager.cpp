@@ -147,7 +147,8 @@ YNetworkManager::start()
     {
 	if(_server)
 	{
-	    _tcpServer = new YTcpServer(_tcpAddr, _tcpPort);
+	    //_tcpServer = new YTcpServer(_tcpAddr, _tcpPort);
+	    _tcpServer = new YTcpServer(_tcpPort);
 	    _tcpServer->setTcpConnectionEvent(this);
 	    _tcpServer->setTcpReceiveDataEvent(this);
 
@@ -383,6 +384,7 @@ YNetworkManager::onReceiveDatagram(string remoteaddr, ushort port, byte* data, u
 
     if(opcode != OPCODE_HEARTBEAT)
     {
+    cout << "onreceivedatagram" << endl;
 	auto itr = _listenerMap.find(opcode);
 	if(itr != _listenerMap.end())
 	{
@@ -415,12 +417,23 @@ YNetworkManager::sendUdpDatagram(uint opcode, byte* data, uint length)
 void
 YNetworkManager::sendTcpPacket(int handle, uint opcode, byte* data, uint length)
 {
-    auto itr = _streamInfoMap.find(handle);
-    
-    if(itr != _streamInfoMap.end()) {
-	YTcpSession* session = itr->second.session;
+    if(handle != 0)
+    {
+	auto itr = _streamInfoMap.find(handle);
+	
+	if(itr != _streamInfoMap.end()) {
+	    YTcpSession* session = itr->second.session;
 
-	session->send(data, length);
+	    session->send(data, length);
+	}
+    }
+    else
+    {
+	for(auto stream : _streamInfoMap) {
+	    YTcpSession* session = stream.second.session;
+
+	    session->send(data, length);
+	}
     }
 }
 

@@ -8,14 +8,15 @@ BIN_SO=libYFramework.so
 BIN_ARM=jsontest_arm
 OPTION=-std=c++11
 OBJECT=YMessage.o YMessageFormatParser.o YHeartbeatManager.o YNetworkManager.o
-BOOSTLIB=-lboost_system -lboost_thread
+BOOSTLIB=-lboost_system -lboost_thread -lpthread
 LINK_LIB=$(BOOSTLIB) -lYComm
 
 all: $(OBJECT) $(BIN).cc clienttest.cc
 	$(CC) $(OPTION) -o $(BIN) $(INCLUDE) $(BIN).cc $(OBJECT) $(LINK_LIB)
 	$(CC) $(OPTION) -o clienttest $(INCLUDE) clienttest.cc $(OBJECT) $(LINK_LIB)
 so: $(OBJECT)
-	$(CC) $(OPTION) $(INCLUDE) -shared -o $(BIN_SO) $(OBJECT)
+	$(CC) $(OPTION) $(INCLUDE) -shared -o $(BIN_SO) $(OBJECT) $(LINK_LIB)
+	sudo cp $(BIN_SO) /usr/local/lib
 	mv $(BIN_SO) $(LIBDIR)
 YMessage.o: $(HEADERDIR)/YMessage.h YMessage.cpp
 	$(CC) $(OPTION) -c -fPIC $(INCLUDE) YMessage.cpp

@@ -14,6 +14,17 @@ YHeartbeatManager::YHeartbeatManager()
     _heartbeatReceived = false;
 }
 
+YHeartbeatManager::YHeartbeatManager(YNetworkManager* manager)
+{
+    _connLostListener = nullptr;
+    _networkManager = nullptr;
+    _sendHeartbeatThread = nullptr;
+    _continueSend = false;
+    _continueCheck = false;
+    _heartbeatReceived = false;
+    setNetworkManager(manager);
+}
+
 YHeartbeatManager::~YHeartbeatManager()
 {
     stopHeartbeat();
@@ -99,7 +110,7 @@ YHeartbeatManager::checkHeartbeatThread()
 {
     const uint period = 1000;		// ms
     const uint loopPeriod = 100;	// ms
-    const uint timeout = period * 4;	//ms
+    const uint timeout = period * 3;	//ms
     uint counter = 0;
 
     while(_continueCheck)

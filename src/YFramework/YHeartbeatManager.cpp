@@ -18,7 +18,7 @@ YHeartbeatManager::~YHeartbeatManager()
 }
 
 void
-YHeartbeatManager::receivedHeartbeat(byte* data, uint length)
+YHeartbeatManager::receivedHeartbeat(string addr, ushort port, byte* data, uint length)
 {
     cout << "received heartbeat" << endl;
     // reset timeout timer

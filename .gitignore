@@ -1,0 +1,5 @@
+lib/
+*.o
+*.swp
+*.so
+*test

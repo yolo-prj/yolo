@@ -72,7 +72,7 @@ YNetworkManager::readConfiguration(string filepath)
     key = SECTION_TCP;
     key.append(KEY_PORT);
     _tcpPort = pt.get<ushort>(key);
-    cout << "tcp addr : " << _hbAddr << ", port : " << _hbPort << ", server : " << _server << endl;
+    cout << "tcp addr : " << _tcpAddr << ", port : " << _tcpPort << ", server : " << _server << endl;
 
     key = SECTION_UDP;
     key.append(KEY_IPADDR);
@@ -398,7 +398,8 @@ YNetworkManager::onReceiveDatagram(string remoteaddr, ushort port, byte* data, u
     {
 	// call-back data receive
 	// Heartbeat
-	_heartbeat->receivedHeartbeat(remoteaddr, port, data, length);
+	if(_heartbeat != nullptr)
+	    _heartbeat->receivedHeartbeat(remoteaddr, port, data, length);
     }
 }
 

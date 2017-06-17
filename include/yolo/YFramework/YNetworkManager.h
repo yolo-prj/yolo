@@ -72,6 +72,8 @@ public:
     void sendUdpDatagram(uint opcode, byte* data, uint length);
     void sendTcpPacket(int handle, uint opcode, byte* data, uint length);
 
+    inline void setHeartbeatManager(YHeartbeatManager* hb) { _heartbeat = hb; }
+
 private:
     void readConfiguration(string filepath);
     void dispatchMessage(uint opcode, byte* data, uint length);

@@ -4,6 +4,9 @@
 #include <yolo/YFramework/YNetworkManager.h>
 #include <yolo/YFramework/YConnectionLostListener.h>
 #include <boost/thread.hpp>
+#include <map>
+
+using namespace std;
 
 namespace yolo
 {
@@ -28,13 +31,21 @@ public:
 
 private:
     void sendHeartbeatThread();
+    void checkHeartbeatThread();
+
 
 private:
     YConnectionLostListener*	_connLostListener;
     YNetworkManager*		_networkManager;
 
     boost::thread*		_sendHeartbeatThread;
+    boost::thread*		_checkHeartbeatThread;
     bool			_continueSend;
+    bool			_continueCheck;
+    bool			_heartbeatReceived;
+
+    map<string, uint>		_timeoutMap;
+    boost::mutex		_mutex;
 };
 
 }

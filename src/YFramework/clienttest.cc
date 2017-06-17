@@ -3,12 +3,13 @@
 #include <yolo/YFramework/YMessageFormatParser.h>
 #include <yolo/YFramework/YNetworkMessageListener.h>
 #include <yolo/YFramework/YHeartbeatManager.h>
+#include <yolo/YFramework/YConnectionLostListener.h>
 
 
 using namespace std;
 using namespace yolo;
 
-class TestClient : public YNetworkMessageListener
+class TestClient : public YNetworkMessageListener, public YConnectionLostListener
 {
 public:
     TestClient(YNetworkManager* manager, YHeartbeatManager* hb) { 
@@ -16,9 +17,14 @@ public:
 	this->hb = hb;
 
 	hb->setNetworkManager(manager);
+	manager->setHeartbeatManager(hb);
     } 
     void onReceiveMessage(byte* data, uint length)
     {
+    }
+
+    void connectionLost(string addr, ushort port) {
+	cout << "connection lost : " << addr << " , " << port << endl;
     }
 
     void onTcpClientConnected(int handle, string addr, ushort port)
@@ -60,6 +66,7 @@ int main()
     YHeartbeatManager* hb = new YHeartbeatManager();
     TestClient client(manager, hb);
     manager->addNetworkMessageListener(1, &client);
+    hb->setConnectionLostListener(&client);
     if(!manager->start())
     {
 	cerr << "network error!!" << endl;

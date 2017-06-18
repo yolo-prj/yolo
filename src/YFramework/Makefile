@@ -18,10 +18,10 @@ endif
 LINK_OPENCV=-lopencv_core -lopencv_highgui -lopencv_imgcodecs -lopencv_imgproc -lopencv_video -lopencv_videoio
 LINK_LIB=$(BOOSTLIB) -lYComm -lpthread $(LINK_LIB_PI) $(LINK_OPENCV)
 
-all: $(OBJECT) $(BIN).cc clienttest.cc
-	$(CC) $(OPTION) -o $(BIN) $(INCLUDE) $(BIN).cc $(OBJECT) $(LINK_LIB)
-	$(CC) $(OPTION) -o clienttest $(INCLUDE) clienttest.cc $(OBJECT) $(LINK_LIB)
-so: $(OBJECT)
+#all: $(OBJECT) $(BIN).cc clienttest.cc
+#	$(CC) $(OPTION) -o $(BIN) $(INCLUDE) $(BIN).cc $(OBJECT) $(LINK_LIB)
+#	$(CC) $(OPTION) -o clienttest $(INCLUDE) clienttest.cc $(OBJECT) $(LINK_LIB)
+all: $(OBJECT)
 	$(CC) $(OPTION) $(INCLUDE) -shared -o $(BIN_SO) $(OBJECT) $(LINK_LIB)
 	sudo cp $(BIN_SO) /usr/local/lib
 	mv $(BIN_SO) $(LIBDIR)

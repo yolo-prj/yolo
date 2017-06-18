@@ -1,7 +1,8 @@
 #include "YMessageReceiver.h"
 
-YCommandReceiver::YCommandReceiver(string msgformat)
+YCommandReceiver::YCommandReceiver(YCommandListener* listener, string msgformat)
 {
+    _listener = listener;
     parser = new YMessageFormatParser(msgformat);
     parser->parse();
 }
@@ -20,10 +21,14 @@ YCommandReceiver::onReceiveMessage(byte* data, uint length)
     YMessage msg = parser->getMessage(opcode);
 
     // pass message to robot controller 
+    if(_listener != nullptr)
+	_listener->onReceiveCommand(msg);
 }
 
-YConfigReceiver::YConfigReceiver(string msgformat)
+YConfigReceiver::YConfigReceiver(YConfigListener* listener, string msgformat)
 {
+    _listener = listener;
+
     parser = new YMessageFormatParser(msgformat);
     parser->parse();
 }
@@ -42,4 +47,6 @@ YConfigReceiver::onReceiveMessage(byte* data, uint length)
     YMessage msg = parser->getMessage(opcode);
 
     // pass message to robot controller 
+    if(_listener != nullptr)
+	_listener->onReceiveConfig(msg);
 }

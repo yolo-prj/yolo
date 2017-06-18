@@ -17,6 +17,7 @@ public:
     ~YSonarController();
 
     void init(int timeout);
+    void stop();
 
     inline void setSonarDistanceListener(YSonarDistanceListener* listener) {
 	_sonarListener = listener;

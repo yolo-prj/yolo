@@ -18,11 +18,14 @@ YNetworkManager::YNetworkManager(string configFilePath)
     _comm = nullptr;
     _server = false;
 
+    _started = false;
+
     readConfiguration(configFilePath);
 }
 
 YNetworkManager::~YNetworkManager()
 {
+    stop();
 }
 
 void
@@ -198,9 +201,36 @@ YNetworkManager::start()
 	}
     }
 
+    _started = true;
+
     return success;
 }
 
+void
+YNetworkManager::stop()
+{
+    _started = false;
+
+    _comm = &YComm::getInstance();
+
+    if(_server && _tcpServer != nullptr) {
+	_comm->removeTcpServer(_tcpServer);
+	_tcpServer = nullptr;
+    } else if(!_server && _tcpClient != nullptr) {
+	_comm->removeTcpClient(_tcpClient);
+	_tcpClient = nullptr;
+    }
+
+    if(_hb != nullptr) {
+	_comm->removeUdp(_hb);
+	_hb = nullptr;
+    }
+
+    if(_udp != nullptr) {
+	_comm->removeUdp(_udp);
+	_udp = nullptr;
+    }
+}
 
 void
 YNetworkManager::onConnected(YTcpSession& session)
@@ -408,31 +438,37 @@ YNetworkManager::onReceiveDatagram(string remoteaddr, ushort port, byte* data, u
 void
 YNetworkManager::sendUdpDatagram(uint opcode, byte* data, uint length)
 {
-    if(opcode == OPCODE_HEARTBEAT)
-	_hb->sendTo(data, length, _hbPeerAddr, _hbPeerPort);
-    else
-	_udp->sendTo(data, length, _udpPeerAddr, _udpPeerPort);
+    if(_started)
+    {
+	if(opcode == OPCODE_HEARTBEAT)
+	    _hb->sendTo(data, length, _hbPeerAddr, _hbPeerPort);
+	else
+	    _udp->sendTo(data, length, _udpPeerAddr, _udpPeerPort);
+    }
 }
 
 void
 YNetworkManager::sendTcpPacket(int handle, uint opcode, byte* data, uint length)
 {
-    if(handle != 0)
+    if(_started)
     {
-	auto itr = _streamInfoMap.find(handle);
-	
-	if(itr != _streamInfoMap.end()) {
-	    YTcpSession* session = itr->second.session;
+	if(handle != 0)
+	{
+	    auto itr = _streamInfoMap.find(handle);
+	    
+	    if(itr != _streamInfoMap.end()) {
+		YTcpSession* session = itr->second.session;
 
-	    session->send(data, length);
+		session->send(data, length);
+	    }
 	}
-    }
-    else
-    {
-	for(auto stream : _streamInfoMap) {
-	    YTcpSession* session = stream.second.session;
+	else
+	{
+	    for(auto stream : _streamInfoMap) {
+		YTcpSession* session = stream.second.session;
 
-	    session->send(data, length);
+		session->send(data, length);
+	    }
 	}
     }
 }

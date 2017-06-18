@@ -57,18 +57,18 @@ YCameraController::start()
 void
 YCameraController::stop()
 {
-    if(_capture != nullptr)
-    {
-	cvReleaseCapture(&_capture);
-	_capture = nullptr;
-    }
-
     if(_captureThread != nullptr)
     {
 	_continueThread = false;
 	_captureThread->join();
 	delete _captureThread;
 	_captureThread = nullptr;
+    }
+
+    if(_capture != nullptr)
+    {
+	cvReleaseCapture(&_capture);
+	_capture = nullptr;
     }
 }
 

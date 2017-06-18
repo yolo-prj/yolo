@@ -13,6 +13,7 @@ YSonarController::YSonarController(int trigger, int echo)
     _echo = echo;
     _sonarListener = nullptr;
     _continueThread = false;
+    _distanceThread = nullptr;
 }
 
 YSonarController::YSonarController(int trigger, int echo, YSonarDistanceListener* listener)
@@ -21,16 +22,12 @@ YSonarController::YSonarController(int trigger, int echo, YSonarDistanceListener
     _echo = echo;
     _sonarListener = listener;
     _continueThread = false;
+    _continueThread = false;
 }
 
 YSonarController::~YSonarController()
 {
-    if(_distanceThread != nullptr)
-    {
-	_continueThread = false;
-	_distanceThread->join();
-	delete _distanceThread;
-    }
+    stop();
 }
 
 void
@@ -47,6 +44,18 @@ YSonarController::init(int timeout)
     _continueThread = true;
     _distanceThread = new boost::thread(boost::bind(&YSonarController::distanceThread, this));
 #endif
+}
+
+void
+YSonarController::stop()
+{
+    if(_distanceThread != nullptr)
+    {
+	_continueThread = false;
+	_distanceThread->join();
+	delete _distanceThread;
+	_distanceThread = nullptr;
+    }
 }
 
 void

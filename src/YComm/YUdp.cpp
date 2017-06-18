@@ -52,6 +52,7 @@ YUdp::YUdp(unsigned short port, CastType castType)
 
 YUdp::~YUdp(void)
 {
+	_valid = false;
 	_continueReceive = false;
 	_receiveThread->join();
 	delete _receiveThread;
@@ -251,10 +252,10 @@ YUdp::close()
 {
 	if(_udp_socket != NULL)
 	{
+		_valid = false;				
 		_udp_socket->close();
 		delete _udp_socket;
 		_udp_socket = NULL;
-		_valid = false;				
 	}
 }
 

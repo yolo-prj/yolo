@@ -89,6 +89,7 @@ typedef char char_t;
 typedef unsigned char byte;
 typedef unsigned short ushort;
 typedef unsigned int uint;
+/*
 #ifdef WIN32
 typedef __int64 int64;
 typedef unsigned __int64 uint64;
@@ -96,3 +97,4 @@ typedef unsigned __int64 uint64;
 typedef long long int64;
 typedef unsigned long long uint64;
 #endif
+*/

@@ -68,6 +68,7 @@ public:
     void addNetworkMessageListener(uint opcode, YNetworkMessageListener* listener);
 
     bool start();
+    void stop();
 
     void sendUdpDatagram(uint opcode, byte* data, uint length);
     void sendTcpPacket(int handle, uint opcode, byte* data, uint length);
@@ -105,6 +106,8 @@ private:
     YTcpServer*					_tcpServer;
     YUdp*					_udp;
     YUdp*					_hb;
+
+    bool					_started;
 };
 
 }

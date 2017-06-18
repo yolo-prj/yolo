@@ -1,7 +1,6 @@
 #include <iostream>
 
-#include "YMessageSender.h"
-#include "YMessageReceiver.h"
+#include "RobotManager.h"
 #include <yolo/YFramework/YNetworkManager.h>
 #include <yolo/YFramework/YHeartbeatManager.h>
 
@@ -28,16 +27,19 @@ int main(int argc, char** argv)
 
     YNetworkManager* manager = new YNetworkManager(configIni);
     YHeartbeatManager* hb = new YHeartbeatManager(manager);
-
-    YImageSender imageSender(manager);
-    YEventSender eventSender(manager);
-    YCommandReceiver cmdReceiver(msgformat);
-    YConfigReceiver configReceiver(msgformat);
-
     manager->setHeartbeatManager(hb);
-    // call add listener function for the every message
-    manager->addNetworkMessageListener(1, &cmdReceiver);
-    manager->addNetworkMessageListener(2, &configReceiver);
+
+    RobotManager robot(manager, msgformat);
+
+    manager->start();
+
+    cout << "Press any key to start robot, and then press any key to stop." << endl;
+    cin.get();
+
+    robot.start();
+
+    cin.get();
+    robot.stop();
 
 
     cin.get();

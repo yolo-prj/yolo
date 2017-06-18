@@ -1,5 +1,6 @@
 CC=g++
-ARM_CC=arm-linux-gnueabihf-g++-4.9
+#DEFINE=ROBOT
+DEFINE=RUI
 INCLUDE=-I/usr/local/include -I../../include
 HEADERDIR=../../include/yolo/YFramework
 LIBDIR=../../lib
@@ -7,9 +8,15 @@ BIN=servertest
 BIN_SO=libYFramework.so
 BIN_ARM=jsontest_arm
 OPTION=-std=c++11
-OBJECT=YMessage.o YMessageFormatParser.o YHeartbeatManager.o YNetworkManager.o
-BOOSTLIB=-lboost_system -lboost_thread -lpthread
-LINK_LIB=$(BOOSTLIB) -lYComm
+OBJECT=YMessage.o YMessageFormatParser.o YHeartbeatManager.o YNetworkManager.o YServoController.o YSonarController.o YCameraController.o
+BOOSTLIB=-lboost_system -lboost_thread
+ifeq ($(DEFINE), ROBOT)
+LINK_LIB_PI=-lwiringPi
+else
+LINK_LIB_PI=
+endif
+LINK_OPENCV=-lopencv_core -lopencv_highgui -lopencv_imgcodecs -lopencv_imgproc -lopencv_video -lopencv_videoio
+LINK_LIB=$(BOOSTLIB) -lYComm -lpthread $(LINK_LIB_PI) $(LINK_OPENCV)
 
 all: $(OBJECT) $(BIN).cc clienttest.cc
 	$(CC) $(OPTION) -o $(BIN) $(INCLUDE) $(BIN).cc $(OBJECT) $(LINK_LIB)
@@ -26,6 +33,12 @@ YHeartbeatManager.o: $(HEADERDIR)/YHeartbeatManager.h YHeartbeatManager.cpp
 	$(CC) $(OPTION) -c -fPIC $(INCLUDE) YHeartbeatManager.cpp
 YNetworkManager.o: $(HEADERDIR)/YNetworkManager.h YNetworkManager.cpp
 	$(CC) $(OPTION) -c -fPIC $(INCLUDE) YNetworkManager.cpp
+YServoController.o: $(HEADERDIR)/YServoController.h YServoController.cpp
+	$(CC) $(OPTION) -c -fPIC $(INCLUDE) YServoController.cpp
+YSonarController.o: $(HEADERDIR)/YSonarController.h YSonarController.cpp
+	$(CC) $(OPTION) -c -fPIC $(INCLUDE) -D$(DEFINE) YSonarController.cpp
+YCameraController.o: $(HEADERDIR)/YCameraController.h YCameraController.cpp
+	$(CC) $(OPTION) -c -fPIC $(INCLUDE) -D$(DEFINE) YCameraController.cpp
 
 clean:
 	rm *.o

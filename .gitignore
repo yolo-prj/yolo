@@ -1,0 +1,6 @@
+lib/
+*.o
+*.swp
+*.so
+*test
+Robot

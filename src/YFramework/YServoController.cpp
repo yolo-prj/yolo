@@ -56,7 +56,6 @@ YServoController::openServos()
 	if(_servoFd >= 0)
 	{
 	    success = true;
-	    boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
 	}
     }
 
@@ -76,6 +75,19 @@ YServoController::closeServos()
 void
 YServoController::start()
 {
+    if(!openServos())
+    {
+	cerr << "[YServoController] servo init failed." << endl;
+	return;
+    }
+    else
+    {
+	cout << "[YServoController] servo is initialized" << endl;
+    }
+
+    resetServo();
+    boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
+
     _continueThread = true;
     _panControlThread = new boost::thread(boost::bind(&YServoController::panControlThread, this));
     _tiltControlThread = new boost::thread(boost::bind(&YServoController::tiltControlThread, this));
@@ -138,7 +150,7 @@ YServoController::panControlThread()
 	}
 	else
 	{
-	    boost::this_thread::sleep(boost::posix_time::milliseconds(10));
+	    boost::this_thread::sleep(boost::posix_time::milliseconds(5));
 	}
     }
 }
@@ -168,7 +180,7 @@ YServoController::tiltControlThread()
 	}
 	else
 	{
-	    boost::this_thread::sleep(boost::posix_time::milliseconds(10));
+	    boost::this_thread::sleep(boost::posix_time::milliseconds(5));
 	}
     }
 }
@@ -198,7 +210,7 @@ YServoController::leftControlThread()
 	}
 	else
 	{
-	    boost::this_thread::sleep(boost::posix_time::milliseconds(10));
+	    boost::this_thread::sleep(boost::posix_time::milliseconds(5));
 	}
     }
 }
@@ -228,7 +240,7 @@ YServoController::rightControlThread()
 	}
 	else
 	{
-	    boost::this_thread::sleep(boost::posix_time::milliseconds(10));
+	    boost::this_thread::sleep(boost::posix_time::milliseconds(5));
 	}
     }
 }
@@ -277,7 +289,7 @@ YServoController::setWheelSpeed(ServoType type, int speed)
 }
 
 void
-YServoController::resetServo(ServoType type)
+YServoController::resetServo()
 {
     int value = SERVO_CENTER_OR_STOP;
     setServoPosition(ENUM_SERVO_RIGHT_WHEEL, value);
@@ -287,7 +299,7 @@ YServoController::resetServo(ServoType type)
 }
 
 void
-YServoController::setCameraServo(int& pan, int& tilt)
+YServoController::setCameraServosLineTrackMode(int& pan, int& tilt)
 {
     pan = TRK_LINE_CAM_PAN;
     tilt = TRK_LINE_CAM_TILT;

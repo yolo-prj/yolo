@@ -5,6 +5,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <boost/thread.hpp>
 #include <yolo/YFramework/YCameraImageListener.h>
+#include "PI3OpencvCompat.h"
 
 
 using namespace std;

@@ -13,6 +13,8 @@
 
 #include "YMessageSender.h"
 #include "YMessageReceiver.h"
+#include "PID.h"
+#include "ImageProcessor.h"
 
 using namespace std;
 using namespace yolo;
@@ -40,6 +42,9 @@ public:
     void receiveCommand(YMessage msg);
     void receiveConfig(YMessage config);
 
+    // for test
+    void commandLoop();
+
 private:
     byte* convertImageToJPEG(Mat image, uint& length);
 
@@ -59,6 +64,13 @@ private:
     YServoController*	_servoController;
     YSonarController*	_sonarController;
 
+    int			_pan;
+    int			_tilt;
+    float		_offset;
+    bool		_run;
+    double		_distance;
+
+    PID			_pid;
 };
 
 

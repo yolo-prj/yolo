@@ -22,7 +22,7 @@ YSonarController::YSonarController(int trigger, int echo, YSonarDistanceListener
     _echo = echo;
     _sonarListener = listener;
     _continueThread = false;
-    _continueThread = false;
+    _distanceThread = nullptr;
 }
 
 YSonarController::~YSonarController()
@@ -34,6 +34,15 @@ void
 YSonarController::init(int timeout)
 {
 #ifdef ROBOT
+    if(wiringPiSetup() != -1)
+    {
+	cout << "[YSonarController] sonar is initialized" << endl;
+    }
+    else
+    {
+	cout << "[YSonarController] sonar is not initialized" << endl;
+    }
+
     pinMode(_trigger, OUTPUT);
     pinMode(_echo, INPUT);
     digitalWrite(_trigger, LOW);
@@ -86,8 +95,9 @@ YSonarController::distanceThread()
 	    }
 	}
 
-	if(fail)
+	if(fail) {
 	    continue;
+	}
 
 	startTimeUsec = micros();
 
@@ -101,14 +111,17 @@ YSonarController::distanceThread()
 	    }
 	}
 
-	if(fail)
+	if(fail) {
 	    continue;
+	}
 
 	travelTimeUsec = endTimeUsec - startTimeUsec;
 	distanceCm = travelTimeUsec / factor;
 
 	if(_sonarListener != nullptr)
 	    _sonarListener->onReceiveDistance(distanceCm);
+
+	boost::this_thread::sleep(boost::posix_time::milliseconds(100));
     }
 #endif
 }

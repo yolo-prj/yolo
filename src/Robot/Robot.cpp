@@ -38,7 +38,8 @@ int main(int argc, char** argv)
 
     robot.start();
 
-    cin.get();
+    robot.commandLoop();
+
     robot.stop();
 
 

@@ -46,9 +46,9 @@ public:
     void setServoPosition(ServoType type, int& position);
     void setWheelSpeed(ServoType type, int speed);
 
-    void resetServo(ServoType type);
+    void resetServo();
 
-    void setCameraServo(int& pan, int& tilt);
+    void setCameraServosLineTrackMode(int& pan, int& tilt);
 
     void start();
     void stop();

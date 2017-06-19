@@ -1,7 +1,20 @@
 CC=g++
 #DEFINE=ROBOT
 DEFINE=RUI
-INCLUDE=-I/usr/local/include -I../../include
+ifeq ($(DEFINE), ROBOT)
+INCLUDE_RASPICAM=-I/home/pi/git/robidouille/raspicam_cv
+else
+INCLUDE_RASPICAM=
+endif
+INCLUDE=-I/usr/local/include -I../../include $(INCLUDE_RASPICAM)
+ifeq ($(DEFINE), ROBOT)
+LIBRARY_RASPICAM=-L/home/pi/git/robidouille/raspicam_cv
+LINK_RASPICAM=-lraspicamcv
+else
+LIBRARY_RASPICAM=
+LINK_RASPICAM=
+endif
+LIBRARY=$(LIBRARY_RASPICAM)
 HEADERDIR=../../include/yolo/YFramework
 LIBDIR=../../lib
 BIN=servertest
@@ -16,13 +29,13 @@ else
 LINK_LIB_PI=
 endif
 LINK_OPENCV=-lopencv_core -lopencv_highgui -lopencv_imgcodecs -lopencv_imgproc -lopencv_video -lopencv_videoio
-LINK_LIB=$(BOOSTLIB) -lYComm -lpthread $(LINK_LIB_PI) $(LINK_OPENCV)
+LINK_LIB=$(BOOSTLIB) -lYComm -lpthread $(LINK_LIB_PI) $(LINK_OPENCV) $(LINK_RASPICAM)
 
 #all: $(OBJECT) $(BIN).cc clienttest.cc
 #	$(CC) $(OPTION) -o $(BIN) $(INCLUDE) $(BIN).cc $(OBJECT) $(LINK_LIB)
 #	$(CC) $(OPTION) -o clienttest $(INCLUDE) clienttest.cc $(OBJECT) $(LINK_LIB)
 all: $(OBJECT)
-	$(CC) $(OPTION) $(INCLUDE) -shared -o $(BIN_SO) $(OBJECT) $(LINK_LIB)
+	$(CC) $(OPTION) $(INCLUDE) $(LIBRARY) -shared -o $(BIN_SO) $(OBJECT) $(LINK_LIB)
 	sudo cp $(BIN_SO) /usr/local/lib
 	mv $(BIN_SO) $(LIBDIR)
 YMessage.o: $(HEADERDIR)/YMessage.h YMessage.cpp

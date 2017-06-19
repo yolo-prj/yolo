@@ -8,10 +8,10 @@ else
 INCLUDE_RASPICAM=
 LIB_RASPICAM=
 endif
-INCLUDE=-I/usr/local/include -I../../include $(INCLUDE_RASPICAM)
+INCLUDE=-I/usr/local/include -I../Common/include $(INCLUDE_RASPICAM)
 LIBRARY=$(LIB_RASPICAM)
-HEADERDIR=../../include/yolo/YFramework
-LIBDIR=../../lib
+HEADERDIR=../Common/include/yolo/YFramework
+LIBDIR=../Common/lib
 BIN=Robot
 OPTION=-std=c++11
 OBJECT=YMessageSender.o YMessageReceiver.o RobotManager.o PID.o ImageProcessor.o

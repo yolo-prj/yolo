@@ -71,6 +71,7 @@ public:
     void stop();
 
     void sendUdpDatagram(uint opcode, byte* data, uint length);
+    void sendUdpDatagram(uint opcode, string addr, ushort port, byte* data, uint length);
     void sendTcpPacket(int handle, uint opcode, byte* data, uint length);
 
     inline void setHeartbeatManager(YHeartbeatManager* hb) { _heartbeat = hb; }

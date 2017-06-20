@@ -48,6 +48,10 @@ public:
 private:
     byte* convertImageToJPEG(Mat image, uint& length);
 
+    // Robot's action
+    void uturnLeft();
+    void uturnRight();
+
 private:
     YCameraController*	_camController;
     vector<int>		_param;

@@ -202,8 +202,32 @@ RobotManager::commandLoop()
 		_servoController->setWheelSpeed(YServoController::ENUM_SERVO_LEFT_WHEEL, speed);
 		_servoController->setWheelSpeed(YServoController::ENUM_SERVO_RIGHT_WHEEL, speed);
 		break;
+	    case 'u':
+		uturnLeft();
+		break;
+	    case 'U':
+		uturnRight();
+		break;
 	}
 
 	cout << "Pan=" << _pan << ", Tilt=" << _tilt << ", Speed=" << speed << endl;
     }
+}
+
+void
+RobotManager::uturnLeft()
+{
+    int leftSpeed = -6;
+    int rightSpeed = 6;
+    _servoController->setWheelSpeed(YServoController::ENUM_SERVO_RIGHT_WHEEL, rightSpeed);
+    _servoController->setWheelSpeed(YServoController::ENUM_SERVO_LEFT_WHEEL, leftSpeed);
+}
+
+void
+RobotManager::uturnRight()
+{
+    int leftSpeed = 6;
+    int rightSpeed = -6;
+    _servoController->setWheelSpeed(YServoController::ENUM_SERVO_RIGHT_WHEEL, rightSpeed);
+    _servoController->setWheelSpeed(YServoController::ENUM_SERVO_LEFT_WHEEL, leftSpeed);
 }

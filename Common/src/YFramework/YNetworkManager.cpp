@@ -448,6 +448,18 @@ YNetworkManager::sendUdpDatagram(uint opcode, byte* data, uint length)
 }
 
 void
+YNetworkManager::sendUdpDatagram(uint opcode, string addr, ushort port, byte* data, uint length)
+{
+    if(_started)
+    {
+	if(opcode == OPCODE_HEARTBEAT)
+	    _hb->sendTo(data, length, addr, port);
+	else
+	    _udp->sendTo(data, length, addr, port);
+    }
+}
+
+void
 YNetworkManager::sendTcpPacket(int handle, uint opcode, byte* data, uint length)
 {
     if(_started)

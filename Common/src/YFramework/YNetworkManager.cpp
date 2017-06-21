@@ -181,6 +181,7 @@ YNetworkManager::start()
 	if(!_comm->registerUdp(_hb))
 	    throw UdpException();
 
+	_started = true;
     } catch(TcpException& e) {
 	success = false;
 
@@ -200,8 +201,6 @@ YNetworkManager::start()
 	    _tcpClient = nullptr;
 	}
     }
-
-    _started = true;
 
     return success;
 }

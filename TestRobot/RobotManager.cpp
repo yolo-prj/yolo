@@ -217,8 +217,8 @@ RobotManager::commandLoop()
 void
 RobotManager::uturnLeft()
 {
-    int leftSpeed = -6;
-    int rightSpeed = 6;
+    int leftSpeed = -5;
+    int rightSpeed = 5;
     _servoController->setWheelSpeed(YServoController::ENUM_SERVO_RIGHT_WHEEL, rightSpeed);
     _servoController->setWheelSpeed(YServoController::ENUM_SERVO_LEFT_WHEEL, leftSpeed);
 }
@@ -226,8 +226,8 @@ RobotManager::uturnLeft()
 void
 RobotManager::uturnRight()
 {
-    int leftSpeed = 6;
-    int rightSpeed = -6;
+    int leftSpeed = 5;
+    int rightSpeed = -5;
     _servoController->setWheelSpeed(YServoController::ENUM_SERVO_RIGHT_WHEEL, rightSpeed);
     _servoController->setWheelSpeed(YServoController::ENUM_SERVO_LEFT_WHEEL, leftSpeed);
 }

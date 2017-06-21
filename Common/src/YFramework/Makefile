@@ -1,12 +1,19 @@
 CC=g++
-#DEFINE=ROBOT
+UNAME := $(shell uname)
+
+#ifeq ($(UNAME), Linux)
 DEFINE=RUI
+#else
+#DEFINE=ROBOT
+#endif
+
 ifeq ($(DEFINE), ROBOT)
 INCLUDE_RASPICAM=-I/home/pi/git/robidouille/raspicam_cv
 else
 INCLUDE_RASPICAM=
 endif
 INCLUDE=-I/usr/local/include -I../../include $(INCLUDE_RASPICAM)
+
 ifeq ($(DEFINE), ROBOT)
 LIBRARY_RASPICAM=-L/home/pi/git/robidouille/raspicam_cv
 LINK_RASPICAM=-lraspicamcv
@@ -14,6 +21,7 @@ else
 LIBRARY_RASPICAM=
 LINK_RASPICAM=
 endif
+
 LIBRARY=$(LIBRARY_RASPICAM)
 HEADERDIR=../../include/yolo/YFramework
 LIBDIR=../../lib

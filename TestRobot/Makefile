@@ -1,6 +1,12 @@
 CC=g++
+#UNAME := $(shell uname)
+
+#ifeq ($(UNAME), Linux)
 DEFINE=RUI
+#else
 #DEFINE=ROBOT
+#endif
+
 ifeq ($(DEFINE), ROBOT)
 INCLUDE_RASPICAM=-I/home/pi/git/robidouille/raspicam_cv
 LIB_RASPICAM=-L/home/pi/git/robidouille/raspicam_cv
@@ -8,6 +14,7 @@ else
 INCLUDE_RASPICAM=
 LIB_RASPICAM=
 endif
+
 INCLUDE=-I/usr/local/include -I../Common/include $(INCLUDE_RASPICAM)
 LIBRARY=$(LIB_RASPICAM)
 HEADERDIR=../Common/include/yolo/YFramework

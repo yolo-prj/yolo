@@ -8,6 +8,7 @@
 #include "ruimodel.h"
 #include <QString>
 #include <QObject>
+#include "robotmode.h"
 
 namespace Ui {
 class Controller;
@@ -22,7 +23,7 @@ public:
     ~Controller();
 
 public slots:
-    void RobotStatusHandler(int a);
+    void RobotStatusHandler(RobotMode a);
 
 protected:
     void timerEvent(QTimerEvent *event);

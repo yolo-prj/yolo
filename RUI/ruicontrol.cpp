@@ -10,7 +10,7 @@ Controller::Controller(QWidget *parent) :
 {
     ui->setupUi(this);
     m = RUIModel::GetInstance();
-    m->SetRobotMode(MANUAL_MODE);
+    m->SetRobotMode(RobotMode::MANUAL_MODE);
 
     QObject::connect(m, SIGNAL(RobotStatusChanged(int)), this, SLOT(RobotStatusHandler(int)));
 }
@@ -21,11 +21,10 @@ Controller::~Controller()
     delete ui;
 }
 
-void Controller::RobotStatusHandler(int a)
+void Controller::RobotStatusHandler(RobotMode a)
 {
-
     qDebug() << "signal slot test";
-    if(a == SUSPEND_MODE)
+    if(a == RobotMode::SUSPENDED_MODE)
     {
         QMessageBox msgBox;
         msgBox.setText("SUSPEND MODE!!!!");
@@ -35,13 +34,20 @@ void Controller::RobotStatusHandler(int a)
 
 void Controller::timerEvent(QTimerEvent *event)
 {
-    cv::Mat image;
+    //cv::Mat image;
+    //int retvalue = m->GetImage(&image);
 
-    int retvalue = m->GetImage(&image);
-
-    if(!retvalue)
+    if(m->IsEmpty())
     {
         qDebug() << "No Data";
+        return;
+    }
+
+    cv::Mat image = m->GetImage();
+
+    if(image.empty())
+    {
+        qDebug() << "Invalid Data";
         return;
     }
 
@@ -54,7 +60,7 @@ void Controller::on_start_toggled(bool checked)
     if(checked)
     {
         m->Connect();
-        startTimer(0);
+        startTimer(20);
     }
     else
     {
@@ -104,12 +110,12 @@ void Controller::on_verticalSlider_sliderMoved()
 
 void Controller::on_auto_2_clicked()
 {
-    m->SetRobotMode(AUTO_MODE);
+    m->SetRobotMode(RobotMode::AUTO_MODE);
 }
 
 void Controller::on_manual_clicked()
 {
-    m->SetRobotMode(MANUAL_MODE);
+    m->SetRobotMode(RobotMode::MANUAL_MODE);
 }
 
 void Controller::on_send_clicked()

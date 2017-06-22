@@ -31,6 +31,12 @@ INCLUDEPATH += /usr/local/include \
             ../Common \
 	    Test \
             ../Common/include
+
+    LIBS += -lboost_system \
+            -lboost_thread \
+            -lboost_exception \
+            -lboost_regex \
+            -lboost_timer
 }
 
 win32 {

@@ -97,9 +97,9 @@ void RUIModel::HandleTiltOperation()
     //send
 }
 
-void RUIModel::CreateSignal()
+void RUIModel::RobotModeChanged(RobotMode mode)
 {
-    emit RobotStatusChanged(3);
+    emit UpdateRobotMode(mode);
 }
 
 bool RUIModel::IsEmpty() const

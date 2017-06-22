@@ -36,13 +36,31 @@ RobotManager::RobotManager(YNetworkManager* manager, string msgFormatFile)
 
     // fix below for the msg interfaces
     manager->addNetworkMessageListener(1, _cmdReceiver);
+    manager->addNetworkMessageListener(2, _cmdReceiver);
+    manager->addNetworkMessageListener(3, _cmdReceiver);
+    manager->addNetworkMessageListener(4, _cmdReceiver);
+    manager->addNetworkMessageListener(5, _cmdReceiver);
+    manager->addNetworkMessageListener(6, _cmdReceiver);
+    manager->addNetworkMessageListener(7, _cmdReceiver);
+    manager->addNetworkMessageListener(8, _cmdReceiver);
+    manager->addNetworkMessageListener(9, _cmdReceiver);
+    manager->addNetworkMessageListener(10, _cmdReceiver);
+    manager->addNetworkMessageListener(11, _cmdReceiver);
+    manager->addNetworkMessageListener(12, _cmdReceiver);
     manager->addNetworkMessageListener(13, _cmdReceiver);
     manager->addNetworkMessageListener(14, _cmdReceiver);
-    manager->addNetworkMessageListener(2, _configReceiver);
+    manager->addNetworkMessageListener(21, _cmdReceiver);
+    manager->addNetworkMessageListener(31, _cmdReceiver);
+    manager->addNetworkMessageListener(300, _cmdReceiver);
+
+    manager->addNetworkMessageListener(200, _configReceiver);
 }
 
 RobotManager::~RobotManager()
 {
+    delete _cameraController;
+    delete _sonarController;
+    delete _servoController;
     delete _parser;
     delete _imageSender;
     delete _eventSender;
@@ -132,6 +150,57 @@ RobotManager::onReceiveCommand(YMessage msg)
 
     switch(msg.getOpcode())
     {
+	case 1:
+	    cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
+	    break;
+	case 2:
+		cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
+
+	    break;
+	case 3:
+	    cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
+
+	    break;
+	case 4:
+		cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
+
+	    break;
+	case 5:
+		cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
+	    sendMsg.setOpcode(1001);
+	    sendMsg.set("id", _id);
+	    sendMsg.set("event", "error");
+	    sendMsg.set("state", 3);
+	    _eventSender->send(sendMsg);
+	    break;
+	case 6:
+		cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
+
+	    break;
+	case 7:
+		cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
+
+	    break;
+	case 8:
+		cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
+
+	    break;
+	case 9:
+		cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
+
+	    break;
+	case 10:
+		cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
+
+	    break;
+	case 11:
+		cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
+
+	    break;
+	case 12:
+		cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
+
+	    break;
 	case 13:
 	    cout << "[RobotManager] Start Robot!!" << endl;
 	    _run = true;
@@ -143,15 +212,38 @@ RobotManager::onReceiveCommand(YMessage msg)
 	    _servoController->setWheelSpeed(YServoController::ENUM_SERVO_LEFT_WHEEL, speed);
 	    _servoController->setWheelSpeed(YServoController::ENUM_SERVO_RIGHT_WHEEL, speed);
 	    sendMsg.setOpcode(1001);
-	    sendMsg.set("id", 14);
+	    sendMsg.set("id", _id);
 	    sendMsg.set("event", 2);
 	    sendMsg.set("state", 3);
 	    _eventSender->send(sendMsg);
 	    break;
+
+	case 21:
+		cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
+	    sendMsg.setOpcode(1001);
+	    sendMsg.set("id", _id);
+	    sendMsg.set("event", "mode_changed");
+	    sendMsg.set("state", msg.getInt("state"));
+	    _eventSender->send(sendMsg);
+	    break;
+	case 31:
+		cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
+	    break;
+
+	    /*
 	case 200:
 	    _id = msg.getInt("id");
 	    cout << "[RobotManager] Robot ID : " << _id << endl;
 	    break;
+	    */
+	case 300:
+		cout << "[RobotManager] " << msg.getString("debug") << ", state : " << msg.getInt("state") << endl;
+	    sendMsg.setOpcode(1300);
+	    sendMsg.set("id", _id);
+	    sendMsg.set("debug_info", "Robot Debug Info");
+	    sendMsg.set("state", 0);
+	    _eventSender->send(sendMsg);
+		break;
     }
 }
 
@@ -159,6 +251,20 @@ void
 RobotManager::onReceiveConfig(YMessage msg)
 {
     cout << "[RobotManager] received config message" << endl;
+
+    switch(msg.getOpcode())
+    {
+    case 200:
+	_id = msg.getInt("id");
+	cout << "[RobotManager] Robot ID : " << _id << endl;
+	break;
+    }
+}
+
+void
+RobotManager::connectionLost(string addr, ushort port)
+{
+    cout << "[RobotManager] CONNECTION LOST : " << addr << ", port: " << port << endl;
 }
 
 byte*

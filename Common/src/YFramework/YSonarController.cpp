@@ -61,7 +61,8 @@ YSonarController::stop()
     if(_distanceThread != nullptr)
     {
 	_continueThread = false;
-	_distanceThread->join();
+	if(_distanceThread->joinable())
+	    _distanceThread->join();
 	delete _distanceThread;
 	_distanceThread = nullptr;
     }

@@ -30,8 +30,10 @@ int main(int argc, char** argv)
     manager->setHeartbeatManager(hb);
 
     RobotManager robot(manager, msgformat);
+    hb->setConnectionLostListener(&robot);
 
     manager->start();
+    hb->startHeartbeat();
 
     cout << "Press any key to start robot, and then press any key to stop." << endl;
     cin.get();
@@ -40,10 +42,13 @@ int main(int argc, char** argv)
 
     robot.commandLoop();
 
+    hb->stopHeartbeat();
     robot.stop();
 
 
     cin.get();
+    delete hb;
+    delete manager;
 
     return 0;
 }

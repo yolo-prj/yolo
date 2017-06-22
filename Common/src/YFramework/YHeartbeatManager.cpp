@@ -12,6 +12,8 @@ YHeartbeatManager::YHeartbeatManager()
     _continueSend = false;
     _continueCheck = false;
     _heartbeatReceived = false;
+    _checkHeartbeatThread = nullptr;
+    _started = false;
 }
 
 YHeartbeatManager::YHeartbeatManager(YNetworkManager* manager)
@@ -22,18 +24,21 @@ YHeartbeatManager::YHeartbeatManager(YNetworkManager* manager)
     _continueSend = false;
     _continueCheck = false;
     _heartbeatReceived = false;
+    _checkHeartbeatThread = nullptr;
     setNetworkManager(manager);
+    _started = false;
 }
 
 YHeartbeatManager::~YHeartbeatManager()
 {
-    stopHeartbeat();
+    if(_started)
+	stopHeartbeat();
 }
 
 void
 YHeartbeatManager::receivedHeartbeat(string addr, ushort port, byte* data, uint length)
 {
-    cout << "[HeartbeatManager] received heartbeat" << endl;
+//    cout << "[HeartbeatManager] received heartbeat" << endl;
     // reset timeout timer
 
     char buf[100];
@@ -68,6 +73,7 @@ YHeartbeatManager::startHeartbeat()
 {
     _continueSend = true;
     _sendHeartbeatThread = new boost::thread( bind(&YHeartbeatManager::sendHeartbeatThread, this) );
+    _started = true;
 }
 
 void
@@ -75,15 +81,21 @@ YHeartbeatManager::stopHeartbeat()
 {
     if(_sendHeartbeatThread != nullptr) {
 	_continueSend = false;
-	_sendHeartbeatThread->join();
+	if(_sendHeartbeatThread->joinable())
+	    _sendHeartbeatThread->join();
 	delete _sendHeartbeatThread;
+	_sendHeartbeatThread = nullptr;
     }
 
     if(_checkHeartbeatThread != nullptr) {
 	_continueCheck = false;
-	_checkHeartbeatThread->join();
+	if(_checkHeartbeatThread->joinable())
+	    _checkHeartbeatThread->join();
 	delete _checkHeartbeatThread;
+	_checkHeartbeatThread = nullptr;
     }
+    _started = false;
+    cout << "[YHeartbeatManager] stop" << endl;
 }
 
 void
@@ -103,12 +115,19 @@ YHeartbeatManager::sendHeartbeatThread()
 	    string addr;
 	    ushort port;
 
-	    for(auto e : _timeoutMap) {
-		string key = e.first;
-		addr = key.substr(0, key.find(":"));
-		port = (ushort)atoi( key.substr(key.find(":") + 1).c_str() );
+	    if(_timeoutMap.size() == 0)
+	    {
+		_networkManager->sendUdpDatagram(OPCODE_HEARTBEAT, heartbeat, sizeof(heartbeat));
+	    }
+	    else
+	    {
+		for(auto e : _timeoutMap) {
+		    string key = e.first;
+		    addr = key.substr(0, key.find(":"));
+		    port = (ushort)atoi( key.substr(key.find(":") + 1).c_str() );
 
-		_networkManager->sendUdpDatagram(OPCODE_HEARTBEAT, addr, port, heartbeat, sizeof(heartbeat));
+		    _networkManager->sendUdpDatagram(OPCODE_HEARTBEAT, addr, port, heartbeat, sizeof(heartbeat));
+		}
 	    }
 
 	    boost::this_thread::sleep(boost::posix_time::milliseconds(1000));

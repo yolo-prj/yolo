@@ -47,6 +47,7 @@ private:
 
     map<string, uint>		_timeoutMap;
     boost::mutex		_mutex;
+    bool			_started;
 };
 
 }

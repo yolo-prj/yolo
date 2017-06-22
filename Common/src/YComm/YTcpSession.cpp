@@ -25,8 +25,12 @@ YTcpSession::YTcpSession(boost::asio::io_service& io_service) : _io_service(io_s
 YTcpSession::~YTcpSession(void)
 {	
     _continueRead = false;
-    _readThread->join();
-    delete _readThread;
+    if(_readThread != NULL)
+    {
+	if(_readThread->joinable())
+	    _readThread->join();
+	delete _readThread;
+    }
 
     std::deque<BufferInfo>::iterator itr;
     for(itr = _dataQueue.begin(); itr != _dataQueue.end(); itr++)
@@ -224,9 +228,9 @@ YTcpSession::send(unsigned char* data, size_t dataLength)
 //		boost::mutex::scoped_lock lock(_mutex);
 
 		if(_valid)
-			//sendLength = boost::asio::write(*_tcp_socket, boost::asio::buffer(data, dataLength));
-			boost::asio::async_write(*_tcp_socket, boost::asio::buffer(data, dataLength)
-				, boost::bind(&YTcpSession::sendHandler, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+			sendLength = boost::asio::write(*_tcp_socket, boost::asio::buffer(data, dataLength));
+//			boost::asio::async_write(*_tcp_socket, boost::asio::buffer(data, dataLength)
+//				, boost::bind(&YTcpSession::sendHandler, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
 	}
 	catch(boost::system::system_error& e) {		
 		std::cerr << "[YComm] TCP send failed" << std::endl;

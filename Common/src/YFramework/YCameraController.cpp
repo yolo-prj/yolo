@@ -60,7 +60,8 @@ YCameraController::stop()
     if(_captureThread != nullptr)
     {
 	_continueThread = false;
-	_captureThread->join();
+	if(_captureThread->joinable())
+	    _captureThread->join();
 	delete _captureThread;
 	_captureThread = nullptr;
     }

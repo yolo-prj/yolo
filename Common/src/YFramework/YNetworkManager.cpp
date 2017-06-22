@@ -25,7 +25,8 @@ YNetworkManager::YNetworkManager(string configFilePath)
 
 YNetworkManager::~YNetworkManager()
 {
-    stop();
+    if(_started)
+	stop();
 }
 
 void
@@ -222,6 +223,7 @@ YNetworkManager::stop()
     _started = false;
 
     _comm = &YComm::getInstance();
+    _comm->stop();
 
     if(_server && _tcpServer != nullptr) {
 	try{
@@ -235,6 +237,13 @@ YNetworkManager::stop()
 	_tcpClient = nullptr;
     }
 
+    if(_udp != nullptr) {
+	try {
+	    _comm->removeUdp(_udp);
+	} catch(...){}
+	_udp = nullptr;
+    }
+
     if(_hb != nullptr) {
 	try{
 	    _comm->removeUdp(_hb);
@@ -242,12 +251,7 @@ YNetworkManager::stop()
 	_hb = nullptr;
     }
 
-    if(_udp != nullptr) {
-	try {
-	    _comm->removeUdp(_udp);
-	} catch(...){}
-	_udp = nullptr;
-    }
+    cout << "[YNetworkManager] stopped" << endl;
 }
 
 void
@@ -296,7 +300,6 @@ YNetworkManager::onReceiveData(YTcpSession& session)
     auto itr = _streamInfoMap.find(handle);
     if(itr != _streamInfoMap.end()) {
 	StreamInfo* info = &itr->second;
-
 
 	uint msgLength = 0;
 	uint opcode = 0;
@@ -426,8 +429,8 @@ YNetworkManager::onReceiveData(YTcpSession& session)
 	    memcpy(dataPtr.get(), info->buffer, msgLength);
 
 	    //dispatchMessage(opcode, info->buffer, msgLength);
-	    //dispatchMessage(opcode, dataPtr, msgLength);
-	    boost::thread t(boost::bind(&YNetworkManager::dispatchMessage, this, opcode, dataPtr, msgLength));
+	    dispatchMessage(opcode, dataPtr, msgLength);
+	    //boost::thread t(boost::bind(&YNetworkManager::dispatchMessage, this, opcode, dataPtr, msgLength));
 	}
 
     }
@@ -468,9 +471,13 @@ YNetworkManager::sendUdpDatagram(uint opcode, byte* data, uint length)
     {
 	try {
 	    if(opcode == OPCODE_HEARTBEAT)
+	    {
 		_hb->sendTo(data, length, _hbPeerAddr, _hbPeerPort);
+	    }
 	    else
+	    {
 		_udp->sendTo(data, length, _udpPeerAddr, _udpPeerPort);
+	    }
 	} catch(...) {
 	}
     }
@@ -483,9 +490,13 @@ YNetworkManager::sendUdpDatagram(uint opcode, string addr, ushort port, byte* da
     {
 	try {
 	    if(opcode == OPCODE_HEARTBEAT)
+	    {
 		_hb->sendTo(data, length, addr, port);
+	    }
 	    else
+	    {
 		_udp->sendTo(data, length, addr, port);
+	    }
 	} catch(...) {
 	}
     }

@@ -48,6 +48,7 @@ YConfigReceiver::onReceiveMessage(byte* data, uint length)
     memcpy(&opcode, data, sizeof(uint));
 
     YMessage msg = parser->getMessage(opcode);
+    msg.deserialize(data, length);
 
     // pass message to robot controller 
     if(_listener != nullptr)

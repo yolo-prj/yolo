@@ -1,19 +1,12 @@
 CC=g++
-UNAME := $(shell uname)
-
-#ifeq ($(UNAME), Linux)
-DEFINE=RUI
-#else
 #DEFINE=ROBOT
-#endif
-
+DEFINE=RUI
 ifeq ($(DEFINE), ROBOT)
 INCLUDE_RASPICAM=-I/home/pi/git/robidouille/raspicam_cv
 else
 INCLUDE_RASPICAM=
 endif
 INCLUDE=-I/usr/local/include -I../../include $(INCLUDE_RASPICAM)
-
 ifeq ($(DEFINE), ROBOT)
 LIBRARY_RASPICAM=-L/home/pi/git/robidouille/raspicam_cv
 LINK_RASPICAM=-lraspicamcv
@@ -21,7 +14,6 @@ else
 LIBRARY_RASPICAM=
 LINK_RASPICAM=
 endif
-
 LIBRARY=$(LIBRARY_RASPICAM)
 HEADERDIR=../../include/yolo/YFramework
 LIBDIR=../../lib
@@ -31,12 +23,29 @@ BIN_ARM=jsontest_arm
 OPTION=-std=c++11
 OBJECT=YMessage.o YMessageFormatParser.o YHeartbeatManager.o YNetworkManager.o YServoController.o YSonarController.o YCameraController.o
 BOOSTLIB=-lboost_system -lboost_thread
+
+OS := $(shell uname)
+ifeq ($(OS),Darwin)  # Mac OS X
+BOOSTLIB=-lboost_system -lboost_thread-mt
+endif
+
+ifeq ($(OS),Linux)
+BOOSTLIB=-lboost_system -lboost_thread
+endif
+
 ifeq ($(DEFINE), ROBOT)
 LINK_LIB_PI=-lwiringPi
 else
 LINK_LIB_PI=
 endif
+
+ifeq ($(OS),Darwin)  # Mac OS X
+LINK_OPENCV=-lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_video -lopencv_videostab
+endif
+
+ifeq ($(OS),Linux)
 LINK_OPENCV=-lopencv_core -lopencv_highgui -lopencv_imgcodecs -lopencv_imgproc -lopencv_video -lopencv_videoio
+endif
 LINK_LIB=$(BOOSTLIB) -lYComm -lpthread $(LINK_LIB_PI) $(LINK_OPENCV) $(LINK_RASPICAM)
 
 #all: $(OBJECT) $(BIN).cc clienttest.cc
@@ -45,7 +54,6 @@ LINK_LIB=$(BOOSTLIB) -lYComm -lpthread $(LINK_LIB_PI) $(LINK_OPENCV) $(LINK_RASP
 all: $(OBJECT)
 	$(CC) $(OPTION) $(INCLUDE) $(LIBRARY) -shared -o $(BIN_SO) $(OBJECT) $(LINK_LIB)
 	sudo cp $(BIN_SO) /usr/local/lib
-	mv $(BIN_SO) $(LIBDIR)
 YMessage.o: $(HEADERDIR)/YMessage.h YMessage.cpp
 	$(CC) $(OPTION) -c -fPIC $(INCLUDE) YMessage.cpp
 YMessageFormatParser.o: $(HEADERDIR)/YMessageFormatParser.h YMessageFormatParser.cpp

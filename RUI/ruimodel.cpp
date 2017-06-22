@@ -5,7 +5,8 @@
 #include "robotcontrolmanager.h"
 
 RUIModel::RUIModel(QObject *parent):
-    QObject(parent)
+    QObject(parent),
+    cur_robot_handle_(-1)
 { 
     image_receive_listener_impl_ = std::make_shared<ImageReceiveListenerImp>(this);
     robot_event_listener_impl_ = std::make_shared<RobotEventListenerImp>(this);
@@ -56,12 +57,6 @@ int RUIModel::GetImage(cv::Mat *Image)
 
 //    return retvalue;
 
-    std::lock_guard<std::mutex> lock(image_mutex_);
-    qDebug() << "GetImage() : " << image_queue_.size();
-
-    cv::Mat image = std::move(image_queue_.front());
-    image_queue_.pop();
-
     return 1;
 }
 
@@ -74,27 +69,50 @@ void RUIModel::HandleRobotOperation()
 
 void RUIModel::SetRobotMode(RobotMode mode)
 {
-    yolo::YMessage msg;
-    msg.setOpcode(21);
-    msg.set("mode_control", static_cast<int>(mode));
+    //yolo::YMessage msg;
+    //msg.setOpcode(21);
+    //msg.set("mode_control", static_cast<int>(mode));
     //send
+
+    std::string id = std::to_string(cur_robot_handle_);
+    std::string command = "mode_control";
+    int state = static_cast<int>(mode);
+
+    yolo::RobotControlManager::GetInstance().SendCommand(cur_robot_handle_,
+                                                         21,
+                                                         std::make_tuple(id, command, state));
 }
 
 
 void RUIModel::HandlePanOperation()
 {
-    yolo::YMessage msg;
-    msg.setOpcode(11);
-    msg.set("camera_pan_control", 50);
+    //yolo::YMessage msg;
+    //msg.setOpcode(11);
+    //msg.set("camera_pan_control", 50);
     //send
+
+    std::string id = std::to_string(cur_robot_handle_);
+    std::string command = "Run"; //test
+    int state = 0;
+
+    yolo::RobotControlManager::GetInstance().SendCommand(cur_robot_handle_,
+                                                         13,
+                                                         std::make_tuple(id, command, state));
 }
 
 void RUIModel::HandleTiltOperation()
 {
-    yolo::YMessage msg;
-    msg.setOpcode(12);
-    msg.set("camera_tilt_control", 50);
+    //yolo::YMessage msg;
+    //msg.setOpcode(12);
+    //msg.set("camera_tilt_control", 50);
     //send
+    std::string id = std::to_string(cur_robot_handle_);
+    std::string command = "Stop"; ////test
+    int state = 0;
+
+    yolo::RobotControlManager::GetInstance().SendCommand(cur_robot_handle_,
+                                                         14,
+                                                         std::make_tuple(id, command, state));
 }
 
 void RUIModel::CreateSignal()
@@ -110,7 +128,7 @@ bool RUIModel::IsEmpty() const
 int RUIModel::PushImage(cv::Mat &&image)
 {
     std::lock_guard<std::mutex> lock(image_mutex_);
-    qDebug() << "PushImage() : " << image_queue_.size();
+    //qDebug() << "PushImage() : " << image_queue_.size();
     image_queue_.push(std::move(image));
 
     //main_window_->imageUpdated();

@@ -85,7 +85,7 @@ void ImageReceiver::SetTimePeriod(int ms)
 
 void ImageReceiver::ImageMessageListener::onReceiveMessage(byte* data, uint length)
 {
-    qDebug() << "message received :" << length;
+    //qDebug() << "message received :" << length;
     parent_->TransferImage(data, length);
     //delete[] data;
 }

@@ -55,9 +55,12 @@ public:
     int PushImage(cv::Mat&& image);
     cv::Mat GetImage();
 
+    void SetRobotHandler(int handle) { cur_robot_handle_ = handle; }
+
 private:
     std::queue<cv::Mat> image_queue_;
     std::mutex image_mutex_;
+    int cur_robot_handle_;
 
     class ImageReceiveListenerImp : public yolo::ImageReceiveListener {
         private:
@@ -99,12 +102,15 @@ private:
         {
             qDebug() << "OnRobotConnected : " << handler;
             // TODO : Handle Connection
+            ruimodel_->SetRobotHandler(handler);
+
         }
 
         virtual void OnRobotDisconnected(int handler)
         {
             qDebug() << "OnRobotDisconnected : " << handler;
             // TODO : Handle Disconnection
+            ruimodel_->SetRobotHandler(-1);
         }
 
         virtual void OnRobotDebugInfoReceived(int handler, const std::string debug_info, int state)

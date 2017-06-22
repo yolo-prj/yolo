@@ -83,13 +83,13 @@ void Controller::on_back_pressed()
 
 void Controller::on_right_pressed()
 {
-
+    m->HandlePanOperation();
 }
 
 
 void Controller::on_left_pressed()
 {
-
+    m->HandleTiltOperation();
 }
 
 void Controller::on_uturn_clicked()

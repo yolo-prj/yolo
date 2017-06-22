@@ -18,6 +18,9 @@
 
 #include <QDebug>
 
+#define PRESS 1
+#define RELEASE 2
+
 using namespace std;
 using namespace yolo;
 
@@ -28,21 +31,27 @@ class RUIModel : public QObject
 
 signals:
     void UpdateRobotMode(RobotMode mode);
+    void UpdateRobotError(int error);
+    void UpdateRobotConnectionStatus(int status);
+    void UpdateRobotDebugInfo(QString debug);
+    void UpdateRobotInvalidDisconnection();
 
 public:
     explicit RUIModel(QObject *parent = 0);
     ~RUIModel();
 
     static RUIModel* GetInstance();
-    virtual void Connect();
-    virtual void Disconnect();
 
-    virtual int GetImage(cv::Mat *Image);
-
-    virtual void HandleRobotOperation();
+    virtual void HandleRobotForwardOperation(int operation);
+    virtual void HandleRobotBackwardOperation(int operation);
+    virtual void HandleRobotLeftOperation(int operation);
+    virtual void HandleRobotRightOperation(int operation);
+    virtual void HandleRobotUturnOperation();
 
     virtual void SetRobotMode(RobotMode mode);
 
+    virtual void Connect();
+    virtual void Disconnect();
     virtual void HandlePanOperation();
     virtual void HandleTiltOperation();
 
@@ -87,39 +96,43 @@ private:
         {
             qDebug() << "OnRobotModeChanged";
             qDebug() << "id : " << handler << " , mode : " << static_cast<int>(mode);
-            ruimodel_->RobotModeChanged(mode);
+            emit ruimodel_->UpdateRobotMode(mode);
         }
 
          virtual void OnRobotErrorEventReceived(int handler, int error)
         {
             qDebug() << "OnRobotModeChanged";
             qDebug() << "id : " << handler << " , error : " << error;
+            emit ruimodel_->UpdateRobotError(error);
         }
 
         virtual void OnRobotConnected(int handler)
         {
             qDebug() << "OnRobotConnected : " << handler;
-            // TODO : Handle Connection
-            ruimodel_->SetRobotHandler(handler);
+            // update robot status on RUI
+            emit ruimodel_->UpdateRobotConnectionStatus(1);
 
         }
 
         virtual void OnRobotDisconnected(int handler)
         {
             qDebug() << "OnRobotDisconnected : " << handler;
-            // TODO : Handle Disconnection
-            ruimodel_->SetRobotHandler(-1);
+            // update robot status on RUI
+            emit ruimodel_->UpdateRobotConnectionStatus(0);
         }
 
         virtual void OnRobotDebugInfoReceived(int handler, const std::string debug_info, int state)
         {
             qDebug() << "OnRobotDebugInfoReceived : ";
             qDebug() << "id : " << handler << ", debug_info : " << debug_info.c_str() << " , state : " << state;
+            emit ruimodel_->UpdateRobotDebugInfo((QString)debug_info.c_str());
         }
 
         virtual void OnRobotInvalidDisconnected(int handler)
         {
             qDebug() << "OnRobotInvalidDisconnected : " << handler;
+            emit ruimodel_->UpdateRobotInvalidDisconnection();
+
         }
     };
 

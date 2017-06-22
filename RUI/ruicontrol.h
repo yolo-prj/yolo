@@ -24,6 +24,10 @@ public:
 
 public slots:
     void RobotModeHandler(RobotMode mode);
+    void RobotErrorHandler(int error);
+    void RobotConnectionHandler(int status);
+    void RobotDebugInfoHandler(QString diag);
+    void RobotInvalidDisconnectionHandler();
 
 protected:
     void timerEvent(QTimerEvent *event);
@@ -32,21 +36,19 @@ private slots:
     void on_start_toggled(bool checked);
 
     void on_go_pressed();
-
+    void on_go_released();
     void on_back_pressed();
-
+    void on_back_released();
     void on_right_pressed();
-
+    void on_right_released();
     void on_left_pressed();
-
+    void on_left_released();
     void on_uturn_clicked();
 
     void on_horizontalSlider_sliderMoved();
-
     void on_verticalSlider_sliderMoved();
 
     void on_auto_2_clicked();
-
     void on_manual_clicked();
 
     void on_send_clicked();

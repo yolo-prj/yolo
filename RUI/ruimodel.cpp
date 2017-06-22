@@ -33,46 +33,63 @@ RUIModel* RUIModel::GetInstance()
     return &m;
 }
 
-void RUIModel::Connect()
-{
-    //signal slot test
-    //CreateSignal();
-}
-
-
-void RUIModel::Disconnect()
-{
-}
-
-
-int RUIModel::GetImage(cv::Mat *Image)
-{
-//    int retvalue = UdpRecvImageAsJpeg(UdpLocalPort,Image,(struct sockaddr *)&remaddr, &addrlen);
-
-//    return retvalue;
-
-    return 1;
-}
-
-
-void RUIModel::HandleRobotOperation()
-{
-
-}
-
-
-void RUIModel::SetRobotMode(RobotMode mode)
+// robot operation
+void RUIModel::HandleRobotForwardOperation(int operation)
 {
     std::string id = std::to_string(cur_robot_handle_);
-    std::string command = "mode_control";
-    int state = static_cast<int>(mode);
+    std::string command = "servo_control_forward";
+    int state = operation;
 
     yolo::RobotControlManager::GetInstance().SendCommand(cur_robot_handle_,
-                                                         21,
+                                                         1,
                                                          std::make_tuple(id, command, state));
 }
 
+void RUIModel::HandleRobotBackwardOperation(int operation)
+{
+    std::string id = std::to_string(cur_robot_handle_);
+    std::string command = "servo_control_backward";
+    int state = operation;
 
+    yolo::RobotControlManager::GetInstance().SendCommand(cur_robot_handle_,
+                                                         2,
+                                                         std::make_tuple(id, command, state));
+}
+
+void RUIModel::HandleRobotLeftOperation(int operation)
+{
+    std::string id = std::to_string(cur_robot_handle_);
+    std::string command = "servo_control_left";
+    int state = operation;
+
+    yolo::RobotControlManager::GetInstance().SendCommand(cur_robot_handle_,
+                                                         3,
+                                                         std::make_tuple(id, command, state));
+}
+
+void RUIModel::HandleRobotRightOperation(int operation)
+{
+    std::string id = std::to_string(cur_robot_handle_);
+    std::string command = "servo_control_right";
+    int state = operation;
+
+    yolo::RobotControlManager::GetInstance().SendCommand(cur_robot_handle_,
+                                                         4,
+                                                         std::make_tuple(id, command, state));
+}
+
+void RUIModel::HandleRobotUturnOperation()
+{
+    std::string id = std::to_string(cur_robot_handle_);
+    std::string command = "servo_control_uturn";
+    int state = 0;
+
+    yolo::RobotControlManager::GetInstance().SendCommand(cur_robot_handle_,
+                                                         5,
+                                                         std::make_tuple(id, command, state));
+}
+
+// camera
 void RUIModel::HandlePanOperation()
 {
 
@@ -96,10 +113,30 @@ void RUIModel::HandleTiltOperation()
                                                          std::make_tuple(id, command, state));
 }
 
-void RUIModel::RobotModeChanged(RobotMode mode)
+// mode selection
+void RUIModel::SetRobotMode(RobotMode mode)
 {
-    emit UpdateRobotMode(mode);
+    std::string id = std::to_string(cur_robot_handle_);
+    std::string command = "mode_control";
+    int state = static_cast<int>(mode);
+
+    yolo::RobotControlManager::GetInstance().SendCommand(cur_robot_handle_,
+                                                         21,
+                                                         std::make_tuple(id, command, state));
 }
+
+// image
+void RUIModel::Connect()
+{
+    //signal slot test
+    //CreateSignal();
+}
+
+
+void RUIModel::Disconnect()
+{
+}
+
 
 bool RUIModel::IsEmpty() const
 {

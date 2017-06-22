@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     Controller w;
-	RobotControlManager::GetInstance().Initialize("config2.ini");
+    RobotControlManager::GetInstance().Initialize("config2.ini", "msgformat.json");
     w.show();
 
     RobotControlManager::GetInstance().Start();

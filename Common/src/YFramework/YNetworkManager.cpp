@@ -25,7 +25,8 @@ YNetworkManager::YNetworkManager(string configFilePath)
 
 YNetworkManager::~YNetworkManager()
 {
-    stop();
+    if(_started)
+	stop();
 }
 
 void
@@ -222,6 +223,7 @@ YNetworkManager::stop()
     _started = false;
 
     _comm = &YComm::getInstance();
+    _comm->stop();
 
     if(_server && _tcpServer != nullptr) {
 	try{
@@ -238,7 +240,6 @@ YNetworkManager::stop()
     if(_udp != nullptr) {
 	try {
 	    _comm->removeUdp(_udp);
-	cout << "3" << endl;
 	} catch(...){}
 	_udp = nullptr;
     }
@@ -246,7 +247,6 @@ YNetworkManager::stop()
     if(_hb != nullptr) {
 	try{
 	    _comm->removeUdp(_hb);
-	cout << "4" << endl;
 	} catch(...){}
 	_hb = nullptr;
     }
@@ -300,7 +300,6 @@ YNetworkManager::onReceiveData(YTcpSession& session)
     auto itr = _streamInfoMap.find(handle);
     if(itr != _streamInfoMap.end()) {
 	StreamInfo* info = &itr->second;
-
 
 	uint msgLength = 0;
 	uint opcode = 0;
@@ -430,8 +429,8 @@ YNetworkManager::onReceiveData(YTcpSession& session)
 	    memcpy(dataPtr.get(), info->buffer, msgLength);
 
 	    //dispatchMessage(opcode, info->buffer, msgLength);
-	    //dispatchMessage(opcode, dataPtr, msgLength);
-	    boost::thread t(boost::bind(&YNetworkManager::dispatchMessage, this, opcode, dataPtr, msgLength));
+	    dispatchMessage(opcode, dataPtr, msgLength);
+	    //boost::thread t(boost::bind(&YNetworkManager::dispatchMessage, this, opcode, dataPtr, msgLength));
 	}
 
     }
@@ -492,7 +491,6 @@ YNetworkManager::sendUdpDatagram(uint opcode, string addr, ushort port, byte* da
 	try {
 	    if(opcode == OPCODE_HEARTBEAT)
 	    {
-		cout << "heart" << endl;
 		_hb->sendTo(data, length, addr, port);
 	    }
 	    else

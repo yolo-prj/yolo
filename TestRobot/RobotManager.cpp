@@ -43,6 +43,9 @@ RobotManager::RobotManager(YNetworkManager* manager, string msgFormatFile)
 
 RobotManager::~RobotManager()
 {
+    delete _cameraController;
+    delete _sonarController;
+    delete _servoController;
     delete _parser;
     delete _imageSender;
     delete _eventSender;
@@ -159,6 +162,12 @@ void
 RobotManager::onReceiveConfig(YMessage msg)
 {
     cout << "[RobotManager] received config message" << endl;
+}
+
+void
+RobotManager::connectionLost(string addr, ushort port)
+{
+    cout << "[RobotManager] CONNECTION LOST : " << addr << ", port: " << port << endl;
 }
 
 byte*

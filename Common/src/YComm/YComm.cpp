@@ -21,139 +21,131 @@ bool YComm::_destroyed = false;
 
 YComm::YComm()
 {	
-	_continueLoop = true;
-//	m_pThreadPool = &(NThreadPool::getInstance());
-
-	auto bf = boost::bind(&YComm::runLoop, this, _1);
-	
-//        boost::thread t(bf, (void*)NULL);
+    _continueLoop = true; 
+    //auto bf = boost::bind(&YComm::runLoop, this, _1);
 }
 
 YComm::~YComm()
 {	
-	stop();
+    stop();
 
-	// 등록되어 있는 client, server, udp 모두 삭제
-	std::set<YTcpClient*>::iterator itrClient;
-	std::set<YTcpServer*>::iterator itrServer;
-	std::set<YUdp*>::iterator itrUdp;
-		
-	BOOST_FOREACH(YTcpClient* client, _setClient) {
-		if(client != NULL)
-			delete client;
-	}
-	BOOST_FOREACH(YTcpServer* server, _setServer) {
-		if(server != NULL)
-			delete server;
-	}
-	BOOST_FOREACH(YUdp* udp, _setUdp) {
-		if(udp != NULL)
-			delete udp;
-	}	
+    std::set<YTcpClient*>::iterator itrClient;
+    std::set<YTcpServer*>::iterator itrServer;
+    std::set<YUdp*>::iterator itrUdp;
+	    
+    BOOST_FOREACH(YTcpClient* client, _setClient) {
+	if(client != NULL)
+	    delete client;
+    }
+    BOOST_FOREACH(YTcpServer* server, _setServer) {
+	if(server != NULL)
+	    delete server;
+    }
+    BOOST_FOREACH(YUdp* udp, _setUdp) {
+	if(udp != NULL)
+	    delete udp;
+    }	
 
-//	delete _bufferPool;
+    cout << "[YComm] destructor" << endl;
 }
 
 void
 YComm::runLoop(void* argv)
 {
-	try
-	{
-		while(_continueLoop) {
-			if(_io_service.run() == 0)
-			{
-				boost::this_thread::sleep( boost::posix_time::milliseconds(10) );
-				//tcout << _T("io_service::run failed") << endl;
-			}
-			//else
-			//	tcout << _T("io_service::run() !!") << endl;
-		}
+    try
+    {
+	while(_continueLoop) {
+	    if(_io_service.run() == 0)
+	    {
+		boost::this_thread::sleep( boost::posix_time::milliseconds(10) );
+	    }
 	}
-	catch(std::exception& e)
-	{
-		_continueLoop = false;
-		tcerr << _T("[YComm] an exception occurred : ") << e.what() << endl;
-	}
+    }
+    catch(std::exception& e)
+    {
+	    _continueLoop = false;
+	    tcerr << _T("[YComm] an exception occurred : ") << e.what() << endl;
+    }
 }
 
 void
 YComm::stop()
 {
-	_continueLoop = false;
-	_io_service.stop();	
+    _continueLoop = false;
+    _io_service.stop();	
 }
 
 void
 YComm::createInstance()
 {
-	static YComm theInstance;
+    static YComm theInstance;
 
-	_singleton = &theInstance;
+    _singleton = &theInstance;
 }
 
 void
 YComm::releaseInstance()
 {
-	_singleton = NULL;
-	_destroyed = true;
+    _singleton = NULL;
+    _destroyed = true;
 }
 
 void
 YComm::onDeadReference()
 {
-	createInstance();
+    createInstance();
 
-	new(_singleton) YComm;
+    new(_singleton) YComm;
 
-	atexit(killYComm);
+    atexit(killYComm);
 
-	_destroyed = false;
+    _destroyed = false;
 }
 
 void
 YComm::killYComm()
 {
-	_singleton->~YComm();
+    _singleton->~YComm();
 }
 
 YComm&
 YComm::getInstance()
 {
-	if(!_singleton)
+    if(!_singleton)
+    {
+	if(_destroyed)
 	{
-		if(_destroyed)
-		{
-			onDeadReference();
-		}
-		else
-		{
-			createInstance();
-		}		
+	    onDeadReference();
 	}
+	else
+	{
+	    createInstance();
+	}		
+    }
 
-	return *_singleton;
+    return *_singleton;
 }
 
 bool
 YComm::registerTcpClient(YTcpClient* client, unsigned int timeout)
 {
-	bool success = false;
+    bool success = false;
 
-	std::set<YTcpClient*>::iterator itr;
+    std::set<YTcpClient*>::iterator itr;
 
-	itr = _setClient.find(client);
+    itr = _setClient.find(client);
 
-	if(client != NULL && itr == _setClient.end())
-	{
-		//client->setAsioIoService(&_io_service);
-		success = client->connect(timeout);
+    if(client != NULL && itr == _setClient.end())
+    {
+	//client->setAsioIoService(&_io_service);
+	success = client->connect(timeout);
 
-		if(success) {
-			_setClient.insert(client);			
-		}
+	if(success) {
+	    _setClient.insert(client);			
 	}
+    }
 
-	return success;
+    return success;
 }
 
 bool

@@ -11,6 +11,7 @@
 #include <yolo/YFramework/YMessage.h>
 #include <yolo/YFramework/YNetworkManager.h>
 #include <yolo/YFramework/YMessageFormatParser.h>
+#include <yolo/YFramework/YConnectionLostListener.h>
 
 #include "YMessageSender.h"
 #include "YMessageReceiver.h"
@@ -23,7 +24,7 @@ using namespace cv;
 
 
 class RobotManager : public YCameraImageListener, public YSonarDistanceListener
-		     , public YCommandListener, public YConfigListener
+		     , public YCommandListener, public YConfigListener, public YConnectionLostListener
 {
 private:
     RobotManager(){}
@@ -36,6 +37,7 @@ public:
     virtual void onReceiveDistance(double distanceCm);
     virtual void onReceiveCommand(YMessage msg);
     virtual void onReceiveConfig(YMessage msg);
+    virtual void connectionLost(string addr, ushort port);
 
     void start();
     void stop();

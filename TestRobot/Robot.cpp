@@ -30,6 +30,7 @@ int main(int argc, char** argv)
     manager->setHeartbeatManager(hb);
 
     RobotManager robot(manager, msgformat);
+    hb->setConnectionLostListener(&robot);
 
     manager->start();
     hb->startHeartbeat();

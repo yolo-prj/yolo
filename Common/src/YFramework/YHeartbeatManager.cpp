@@ -13,6 +13,7 @@ YHeartbeatManager::YHeartbeatManager()
     _continueCheck = false;
     _heartbeatReceived = false;
     _checkHeartbeatThread = nullptr;
+    _started = false;
 }
 
 YHeartbeatManager::YHeartbeatManager(YNetworkManager* manager)
@@ -25,17 +26,19 @@ YHeartbeatManager::YHeartbeatManager(YNetworkManager* manager)
     _heartbeatReceived = false;
     _checkHeartbeatThread = nullptr;
     setNetworkManager(manager);
+    _started = false;
 }
 
 YHeartbeatManager::~YHeartbeatManager()
 {
-    stopHeartbeat();
+    if(_started)
+	stopHeartbeat();
 }
 
 void
 YHeartbeatManager::receivedHeartbeat(string addr, ushort port, byte* data, uint length)
 {
-    cout << "[HeartbeatManager] received heartbeat" << endl;
+//    cout << "[HeartbeatManager] received heartbeat" << endl;
     // reset timeout timer
 
     char buf[100];
@@ -70,6 +73,7 @@ YHeartbeatManager::startHeartbeat()
 {
     _continueSend = true;
     _sendHeartbeatThread = new boost::thread( bind(&YHeartbeatManager::sendHeartbeatThread, this) );
+    _started = true;
 }
 
 void
@@ -88,7 +92,8 @@ YHeartbeatManager::stopHeartbeat()
 	delete _checkHeartbeatThread;
 	_checkHeartbeatThread = nullptr;
     }
-    cout << "[YHEartbeatManager] stop" << endl;
+    _started = false;
+    cout << "[YHeartbeatManager] stop" << endl;
 }
 
 void

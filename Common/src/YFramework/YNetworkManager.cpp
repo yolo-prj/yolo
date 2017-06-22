@@ -235,19 +235,23 @@ YNetworkManager::stop()
 	_tcpClient = nullptr;
     }
 
+    if(_udp != nullptr) {
+	try {
+	    _comm->removeUdp(_udp);
+	cout << "3" << endl;
+	} catch(...){}
+	_udp = nullptr;
+    }
+
     if(_hb != nullptr) {
 	try{
 	    _comm->removeUdp(_hb);
+	cout << "4" << endl;
 	} catch(...){}
 	_hb = nullptr;
     }
 
-    if(_udp != nullptr) {
-	try {
-	    _comm->removeUdp(_udp);
-	} catch(...){}
-	_udp = nullptr;
-    }
+    cout << "[YNetworkManager] stopped" << endl;
 }
 
 void
@@ -468,9 +472,13 @@ YNetworkManager::sendUdpDatagram(uint opcode, byte* data, uint length)
     {
 	try {
 	    if(opcode == OPCODE_HEARTBEAT)
+	    {
 		_hb->sendTo(data, length, _hbPeerAddr, _hbPeerPort);
+	    }
 	    else
+	    {
 		_udp->sendTo(data, length, _udpPeerAddr, _udpPeerPort);
+	    }
 	} catch(...) {
 	}
     }
@@ -483,9 +491,14 @@ YNetworkManager::sendUdpDatagram(uint opcode, string addr, ushort port, byte* da
     {
 	try {
 	    if(opcode == OPCODE_HEARTBEAT)
+	    {
+		cout << "heart" << endl;
 		_hb->sendTo(data, length, addr, port);
+	    }
 	    else
+	    {
 		_udp->sendTo(data, length, addr, port);
+	    }
 	} catch(...) {
 	}
     }

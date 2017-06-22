@@ -32,6 +32,7 @@ int main(int argc, char** argv)
     RobotManager robot(manager, msgformat);
 
     manager->start();
+    hb->startHeartbeat();
 
     cout << "Press any key to start robot, and then press any key to stop." << endl;
     cin.get();
@@ -40,10 +41,13 @@ int main(int argc, char** argv)
 
     robot.commandLoop();
 
+    hb->stopHeartbeat();
     robot.stop();
 
 
     cin.get();
+    delete hb;
+    delete manager;
 
     return 0;
 }

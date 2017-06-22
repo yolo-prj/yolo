@@ -22,6 +22,7 @@ YUdp::YUdp(std::string localAddress, unsigned short localport , std::string remo
 	_io_service = &YComm::getInstance().getIOService();
 	_strand = new boost::asio::strand(*_io_service);
 	_work = new boost::asio::io_service::work(*_io_service);
+	_receiveThread = NULL;
 }
 
 YUdp::YUdp(std::string localAddress, unsigned short localport, CastType castType)
@@ -35,6 +36,7 @@ YUdp::YUdp(std::string localAddress, unsigned short localport, CastType castType
 	_io_service = &YComm::getInstance().getIOService();
 	_strand = new boost::asio::strand(*_io_service);
 	_work = new boost::asio::io_service::work(*_io_service);
+	_receiveThread = NULL;
 }
 
 YUdp::YUdp(unsigned short port, CastType castType)
@@ -48,14 +50,18 @@ YUdp::YUdp(unsigned short port, CastType castType)
 	_io_service = &YComm::getInstance().getIOService();
 	_strand = new boost::asio::strand(*_io_service);
 	_work = new boost::asio::io_service::work(*_io_service);
+	_receiveThread = NULL;
 }
 
 YUdp::~YUdp(void)
 {
 	_valid = false;
 	_continueReceive = false;
-	_receiveThread->join();
-	delete _receiveThread;
+	if(_receiveThread != NULL)
+	{
+	    //_receiveThread->join();
+	    //delete _receiveThread;
+	}
 
 	close();
 
@@ -495,17 +501,14 @@ YUdp::handle_receive(const boost::system::error_code& error, size_t bytes_transf
 
 	if(!error)
 	{
-		// 무엇인가 성공적으로 datagram을 수신했음
 		_receivedDatagramLength = (unsigned short)bytes_transferred;
 
-		// 2013-12-18 이용헌 수정
-		// 수신된 datagram을 buffer로 복사하여 사용
 		memcpy(_receivedDatagramForHandler, _receivedDatagram, _receivedDatagramLength);
+		uint opcode;
+		memcpy(&opcode, _receivedDatagram, 4);
 
-		//receiveSome();
 		_receivedSome = true;
 		
-		// 수신 데이터 처리
 		if(_receiveEvent != NULL)
 			_receiveEvent->onReceiveDatagram(_senderEndpoint.address().to_string(), _senderEndpoint.port()
 			, _receivedDatagramForHandler, _receivedDatagramLength);

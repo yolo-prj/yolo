@@ -21,7 +21,7 @@ using namespace yolo::ycomm;
 
 namespace yolo
 {
-const uint OPCODE_HEARTBEAT = 100;
+const uint OPCODE_HEARTBEAT = 10000;
 
 class YHeartbeatManager;
 

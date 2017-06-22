@@ -23,7 +23,7 @@ public:
     ~Controller();
 
 public slots:
-    void RobotStatusHandler(RobotMode a);
+    void RobotModeHandler(RobotMode mode);
 
 protected:
     void timerEvent(QTimerEvent *event);

@@ -12,7 +12,7 @@ Controller::Controller(QWidget *parent) :
     m = RUIModel::GetInstance();
     m->SetRobotMode(RobotMode::MANUAL_MODE);
 
-    QObject::connect(m, SIGNAL(RobotStatusChanged(int)), this, SLOT(RobotStatusHandler(int)));
+    QObject::connect(m, SIGNAL(UpdateRobotMode(RobotMode)), this, SLOT(RobotModeHandler(RobotMode)));
 }
 
 Controller::~Controller()
@@ -21,14 +21,21 @@ Controller::~Controller()
     delete ui;
 }
 
-void Controller::RobotStatusHandler(RobotMode a)
+void Controller::RobotModeHandler(RobotMode mode)
 {
     qDebug() << "signal slot test";
-    if(a == RobotMode::SUSPENDED_MODE)
+    if(mode == RobotMode::SUSPENDED_MODE)
     {
         QMessageBox msgBox;
-        msgBox.setText("SUSPEND MODE!!!!");
-        msgBox.exec();
+        msgBox.setText("Autonomous mode is failed");
+        msgBox.setInformativeText("Do you want to change Manual mode?");
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msgBox.setDefaultButton(QMessageBox::Yes);
+        if(msgBox.exec() == QMessageBox::Yes)
+        {
+            // change to manual mode
+            m->SetRobotMode(RobotMode::MANUAL_MODE);
+        }
     }
 }
 

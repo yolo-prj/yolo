@@ -27,7 +27,7 @@ class RUIModel : public QObject
     Q_OBJECT
 
 signals:
-    void RobotStatusChanged(int a);
+    void UpdateRobotMode(RobotMode mode);
 
 public:
     explicit RUIModel(QObject *parent = 0);
@@ -36,8 +36,6 @@ public:
     static RUIModel* GetInstance();
     virtual void Connect();
     virtual void Disconnect();
-
-    virtual int GetRobotStatus();
 
     virtual int GetImage(cv::Mat *Image);
 
@@ -48,8 +46,7 @@ public:
     virtual void HandlePanOperation();
     virtual void HandleTiltOperation();
 
-    // signal slot test
-    void CreateSignal();
+    void RobotModeChanged(RobotMode mode);
 
     bool IsEmpty() const;
     int PushImage(cv::Mat&& image);
@@ -90,6 +87,7 @@ private:
         {
             qDebug() << "OnRobotModeChanged";
             qDebug() << "id : " << handler << " , mode : " << static_cast<int>(mode);
+            ruimodel_->RobotModeChanged(mode);
         }
 
          virtual void OnRobotErrorEventReceived(int handler, int error)

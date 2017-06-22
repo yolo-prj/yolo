@@ -39,7 +39,7 @@ void RobotControlManager::Initialize(const std::string config, const std::string
 
     debug_info_listener_ = make_shared<RobotDebugInfoListener>();
     debug_info_listener_->SetParent(this);
-    manager_->addNetworkMessageListener(1100, debug_info_listener_.get());
+    manager_->addNetworkMessageListener(1300, debug_info_listener_.get());
 
     ImageReceiver::GetInstance().SetNetworkManager(manager_);
 }
@@ -86,16 +86,6 @@ void RobotControlManager::RemoveController(int handler)
 int RobotControlManager::SendFirstConfig(const int handler)
 {
     YMessage msg;
-    /*
-     *
-    “200” : {	// initial command
-        “id” : “allocated robot id”,		// robot should use this id
-        “udp_port” : 4001,
-        “height” : 480,
-        “width” : 64,
-        “sampling_rate” : 20 		//milli second
-        }
-     */
 
     msg.set("id", handler);
     msg.set("udp_port", 9004);
@@ -112,6 +102,24 @@ int RobotControlManager::SendFirstConfig(const int handler)
 
     manager_->sendTcpPacket(handler, 200, data, len);
 
+}
+
+int RobotControlManager::SendDebugCommand(const int handler, const std::string debug_command, int state)
+{
+    YMessage msg;
+
+    msg.set("id", handler);
+    msg.set("debug", debug_command);
+    msg.set("state", state);
+    msg.setOpcode(300);
+
+    byte* data;
+    uint len;
+    data = msg.serialize(len);
+
+    cout << "handler : " << handler << ", opcode " << 200 << ", length : " << len << endl;
+
+    manager_->sendTcpPacket(handler, 300, data, len);
 }
 
 int RobotControlManager::SendCommand(const int handler, const int opcode, std::tuple<std::string, std::string, int>&& command)
@@ -249,17 +257,15 @@ void RobotControlManager::RobotEventInfoListener::onReceiveMessage(byte* data, u
 
     if(robot_controller_manager_->robot_controllers_.find(id) == robot_controller_manager_->robot_controllers_.end()) {
         qDebug() << "Invalid Id : " << id;
-    } else
-    {
-        if(event.compare("event") == 0)
-        {
+    } else {
+        if(event.compare("event") == 0) {
             RobotMode mode = static_cast<RobotMode>(state);
             robot_controller_manager_->event_listener_->OnRobotModeChanged(id, mode);
-        }
-
-        if(event.compare("error") == 0)
-        {
+        } else if(event.compare("error") == 0) {
             robot_controller_manager_->event_listener_->OnRobotErrorEventReceived(id, state);
+        }
+        else {
+
         }
     }
 }

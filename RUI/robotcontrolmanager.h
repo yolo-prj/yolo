@@ -118,6 +118,7 @@ public :
     void Stop();
 
     int SendFirstConfig(const int handler);
+    int SendDebugCommand(const int handler, const std::string debug_command, int state);
     int SendCommand(const int handler, const int opcode, std::tuple<std::string, std::string, int>&& command);
     int SelectRobot(const int handler);
 

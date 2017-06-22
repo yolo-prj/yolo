@@ -110,6 +110,7 @@ private:
 
     void AddController(int handler, const std::string addr, unsigned int port);
     void RemoveController(int handler);
+    void ChangeMode(int handler, RobotMode mode);
     void ProcessRobotDisconncetion(int handler);
 
 public :

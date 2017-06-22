@@ -14,17 +14,17 @@ public:
     int handle() const { return handle_; }
     const std::string& addr() const { return addr_; }
     unsigned int port() const { return port_; }
-    RobotMode state() const { return state_; }
+    RobotMode mode() const { return mode_; }
 
-    void ChangeState(int state) {
-        state_ = static_cast<RobotMode>(state);
+    void ChangeMode(RobotMode mode) {
+        mode_ = mode;
     }
 
 private:
     int handle_;
     std::string addr_;
     unsigned int port_;
-    RobotMode state_;
+    RobotMode mode_;
 };
 }
 

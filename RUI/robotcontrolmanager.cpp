@@ -83,6 +83,18 @@ void RobotControlManager::RemoveController(int handler)
     robot_controllers_.erase(handler);
 }
 
+void RobotControlManager::ChangeMode(int handler, RobotMode mode)
+{
+    qDebug() << "ChangeMode() : " << handler;
+
+    if ( robot_controllers_.find(handler) == robot_controllers_.end() ) {
+        qDebug() <<  "Duplicated Controller : " << handler;
+    } else {
+        RobotController& controller = robot_controllers_[handler];
+        controller.ChangeMode(mode);
+    }
+}
+
 int RobotControlManager::SendFirstConfig(const int handler)
 {
     YMessage msg;
@@ -172,7 +184,7 @@ RobotControlManager::GetRobotInfo(int handler)
         return std::make_tuple(controller.handle(),
                                          controller.addr(),
                                          controller.port(),
-                                         static_cast<RobotMode>(controller.state()));
+                                         controller.mode());
     }
 }
 
@@ -260,6 +272,7 @@ void RobotControlManager::RobotEventInfoListener::onReceiveMessage(byte* data, u
     } else {
         if(event.compare("event") == 0) {
             RobotMode mode = static_cast<RobotMode>(state);
+            robot_controller_manager_->ChangeMode(id, mode);
             robot_controller_manager_->event_listener_->OnRobotModeChanged(id, mode);
         } else if(event.compare("error") == 0) {
             robot_controller_manager_->event_listener_->OnRobotErrorEventReceived(id, state);

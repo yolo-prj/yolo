@@ -117,6 +117,7 @@ public :
     bool Start();
     void Stop();
 
+    int SendFirstConfig(const int handler);
     int SendCommand(const int handler, const int opcode, std::tuple<std::string, std::string, int>&& command);
     int SelectRobot(const int handler);
 

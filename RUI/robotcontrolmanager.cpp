@@ -83,6 +83,37 @@ void RobotControlManager::RemoveController(int handler)
     robot_controllers_.erase(handler);
 }
 
+int RobotControlManager::SendFirstConfig(const int handler)
+{
+    YMessage msg;
+    /*
+     *
+    “200” : {	// initial command
+        “id” : “allocated robot id”,		// robot should use this id
+        “udp_port” : 4001,
+        “height” : 480,
+        “width” : 64,
+        “sampling_rate” : 20 		//milli second
+        }
+     */
+
+    msg.set("id", handler);
+    msg.set("udp_port", 9004);
+    msg.set("height", 240);
+    msg.set("width", 320);
+    msg.set("sampling_rate", 20);
+    msg.setOpcode(200);
+
+    byte* data;
+    uint len;
+    data = msg.serialize(len);
+
+    cout << "handler : " << handler << ", opcode " << 200 << ", length : " << len << endl;
+
+    manager_->sendTcpPacket(handler, 200, data, len);
+
+}
+
 int RobotControlManager::SendCommand(const int handler, const int opcode, std::tuple<std::string, std::string, int>&& command)
 {
     qDebug() << "SendCommand() : " << handler;
@@ -177,6 +208,8 @@ void RobotControlManager::NetworkEventListener::onTcpClientConnected(int handle,
 
     robot_controller_manager_->AddController(handle, addr, port);
     robot_controller_manager_->event_listener_->OnRobotConnected(handle);
+
+    robot_controller_manager_->SendFirstConfig(handle);
 }
 
 void RobotControlManager::NetworkEventListener::onTcpClientDisconnected(int handle, string addr, ushort port)
@@ -204,11 +237,13 @@ void RobotControlManager::NetworkConnectionListener::connectionLost(string addr,
 
 void RobotControlManager::RobotEventInfoListener::onReceiveMessage(byte* data, uint length)
 {
-    qDebug() << "message received : do noting, it's only for tcp connection";
+    qDebug() << "RobotEventInfoListener::onReceiveMessage()";
+
     YMessage msg;
     msg.deserialize(data, length);
 
-    int id = msg.getInt("id");
+    std::string str = msg.getString("id");
+    int id = std::stoi(str);
     std::string event = msg.getString("event");
     int state = msg.getInt("state");
 
@@ -231,7 +266,7 @@ void RobotControlManager::RobotEventInfoListener::onReceiveMessage(byte* data, u
 
 void RobotControlManager::RobotDebugInfoListener::onReceiveMessage(byte* data, uint length)
 {
-    qDebug() << "message received : do noting, it's only for tcp connection";
+    qDebug() << "obotDebugInfoListener::onReceiveMessage";
     YMessage msg;
     msg.deserialize(data, length);
 

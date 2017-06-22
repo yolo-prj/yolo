@@ -8,6 +8,7 @@
 #include <yolo/YFramework/YNetworkMessageListener.h>
 #include <yolo/YFramework/YConnectionLostListener.h>
 #include <yolo/YFramework/YHeartbeatManager.h>
+#include <yolo/YFramework/YMessageFormatParser.h>
 #include <QtDebug>
 #include "robotcontroller.h"
 #include "roboteventlistener.h"
@@ -103,6 +104,8 @@ private:
     std::map<int, RobotController> robot_controllers_;
     int selected_robot_;
 
+    std::shared_ptr<YMessageFormatParser> parser_;
+
     int FindRobotHandler(const std::string addr);
 
     void AddController(int handler, const std::string addr, unsigned int port);
@@ -110,7 +113,7 @@ private:
     void ProcessRobotDisconncetion(int handler);
 
 public :
-    void Initialize(const std::string config);
+    void Initialize(const std::string config, const std::string msgformat);
     bool Start();
     void Stop();
 

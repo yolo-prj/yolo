@@ -19,8 +19,11 @@ RobotControlManager::~RobotControlManager()
     Stop();
 }
 
-void RobotControlManager::Initialize(const std::string config)
+void RobotControlManager::Initialize(const std::string config, const std::string msgformat)
 {
+    parser_ = std::make_shared<YMessageFormatParser>(msgformat);
+    parser_->parse();
+
     manager_ = make_shared<YNetworkManager>(config);
     listener_ = make_shared<NetworkEventListener>();
     listener_->SetParent(this);
@@ -102,6 +105,8 @@ int RobotControlManager::SendCommand(const int handler, const int opcode, std::t
         byte* data;
         uint len;
         data = msg.serialize(len);
+
+        cout << "handler : " << handler << ", opcode " << opcode << ", length : " << len << endl;
 
         manager_->sendTcpPacket(handler, opcode, data, len);
     }
@@ -203,8 +208,7 @@ void RobotControlManager::RobotEventInfoListener::onReceiveMessage(byte* data, u
     YMessage msg;
     msg.deserialize(data, length);
 
-    std::string str = msg.getString("id");
-    int id = std::atoi(str.c_str());
+    int id = msg.getInt("id");
     std::string event = msg.getString("event");
     int state = msg.getInt("state");
 
@@ -231,7 +235,7 @@ void RobotControlManager::RobotDebugInfoListener::onReceiveMessage(byte* data, u
     YMessage msg;
     msg.deserialize(data, length);
 
-    int id = std::atoi(msg.getString("id").c_str());
+    int id = msg.getInt("id");
     std::string debug_info = msg.getString("event");
     int state = msg.getInt("state");
 

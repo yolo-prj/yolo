@@ -31,7 +31,14 @@ YCameraController::~YCameraController()
 }
 
 void
-YCameraController::start()
+YCameraController::setWidthHeight(int width, int height)
+{
+    _width = width;
+    height = height;
+}
+
+void
+YCameraController::start(bool startThread)
 {
     _capture = cvCreateCameraCapture(0);
     if(_capture == nullptr) {
@@ -49,8 +56,11 @@ YCameraController::start()
 	cout << "[CameraController] Width = " << width << endl;
 	cout << "[CameraController] Height = " << height << endl;
 
-	_continueThread = true;
-	_captureThread = new boost::thread(bind(&YCameraController::captureThread, this));
+	if(startThread)
+	{
+	    _continueThread = true;
+	    _captureThread = new boost::thread(bind(&YCameraController::captureThread, this));
+	}
     }
 }
 
@@ -71,6 +81,21 @@ YCameraController::stop()
 	cvReleaseCapture(&_capture);
 	_capture = nullptr;
     }
+}
+
+Mat
+YCameraController::getCameraImage()
+{
+    IplImage* iplCameraImage;
+    Mat image;
+
+    iplCameraImage = cvQueryFrame(_capture);
+    image = cv::cvarrToMat(iplCameraImage);
+#ifdef ROBOT
+    flip(image, image, -1);
+#endif
+
+    return image;
 }
 
 void

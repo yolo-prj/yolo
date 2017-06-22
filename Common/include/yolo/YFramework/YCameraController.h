@@ -20,8 +20,12 @@ public:
     YCameraController(YCameraImageListener*);
     ~YCameraController();
 
-    void start();
+    void start(bool startThread = true);
     void stop();
+
+    void setWidthHeight(int width, int height);
+
+    Mat getCameraImage();
 
 private:
     void init();

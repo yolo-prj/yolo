@@ -88,11 +88,13 @@ YServoController::start()
     resetServo();
     boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
 
+    /*
     _continueThread = true;
     _panControlThread = new boost::thread(boost::bind(&YServoController::panControlThread, this));
     _tiltControlThread = new boost::thread(boost::bind(&YServoController::tiltControlThread, this));
     _leftControlThread = new boost::thread(boost::bind(&YServoController::leftControlThread, this));
     _rightControlThread = new boost::thread(boost::bind(&YServoController::rightControlThread, this));
+    */
 }
 
 void
@@ -100,6 +102,7 @@ YServoController::stop()
 {
     _continueThread = false;
 
+    /*
     if(_panControlThread) {
 	if(_panControlThread->joinable())
 	    _panControlThread->join();
@@ -127,6 +130,7 @@ YServoController::stop()
 	delete _rightControlThread;
 	_rightControlThread = nullptr;
     }
+    */
 }
 
 void
@@ -264,6 +268,9 @@ YServoController::setServoPosition(ServoType type, int& position)
 
     sprintf(buf, "%d=%d\n", type, position);
 
+    write(_servoFd, buf, strlen(buf));
+    fsync(_servoFd);
+    /*
     {
 	boost::mutex::scoped_lock lock(_mutex);
 
@@ -272,6 +279,7 @@ YServoController::setServoPosition(ServoType type, int& position)
 
 	success = true;
     }
+    */
 }
 
 void

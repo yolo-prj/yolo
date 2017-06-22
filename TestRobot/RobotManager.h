@@ -10,6 +10,7 @@
 #include <yolo/YFramework/YServoController.h>
 #include <yolo/YFramework/YMessage.h>
 #include <yolo/YFramework/YNetworkManager.h>
+#include <yolo/YFramework/YMessageFormatParser.h>
 
 #include "YMessageSender.h"
 #include "YMessageReceiver.h"
@@ -68,6 +69,8 @@ private:
     YServoController*	_servoController;
     YSonarController*	_sonarController;
 
+    YMessageFormatParser* _parser;
+
     int			_pan;
     int			_tilt;
     float		_offset;
@@ -75,6 +78,7 @@ private:
     double		_distance;
 
     PID			_pid;
+    int			_id;
 };
 
 

@@ -116,9 +116,19 @@ YNetworkManager::addNetworkMessageListener(uint opcode, YNetworkMessageListener*
 }
 
 void
-YNetworkManager::dispatchMessage(uint opcode, byte* data, uint length)
+//YNetworkManager::dispatchMessage(uint opcode, byte* data, uint length)
+YNetworkManager::dispatchMessage(uint opcode, boost::shared_ptr<byte[]> data, uint length)
 {
     auto itr = _listenerMap.find(opcode);
+    
+    /*
+    uint o;
+    uint len;
+    memcpy(&o, data.get(), 4);
+    memcpy(&len, data.get()+4, 4);
+
+    cout << "opcode : " << opcode << ", o : " << o << ", len: " << len<< endl;
+    */
 
     if(itr != _listenerMap.end())
     {
@@ -126,7 +136,7 @@ YNetworkManager::dispatchMessage(uint opcode, byte* data, uint length)
 
 	for(auto listener : listenerList)
 	{
-	    listener->onReceiveMessage(data, length);
+	    listener->onReceiveMessage(data.get(), length);
 	}
     }
     else
@@ -134,6 +144,7 @@ YNetworkManager::dispatchMessage(uint opcode, byte* data, uint length)
 	// It must not be happned.
 	cerr << "There is no component to send message for the opcode " << opcode << endl;
     }
+
 }
 
 bool
@@ -213,20 +224,28 @@ YNetworkManager::stop()
     _comm = &YComm::getInstance();
 
     if(_server && _tcpServer != nullptr) {
-	_comm->removeTcpServer(_tcpServer);
+	try{
+	    _comm->removeTcpServer(_tcpServer);
+	} catch(...){}
 	_tcpServer = nullptr;
     } else if(!_server && _tcpClient != nullptr) {
-	_comm->removeTcpClient(_tcpClient);
+	try{
+	    _comm->removeTcpClient(_tcpClient);
+	} catch(...){}
 	_tcpClient = nullptr;
     }
 
     if(_hb != nullptr) {
-	_comm->removeUdp(_hb);
+	try{
+	    _comm->removeUdp(_hb);
+	} catch(...){}
 	_hb = nullptr;
     }
 
     if(_udp != nullptr) {
-	_comm->removeUdp(_udp);
+	try {
+	    _comm->removeUdp(_udp);
+	} catch(...){}
 	_udp = nullptr;
     }
 }
@@ -250,7 +269,7 @@ YNetworkManager::onConnected(YTcpSession& session)
 	}
     }
 
-    //cout << "tcp connected" << endl;
+    cout << "[YNetworkManager] TCP connected" << endl;
 }
 
 void
@@ -265,7 +284,7 @@ YNetworkManager::onDisconnected(YTcpSession& session)
 	}
     }
 
-    //cout << "tcp disconnected" << endl;
+    cout << "[YNetworkManager] TCP DISconnected" << endl;
 }
 
 void
@@ -392,6 +411,7 @@ YNetworkManager::onReceiveData(YTcpSession& session)
 	    info->index = 0;
 
 	    // opcode processing & call-back received message
+	    /*
 	    auto itrList = _listenerMap.find(opcode);
 	    if(itrList != _listenerMap.end()) {
 		auto listenerList = itrList->second;
@@ -400,6 +420,14 @@ YNetworkManager::onReceiveData(YTcpSession& session)
 		    listener->onReceiveMessage(info->buffer, msgLength);
 		}
 	    }
+	    */
+
+	    boost::shared_ptr<byte[]> dataPtr = boost::make_shared<byte[]>(msgLength);
+	    memcpy(dataPtr.get(), info->buffer, msgLength);
+
+	    //dispatchMessage(opcode, info->buffer, msgLength);
+	    //dispatchMessage(opcode, dataPtr, msgLength);
+	    boost::thread t(boost::bind(&YNetworkManager::dispatchMessage, this, opcode, dataPtr, msgLength));
 	}
 
     }
@@ -413,7 +441,6 @@ YNetworkManager::onReceiveDatagram(string remoteaddr, ushort port, byte* data, u
 
     if(opcode != OPCODE_HEARTBEAT)
     {
-    cout << "onreceivedatagram" << endl;
 	auto itr = _listenerMap.find(opcode);
 	if(itr != _listenerMap.end())
 	{
@@ -439,10 +466,13 @@ YNetworkManager::sendUdpDatagram(uint opcode, byte* data, uint length)
 {
     if(_started)
     {
-	if(opcode == OPCODE_HEARTBEAT)
-	    _hb->sendTo(data, length, _hbPeerAddr, _hbPeerPort);
-	else
-	    _udp->sendTo(data, length, _udpPeerAddr, _udpPeerPort);
+	try {
+	    if(opcode == OPCODE_HEARTBEAT)
+		_hb->sendTo(data, length, _hbPeerAddr, _hbPeerPort);
+	    else
+		_udp->sendTo(data, length, _udpPeerAddr, _udpPeerPort);
+	} catch(...) {
+	}
     }
 }
 
@@ -451,10 +481,13 @@ YNetworkManager::sendUdpDatagram(uint opcode, string addr, ushort port, byte* da
 {
     if(_started)
     {
-	if(opcode == OPCODE_HEARTBEAT)
-	    _hb->sendTo(data, length, addr, port);
-	else
-	    _udp->sendTo(data, length, addr, port);
+	try {
+	    if(opcode == OPCODE_HEARTBEAT)
+		_hb->sendTo(data, length, addr, port);
+	    else
+		_udp->sendTo(data, length, addr, port);
+	} catch(...) {
+	}
     }
 }
 

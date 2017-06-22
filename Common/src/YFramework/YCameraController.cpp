@@ -89,6 +89,8 @@ YCameraController::captureThread()
 
 	if(_listener != nullptr)
 	    _listener->onReceiveImage(image);
+
+	boost::this_thread::sleep(boost::posix_time::milliseconds(20));
     }
 }
 

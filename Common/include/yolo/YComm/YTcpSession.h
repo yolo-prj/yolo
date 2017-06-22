@@ -61,6 +61,9 @@ private:
 	void			block_thread(unsigned int timeout);
 
         void                    readSomeThread();
+
+	void			sendHandler(const boost::system::error_code& e, size_t byteSent);
+	void			receiveDataCallback();
 public:
 	unsigned int					_number;
 

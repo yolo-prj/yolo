@@ -26,6 +26,9 @@ RobotManager::RobotManager(YNetworkManager* manager, string msgFormatFile)
     _sonarController = new YSonarController(28, 29, this);
     _servoController = new YServoController();
 
+    _parser = new YMessageFormatParser(msgFormatFile);
+    _parser->parse();
+
     _pan = 0;
     _tilt = 0;
 
@@ -33,11 +36,14 @@ RobotManager::RobotManager(YNetworkManager* manager, string msgFormatFile)
 
     // fix below for the msg interfaces
     manager->addNetworkMessageListener(1, _cmdReceiver);
+    manager->addNetworkMessageListener(13, _cmdReceiver);
+    manager->addNetworkMessageListener(14, _cmdReceiver);
     manager->addNetworkMessageListener(2, _configReceiver);
 }
 
 RobotManager::~RobotManager()
 {
+    delete _parser;
     delete _imageSender;
     delete _eventSender;
     delete _cmdReceiver;
@@ -120,6 +126,33 @@ void
 RobotManager::onReceiveCommand(YMessage msg)
 {
     cout << "[RobotManager] received command" << endl;
+    int speed = 0;
+
+    YMessage sendMsg = _parser->getMessage(1001);
+
+    switch(msg.getOpcode())
+    {
+	case 13:
+	    cout << "[RobotManager] Start Robot!!" << endl;
+	    _run = true;
+	    break;
+	case 14:
+	    cout << "[RobotManager] Stop Robot!!" << endl;
+	    _run = false;
+	    speed = 0;
+	    _servoController->setWheelSpeed(YServoController::ENUM_SERVO_LEFT_WHEEL, speed);
+	    _servoController->setWheelSpeed(YServoController::ENUM_SERVO_RIGHT_WHEEL, speed);
+	    sendMsg.setOpcode(1001);
+	    sendMsg.set("id", 14);
+	    sendMsg.set("event", 2);
+	    sendMsg.set("state", 3);
+	    _eventSender->send(sendMsg);
+	    break;
+	case 200:
+	    _id = msg.getInt("id");
+	    cout << "[RobotManager] Robot ID : " << _id << endl;
+	    break;
+    }
 }
 
 void

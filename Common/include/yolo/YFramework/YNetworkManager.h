@@ -12,6 +12,7 @@
 #include <list>
 #include <map>
 #include <string>
+#include <boost/shared_ptr.hpp>
 
 using namespace std;
 using namespace yolo;
@@ -78,7 +79,8 @@ public:
 
 private:
     void readConfiguration(string filepath);
-    void dispatchMessage(uint opcode, byte* data, uint length);
+//    void dispatchMessage(uint opcode, byte* data, uint length);
+    void dispatchMessage(uint opcode, boost::shared_ptr<byte[]> data, uint length);
 
 
 private:

@@ -17,7 +17,8 @@
 #define __USE_W32_SOCKETS
 #endif
 
-#define defaultBufferSize 65536
+//#define defaultBufferSize 65536
+#define defaultBufferSize 4096
 
 #include <iostream>
 

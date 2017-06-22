@@ -34,6 +34,7 @@ YEventSender::send(YMessage& msg)
     uint length = 0;
     byte* data = msg.serialize(length);
 
-    // image will be sent via TCP
     manager->sendTcpPacket(0, msg.getOpcode(), data, length);
+
+    cout << "opcode: " << msg.getOpcode() << " data : " << (char*)(data + 8) << endl;
 }

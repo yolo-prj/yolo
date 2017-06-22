@@ -18,7 +18,10 @@ YCommandReceiver::onReceiveMessage(byte* data, uint length)
     uint opcode;
     memcpy(&opcode, data, sizeof(uint));
 
+    cout << "recv opcode : " << opcode << ",data: " << (char*)(data+8) << endl;
+
     YMessage msg = parser->getMessage(opcode);
+    msg.deserialize(data, length);
 
     // pass message to robot controller 
     if(_listener != nullptr)

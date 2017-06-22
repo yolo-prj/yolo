@@ -46,7 +46,6 @@ public:
     virtual void HandlePanOperation();
     virtual void HandleTiltOperation();
 
-    // signal slot test
     void RobotModeChanged(RobotMode mode);
 
     bool IsEmpty() const;

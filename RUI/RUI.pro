@@ -33,6 +33,15 @@ INCLUDEPATH += /usr/local/include \
             ../Common/include
 }
 
+unix {
+    LIBS += -lboost_system \
+            -lboost_thread \
+            -lboost_exception \
+            -lboost_regex \
+            -lboost_timer
+
+}
+
 win32 {
     message("WIN32 Compile")
 }

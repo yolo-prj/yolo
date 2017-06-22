@@ -45,12 +45,6 @@ void RUIModel::Disconnect()
 }
 
 
-int RUIModel::GetRobotStatus()
-{
-    return 0;
-}
-
-
 int RUIModel::GetImage(cv::Mat *Image)
 {
 //    int retvalue = UdpRecvImageAsJpeg(UdpLocalPort,Image,(struct sockaddr *)&remaddr, &addrlen);
@@ -69,11 +63,6 @@ void RUIModel::HandleRobotOperation()
 
 void RUIModel::SetRobotMode(RobotMode mode)
 {
-    //yolo::YMessage msg;
-    //msg.setOpcode(21);
-    //msg.set("mode_control", static_cast<int>(mode));
-    //send
-
     std::string id = std::to_string(cur_robot_handle_);
     std::string command = "mode_control";
     int state = static_cast<int>(mode);
@@ -86,10 +75,6 @@ void RUIModel::SetRobotMode(RobotMode mode)
 
 void RUIModel::HandlePanOperation()
 {
-    //yolo::YMessage msg;
-    //msg.setOpcode(11);
-    //msg.set("camera_pan_control", 50);
-    //send
 
     std::string id = std::to_string(cur_robot_handle_);
     std::string command = "Run"; //test
@@ -102,12 +87,8 @@ void RUIModel::HandlePanOperation()
 
 void RUIModel::HandleTiltOperation()
 {
-    //yolo::YMessage msg;
-    //msg.setOpcode(12);
-    //msg.set("camera_tilt_control", 50);
-    //send
     std::string id = std::to_string(cur_robot_handle_);
-    std::string command = "Stop"; ////test
+    std::string command = "Stop"; //test
     int state = 0;
 
     yolo::RobotControlManager::GetInstance().SendCommand(cur_robot_handle_,

@@ -81,14 +81,16 @@ YHeartbeatManager::stopHeartbeat()
 {
     if(_sendHeartbeatThread != nullptr) {
 	_continueSend = false;
-	_sendHeartbeatThread->join();
+	if(_sendHeartbeatThread->joinable())
+	    _sendHeartbeatThread->join();
 	delete _sendHeartbeatThread;
 	_sendHeartbeatThread = nullptr;
     }
 
     if(_checkHeartbeatThread != nullptr) {
 	_continueCheck = false;
-	_checkHeartbeatThread->join();
+	if(_checkHeartbeatThread->joinable())
+	    _checkHeartbeatThread->join();
 	delete _checkHeartbeatThread;
 	_checkHeartbeatThread = nullptr;
     }

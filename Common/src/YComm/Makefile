@@ -30,7 +30,6 @@ all: $(TARGET)
 $(TARGET) : $(OBJS)
 	$(GCC) $(INCLUDES) -shared -o $(TARGET) $(OBJS) $(BOOSTLIBS)
 	sudo cp $(TARGET) /usr/local/lib
-	mv $(TARGET) $(LIBSDIR)
 
 #$(OBJS): YComm.o YTcpClient.o YTcpServer.o YTcpSession.o YUdp.o YUdpReceiveDatagramHandler.o
 

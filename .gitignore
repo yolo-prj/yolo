@@ -2,4 +2,5 @@ lib/
 *.o
 *.swp
 *.so
+*.ini
 *test

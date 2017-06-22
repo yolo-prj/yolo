@@ -101,25 +101,29 @@ YServoController::stop()
     _continueThread = false;
 
     if(_panControlThread) {
-	_panControlThread->join();
+	if(_panControlThread->joinable())
+	    _panControlThread->join();
 	delete _panControlThread;
 	_panControlThread = nullptr;
     }
 
     if(_tiltControlThread) {
+	if(_tiltControlThread->joinable())
 	_tiltControlThread->join();
 	delete _tiltControlThread;
 	_tiltControlThread = nullptr;
     }
 
     if(_leftControlThread) {
+	if(_leftControlThread->joinable())
 	_leftControlThread->join();
 	delete _leftControlThread;
 	_leftControlThread = nullptr;
     }
 
     if(_rightControlThread) {
-	_rightControlThread->join();
+	if(_rightControlThread->joinable())
+	    _rightControlThread->join();
 	delete _rightControlThread;
 	_rightControlThread = nullptr;
     }

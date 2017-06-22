@@ -25,8 +25,12 @@ YTcpSession::YTcpSession(boost::asio::io_service& io_service) : _io_service(io_s
 YTcpSession::~YTcpSession(void)
 {	
     _continueRead = false;
-    _readThread->join();
-    delete _readThread;
+    if(_readThread != NULL)
+    {
+	if(_readThread->joinable())
+	    _readThread->join();
+	delete _readThread;
+    }
 
     std::deque<BufferInfo>::iterator itr;
     for(itr = _dataQueue.begin(); itr != _dataQueue.end(); itr++)

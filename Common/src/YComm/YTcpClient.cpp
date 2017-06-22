@@ -81,37 +81,32 @@ YTcpClient::connect(unsigned int timeout)
 {
     bool success = false;
 
-    //if(_io_service != NULL)
-    {		
-	// TCP session을 생성하여 접속을 시도한다.
-	boost::asio::io_service& io = YComm::getInstance().getIOService();
-	_session = new YTcpSession(io);
-	_session->setBufferSize(_bufferSize);
-	// TCP session 객체에 connection, recv data 이벤트 콜백을 등록한다.		
-	_session->registerConnectionEventCallback(_c_event);
-	_session->registerConnectionEventCallback(this);
-	_session->registerConnectionEventCallback(&YComm::getInstance());
+    boost::asio::io_service& io = YComm::getInstance().getIOService();
+    _session = new YTcpSession(io);
+    _session->setBufferSize(_bufferSize);
+
+    _session->registerConnectionEventCallback(_c_event);
+    _session->registerConnectionEventCallback(this);
+    _session->registerConnectionEventCallback(&YComm::getInstance());
+    
+    _session->registerReceiveDataEventCallback(_r_event);
+    
+    if(!_isTryToReconnect)
+    {
+	success = _session->connect(_serverAddress, _serverPort, timeout);
 	
-	_session->registerReceiveDataEventCallback(_r_event);
-	
-	if(!_isTryToReconnect)
-	{
-	    success = _session->connect(_serverAddress, _serverPort, timeout);
-	    
-	    if(success)
-		_session->start();		
-	}
-	else
-	{
-	    auto bf = boost::bind(&YTcpClient::reconnectThread, this, _1);
-
-	    boost::thread t(bf, (void*)_session);
-
-	    success = true;
-
-	    cout << "[YTcpClient] connection failed: trying to reconnect....(" << _serverAddress << ":" << _serverPort << ")" << endl;
-	}		
+	if(success)
+	    _session->start();		
     }
+    else
+    {
+	auto bf = boost::bind(&YTcpClient::reconnectThread, this, _1);
+
+	boost::thread t(bf, (void*)_session);
+
+	success = true;
+
+    }		
 
     return success;
 }
@@ -161,7 +156,8 @@ YTcpClient::reconnectThread(void* arg)
     bool success = false;
     do
     {
-	success = session->connect(_serverAddress, _serverPort, 1000);
+	//success = session->connect(_serverAddress, _serverPort, 1000);
+	success = session->connect(_serverAddress, _serverPort);
 
 	if(!success)
 	{
@@ -173,7 +169,7 @@ YTcpClient::reconnectThread(void* arg)
 	    break;
 	}
 
-	boost::this_thread::sleep(boost::posix_time::seconds(1));
+	boost::this_thread::sleep(boost::posix_time::seconds(2));
     } while(!success);
 }
 

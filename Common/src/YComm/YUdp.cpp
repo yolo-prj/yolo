@@ -59,7 +59,8 @@ YUdp::~YUdp(void)
     _continueReceive = false;
     if(_receiveThread != NULL)
     {
-	_receiveThread->join();
+	if(_receiveThread->joinable())
+	    _receiveThread->join();
 	delete _receiveThread;
     }
 

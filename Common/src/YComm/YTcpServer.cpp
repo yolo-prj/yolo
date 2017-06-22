@@ -93,7 +93,7 @@ YTcpServer::accept()
 		    boost::bind(&YTcpServer::handle_accept, this, new_session,
 		    boost::asio::placeholders::error));
 
-		boost::thread t(boost::bind(&boost::asio::io_service::run_one, &io));
+//		boost::thread t(boost::bind(&boost::asio::io_service::run_one, &io));
 
 		success = true;				
 	    }

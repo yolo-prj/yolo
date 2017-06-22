@@ -251,8 +251,14 @@ void
 RobotManager::onReceiveConfig(YMessage msg)
 {
     cout << "[RobotManager] received config message" << endl;
+
+    switch(msg.getOpcode())
+    {
+    case 200:
 	_id = msg.getInt("id");
 	cout << "[RobotManager] Robot ID : " << _id << endl;
+	break;
+    }
 }
 
 void

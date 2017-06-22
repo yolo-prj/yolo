@@ -54,7 +54,6 @@ LINK_LIB=$(BOOSTLIB) -lYComm -lpthread $(LINK_LIB_PI) $(LINK_OPENCV) $(LINK_RASP
 all: $(OBJECT)
 	$(CC) $(OPTION) $(INCLUDE) $(LIBRARY) -shared -o $(BIN_SO) $(OBJECT) $(LINK_LIB)
 	sudo cp $(BIN_SO) /usr/local/lib
-	mv $(BIN_SO) $(LIBDIR)
 YMessage.o: $(HEADERDIR)/YMessage.h YMessage.cpp
 	$(CC) $(OPTION) -c -fPIC $(INCLUDE) YMessage.cpp
 YMessageFormatParser.o: $(HEADERDIR)/YMessageFormatParser.h YMessageFormatParser.cpp

@@ -299,7 +299,7 @@ YNetworkManager::onReceiveData(YTcpSession& session)
     int handle = session.getSocketHandle();
     auto itr = _streamInfoMap.find(handle);
     if(itr != _streamInfoMap.end()) {
-	StreamInfo* info = &itr->second;
+	StreamInfo& info = itr->second;
 
 	uint msgLength = 0;
 	uint opcode = 0;
@@ -315,31 +315,33 @@ YNetworkManager::onReceiveData(YTcpSession& session)
 
 	while(true)
 	{
-	    if(info->index == 0)
+	    if(info.index == 0)
 	    {
-		if(info->buffer != NULL)
+		if(info.buffer != NULL)
 		{
-		    delete[] info->buffer;
-		    info->buffer = NULL;		    
+		    //delete[] info.buffer;
+		    //info.buffer = NULL;		    
 		}
 		else
 		{
 		    // Buffer is NULL
 		}
 
-		if(info->msgHeader != NULL)
+		if(info.msgHeader != NULL)
 		{
-		    delete[] info->msgHeader;
-		    info->msgHeader = NULL;
+		    //delete[] info.msgHeader;
+		    //info.msgHeader = NULL;
 		}		
 
-		info->msgHeader = new byte[msgHeaderSize];
-		memset(info->msgHeader, 0, msgHeaderSize);
+		//info.msgHeader = new byte[msgHeaderSize];
+		boost::shared_ptr<byte[]> newptr = boost::make_shared<byte[]>(msgHeaderSize);
+		info.msgHeader = newptr;
+		memset(info.msgHeader.get(), 0, msgHeaderSize);
 	    }
 
-	    if(info->index < msgHeaderSize)
+	    if(info.index < msgHeaderSize)
 	    {
-		bytes_read = info->index;
+		bytes_read = info.index;
 	    }
 	    else
 	    {
@@ -348,16 +350,16 @@ YNetworkManager::onReceiveData(YTcpSession& session)
 
 	    new_bytes_read = 0;
 
-	    if(!info->isReadHeader)
+	    if(!info.isReadHeader)
 	    {		    
 		do
 		{
-		    new_bytes_read = session.recv((unsigned char*)info->msgHeader + bytes_read, msgHeaderSize - bytes_read);
+		    new_bytes_read = session.recv((unsigned char*)info.msgHeader.get() + bytes_read, msgHeaderSize - bytes_read);
 
 		    if(new_bytes_read > 0)
 		    {
 			bytes_read += new_bytes_read;
-			info->index = bytes_read;
+			info.index = bytes_read;
 		    }
 		    else
 		    {
@@ -367,40 +369,42 @@ YNetworkManager::onReceiveData(YTcpSession& session)
 		} while(bytes_read != msgHeaderSize);
 	    }
 
-	    info->isReadHeader = true;
+	    info.isReadHeader = true;
 
 	    // Message ID
-	    memcpy(&opcode, info->msgHeader, opcodeSize );
+	    memcpy(&opcode, info.msgHeader.get(), opcodeSize );
 
 	    // Message Length
 	    msgLength = 0;
-	    memcpy(&msgLength, info->msgHeader + opcodeSize , msgLengthSize);   
+	    memcpy(&msgLength, info.msgHeader.get() + opcodeSize , msgLengthSize);   
 
 	    if(msgLength < 0 || msgLength > MAX_LENGTH)
 	    {
 		break;
 	    }
 
-	    if(info->buffer == NULL)
+	    if(info.buffer == NULL)
 	    {
-		info->buffer = new byte[msgLength];
-		memset(info->buffer, 0, msgLength);
+		//info.buffer = new byte[msgLength];
+		boost::shared_ptr<byte[]> newptr = boost::make_shared<byte[]>(msgLength);
+		info.buffer = newptr;
+		memset(info.buffer.get(), 0, msgLength);
 	    }	    
-	    memcpy(info->buffer, info->msgHeader, msgHeaderSize);
+	    memcpy(info.buffer.get(), info.msgHeader.get(), msgHeaderSize);
 
-	    bytes_read = info->index - msgHeaderSize;
+	    bytes_read = info.index - msgHeaderSize;
 	    new_bytes_read = 0;
 
 	    if(msgLength > msgHeaderSize)
 	    {
 		do
 		{
-		    new_bytes_read = session.recv((unsigned char*)info->buffer + bytes_read + msgHeaderSize, msgLength - bytes_read - msgHeaderSize);
+		    new_bytes_read = session.recv((unsigned char*)info.buffer.get() + bytes_read + msgHeaderSize, msgLength - bytes_read - msgHeaderSize);
 
 		    if(new_bytes_read > 0)
 		    {
 			bytes_read += new_bytes_read;
-			info->index = bytes_read + msgHeaderSize;
+			info.index = bytes_read + msgHeaderSize;
 		    }
 		    else
 		    {
@@ -410,8 +414,8 @@ YNetworkManager::onReceiveData(YTcpSession& session)
 		} while(bytes_read + msgHeaderSize != msgLength);
 	    }		
 
-	    info->isReadHeader = false;
-	    info->index = 0;
+	    info.isReadHeader = false;
+	    info.index = 0;
 
 	    // opcode processing & call-back received message
 	    /*
@@ -426,7 +430,7 @@ YNetworkManager::onReceiveData(YTcpSession& session)
 	    */
 
 	    boost::shared_ptr<byte[]> dataPtr = boost::make_shared<byte[]>(msgLength);
-	    memcpy(dataPtr.get(), info->buffer, msgLength);
+	    memcpy(dataPtr.get(), info.buffer.get(), msgLength);
 
 	    //dispatchMessage(opcode, info->buffer, msgLength);
 	    dispatchMessage(opcode, dataPtr, msgLength);
@@ -527,5 +531,33 @@ YNetworkManager::sendTcpPacket(int handle, uint opcode, byte* data, uint length)
 	}
     }
 }
+
+/*
+void
+YNetworkManager::sendTcpPacket(int handle, uint opcode, boost::shared_ptr<byte[]> data, uint length)
+{
+    if(_started)
+    {
+	if(handle != 0)
+	{
+	    auto itr = _streamInfoMap.find(handle);
+	    
+	    if(itr != _streamInfoMap.end()) {
+		YTcpSession* session = itr->second.session;
+
+		session->send(data.get(), length);
+	    }
+	}
+	else
+	{
+	    for(auto stream : _streamInfoMap) {
+		YTcpSession* session = stream.second.session;
+
+		session->send(data.get(), length);
+	    }
+	}
+    }
+}
+*/
 
 }

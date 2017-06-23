@@ -34,6 +34,8 @@ RobotManager::RobotManager(YNetworkManager* manager, string msgFormatFile)
 
     _run = false;
 
+    _id = 0;
+
     // fix below for the msg interfaces
     manager->addNetworkMessageListener(1, _cmdReceiver);
     manager->addNetworkMessageListener(2, _cmdReceiver);

@@ -31,8 +31,10 @@ private:
     struct StreamInfo
     {
 	YTcpSession*	session;
-	byte*		msgHeader;
-	byte*		buffer;
+//	byte*		msgHeader;
+//	byte*		buffer;
+	boost::shared_ptr<byte[]> msgHeader;
+	boost::shared_ptr<byte[]> buffer;
 	int		index;
 	bool		isReadHeader;
 	bool		isConnected;
@@ -47,10 +49,12 @@ private:
 	}
 
 	~StreamInfo() {
+	    /*
 	    if(msgHeader != NULL)
 	    delete[] msgHeader;
 	    if(buffer != NULL)
 	    delete[] buffer;
+	    */
 	}
     };
 
@@ -74,6 +78,7 @@ public:
     void sendUdpDatagram(uint opcode, byte* data, uint length);
     void sendUdpDatagram(uint opcode, string addr, ushort port, byte* data, uint length);
     void sendTcpPacket(int handle, uint opcode, byte* data, uint length);
+//    void sendTcpPacket(int handle, uint opcode, boost::shared_ptr<byte[]>, uint length);
 
     inline void setHeartbeatManager(YHeartbeatManager* hb) { _heartbeat = hb; }
 

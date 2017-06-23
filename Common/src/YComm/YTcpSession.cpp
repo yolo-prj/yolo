@@ -230,7 +230,7 @@ YTcpSession::send(unsigned char* data, size_t dataLength)
 		if(_valid)
 			sendLength = boost::asio::write(*_tcp_socket, boost::asio::buffer(data, dataLength));
 //			boost::asio::async_write(*_tcp_socket, boost::asio::buffer(data, dataLength)
-//				, boost::bind(&YTcpSession::sendHandler, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+//			, boost::bind(&YTcpSession::sendHandler, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
 	}
 	catch(boost::system::system_error& e) {		
 		std::cerr << "[YComm] TCP send failed" << std::endl;

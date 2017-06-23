@@ -32,7 +32,23 @@ void Controller::RobotModeHandler(RobotMode mode)
     qDebug() << "robot mode is changed";
     // update robot mode to RUI
 
-
+    switch(mode)
+    {
+        case RobotMode::AUTO_MODE:
+            ui->auto_2->setChecked(true);
+            ui->manual->setChecked(false);
+            break;
+        case RobotMode::MANUAL_MODE:
+            ui->manual->setChecked(true);
+            ui->auto_2->setChecked(false);
+            break;
+        case RobotMode::IDLE_MODE:
+        case RobotMode::SUSPENDED_MODE:
+        default:
+            ui->auto_2->setChecked(false);
+            ui->manual->setChecked(false);
+             break;
+    }
 }
 
 // error
@@ -236,7 +252,7 @@ void Controller::on_send_clicked()
     QString text;
     text = ui->command->text();
 
-    //send
+    m->SendTextInput(text);
 }
 
 

@@ -94,22 +94,22 @@ void RUIModel::HandlePanOperation()
 {
 
     std::string id = std::to_string(cur_robot_handle_);
-    std::string command = "Run"; //test
+    std::string command = "camera_pan_control";
     int state = 0;
 
     yolo::RobotControlManager::GetInstance().SendCommand(cur_robot_handle_,
-                                                         13,
+                                                         11,
                                                          std::make_tuple(id, command, state));
 }
 
 void RUIModel::HandleTiltOperation()
 {
     std::string id = std::to_string(cur_robot_handle_);
-    std::string command = "Stop"; //test
+    std::string command = "camera_tilt_control";
     int state = 0;
 
     yolo::RobotControlManager::GetInstance().SendCommand(cur_robot_handle_,
-                                                         14,
+                                                         12,
                                                          std::make_tuple(id, command, state));
 }
 

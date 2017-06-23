@@ -14,8 +14,8 @@
    <string>Controller</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QHBoxLayout" name="horizontalLayout">
-    <item>
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
      <widget class="QTabWidget" name="tab_manager">
       <property name="enabled">
        <bool>true</bool>
@@ -88,7 +88,7 @@
       </widget>
      </widget>
     </item>
-    <item>
+    <item row="0" column="1">
      <widget class="QDockWidget" name="dock_status">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
@@ -98,7 +98,7 @@
       </property>
       <property name="minimumSize">
        <size>
-        <width>325</width>
+        <width>372</width>
         <height>571</height>
        </size>
       </property>
@@ -124,160 +124,156 @@
           <property name="frameShadow">
            <enum>QFrame::Raised</enum>
           </property>
-          <widget class="QGroupBox" name="groupBox_4">
-           <property name="geometry">
-            <rect>
-             <x>10</x>
-             <y>10</y>
-             <width>441</width>
-             <height>161</height>
-            </rect>
-           </property>
-           <property name="title">
-            <string>Robot Control</string>
-           </property>
-           <widget class="QPushButton" name="go">
-            <property name="geometry">
-             <rect>
-              <x>170</x>
-              <y>40</y>
-              <width>89</width>
-              <height>25</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Go</string>
-            </property>
-           </widget>
-           <widget class="QPushButton" name="back">
-            <property name="geometry">
-             <rect>
-              <x>170</x>
-              <y>100</y>
-              <width>89</width>
-              <height>25</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Back</string>
-            </property>
-           </widget>
-           <widget class="QPushButton" name="left">
-            <property name="geometry">
-             <rect>
-              <x>76</x>
-              <y>70</y>
-              <width>89</width>
-              <height>25</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Left Turn</string>
-            </property>
-           </widget>
-           <widget class="QPushButton" name="right">
-            <property name="geometry">
-             <rect>
-              <x>264</x>
-              <y>70</y>
-              <width>89</width>
-              <height>25</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Right Turn</string>
-            </property>
-           </widget>
-           <widget class="QPushButton" name="uturn">
-            <property name="geometry">
-             <rect>
-              <x>170</x>
-              <y>70</y>
-              <width>89</width>
-              <height>25</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>U Turn</string>
-            </property>
-           </widget>
-           <widget class="QSplitter" name="splitter">
-            <property name="geometry">
-             <rect>
-              <x>10</x>
-              <y>132</y>
-              <width>331</width>
-              <height>31</height>
-             </rect>
-            </property>
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <widget class="QLabel" name="label_4">
-             <property name="text">
-              <string>Operation Mode</string>
+          <layout class="QVBoxLayout" name="verticalLayout_3">
+           <item>
+            <widget class="QGroupBox" name="groupBox_4">
+             <property name="title">
+              <string>Robot Control</string>
              </property>
+             <widget class="QPushButton" name="go">
+              <property name="geometry">
+               <rect>
+                <x>170</x>
+                <y>40</y>
+                <width>89</width>
+                <height>25</height>
+               </rect>
+              </property>
+              <property name="text">
+               <string>Go</string>
+              </property>
+             </widget>
+             <widget class="QPushButton" name="back">
+              <property name="geometry">
+               <rect>
+                <x>170</x>
+                <y>100</y>
+                <width>89</width>
+                <height>25</height>
+               </rect>
+              </property>
+              <property name="text">
+               <string>Back</string>
+              </property>
+             </widget>
+             <widget class="QPushButton" name="left">
+              <property name="geometry">
+               <rect>
+                <x>76</x>
+                <y>70</y>
+                <width>89</width>
+                <height>25</height>
+               </rect>
+              </property>
+              <property name="text">
+               <string>Left Turn</string>
+              </property>
+             </widget>
+             <widget class="QPushButton" name="right">
+              <property name="geometry">
+               <rect>
+                <x>264</x>
+                <y>70</y>
+                <width>89</width>
+                <height>25</height>
+               </rect>
+              </property>
+              <property name="text">
+               <string>Right Turn</string>
+              </property>
+             </widget>
+             <widget class="QPushButton" name="uturn">
+              <property name="geometry">
+               <rect>
+                <x>170</x>
+                <y>70</y>
+                <width>89</width>
+                <height>25</height>
+               </rect>
+              </property>
+              <property name="text">
+               <string>U Turn</string>
+              </property>
+             </widget>
+             <widget class="QSplitter" name="splitter">
+              <property name="geometry">
+               <rect>
+                <x>10</x>
+                <y>132</y>
+                <width>321</width>
+                <height>31</height>
+               </rect>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <widget class="QLabel" name="label_4">
+               <property name="text">
+                <string>Operation Mode</string>
+               </property>
+              </widget>
+              <widget class="QRadioButton" name="auto_2">
+               <property name="text">
+                <string>Autonomous</string>
+               </property>
+              </widget>
+              <widget class="QRadioButton" name="manual">
+               <property name="text">
+                <string>Manual</string>
+               </property>
+              </widget>
+             </widget>
+             <widget class="QLabel" name="status_red">
+              <property name="geometry">
+               <rect>
+                <x>390</x>
+                <y>2</y>
+                <width>31</width>
+                <height>17</height>
+               </rect>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="pixmap">
+               <pixmap>assets/bullet_red.png</pixmap>
+              </property>
+             </widget>
+             <widget class="QLabel" name="status_green">
+              <property name="geometry">
+               <rect>
+                <x>367</x>
+                <y>2</y>
+                <width>31</width>
+                <height>17</height>
+               </rect>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="pixmap">
+               <pixmap>assets/bullet_green.png</pixmap>
+              </property>
+             </widget>
+             <widget class="QLabel" name="status_yellow">
+              <property name="geometry">
+               <rect>
+                <x>412</x>
+                <y>2</y>
+                <width>31</width>
+                <height>17</height>
+               </rect>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="pixmap">
+               <pixmap>assets/bullet_yellow.png</pixmap>
+              </property>
+             </widget>
             </widget>
-            <widget class="QRadioButton" name="auto_2">
-             <property name="text">
-              <string>Autonomous</string>
-             </property>
-            </widget>
-            <widget class="QRadioButton" name="manual">
-             <property name="text">
-              <string>Manual</string>
-             </property>
-            </widget>
-           </widget>
-           <widget class="QLabel" name="status_red">
-            <property name="geometry">
-             <rect>
-              <x>390</x>
-              <y>2</y>
-              <width>31</width>
-              <height>17</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="pixmap">
-             <pixmap>assets/bullet_red.png</pixmap>
-            </property>
-           </widget>
-           <widget class="QLabel" name="status_green">
-            <property name="geometry">
-             <rect>
-              <x>367</x>
-              <y>2</y>
-              <width>31</width>
-              <height>17</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="pixmap">
-             <pixmap>assets/bullet_green.png</pixmap>
-            </property>
-           </widget>
-           <widget class="QLabel" name="status_yellow">
-            <property name="geometry">
-             <rect>
-              <x>412</x>
-              <y>2</y>
-              <width>31</width>
-              <height>17</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="pixmap">
-             <pixmap>assets/bullet_yellow.png</pixmap>
-            </property>
-           </widget>
-          </widget>
+           </item>
+          </layout>
          </widget>
         </item>
         <item>
@@ -306,7 +302,7 @@
              <x>9</x>
              <y>9</y>
              <width>441</width>
-             <height>128</height>
+             <height>161</height>
             </rect>
            </property>
            <property name="title">

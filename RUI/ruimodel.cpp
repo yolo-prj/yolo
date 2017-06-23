@@ -126,17 +126,16 @@ void RUIModel::SetRobotMode(RobotMode mode)
 }
 
 // image
-void RUIModel::Connect()
+void RUIModel::SetImageOnOff(int operation)
 {
-    //signal slot test
-    //CreateSignal();
+    std::string id = std::to_string(cur_robot_handle_);
+    std::string command = "image_streaming_control";
+    int state = operation;
+
+    yolo::RobotControlManager::GetInstance().SendCommand(cur_robot_handle_,
+                                                         31,
+                                                         std::make_tuple(id, command, state));
 }
-
-
-void RUIModel::Disconnect()
-{
-}
-
 
 bool RUIModel::IsEmpty() const
 {
@@ -170,3 +169,19 @@ cv::Mat RUIModel::GetImage()
 
     return image;
 }
+
+// input text
+void RUIModel::SendTextInput(QString string)
+{
+    std::string id = std::to_string(cur_robot_handle_);
+    std::string command = string.toStdString();
+    int state = 0;
+
+    yolo::RobotControlManager::GetInstance().SendCommand(cur_robot_handle_,
+                                                         300,
+                                                         std::make_tuple(id, command, state));
+}
+
+
+
+

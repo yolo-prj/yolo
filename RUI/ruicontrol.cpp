@@ -22,7 +22,6 @@ Controller::Controller(QWidget *parent) :
 
 Controller::~Controller()
 {
-    m->Disconnect();
     delete ui;
 }
 
@@ -38,14 +37,26 @@ void Controller::RobotModeHandler(RobotMode mode)
 void Controller::RobotErrorHandler(int error)
 {
     QMessageBox msgBox;
+    QString text;
 
-    msgBox.setText("Autonomous mode is failed");
-    // 1 : Adirectional dot or road sign is not present
-    // 2 : robot cannot recognize a sign
-    // 3 : lost track
-    // TODO - change Text according to error
+    msgBox.setText("Autonomous mode is failed!!! Do you want to change Manual mode? ");
 
-    msgBox.setInformativeText("Do you want to change Manual mode?");
+    switch(error)
+    {
+        case 1:
+            text = "cause: robot cannot find red dot or road sign.";
+            break;
+        case 2:
+            text = "cause: robot cannot recognize a road sign";
+            break;
+        case 3:
+            text = "cause: robot is out of track";
+            break;
+        default:
+            break;
+    }
+
+    msgBox.setInformativeText(text);
     msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
     msgBox.setDefaultButton(QMessageBox::Yes);
     if(msgBox.exec() == QMessageBox::Yes)
@@ -58,7 +69,26 @@ void Controller::RobotErrorHandler(int error)
 // connect, disconnect
 void Controller::RobotConnectionHandler(int status)
 {
-    // update robot connection status to RUI
+    qDebug () << "Robot connection status" << status;
+
+    QMessageBox msgBox;
+    QString text;
+
+    if(status) // connected
+    {
+        ui->status_green->setPixmap(QPixmap(":assets/bullet_green.png"));
+        ui->status_green->show();
+
+        text = "Robot is conneted!!!";
+    }
+    else // disconnected
+    {
+        ui->status_red->setPixmap(QPixmap(":assets/bullet_red.png"));
+        ui->status_red->show();
+        text = "Robot is disconnected!!!";
+    }
+    msgBox.setText(text);
+    msgBox.exec();
 }
 
 // debug info
@@ -73,7 +103,8 @@ void Controller::RobotInvalidDisconnectionHandler()
 {
     QMessageBox msgBox;
 
-    msgBox.setText("Network connection is lost");
+    msgBox.setText("Network connection is lost!!!");
+    msgBox.setInformativeText("Please wait for connection re-establishment.");
     msgBox.exec();
 }
 
@@ -104,15 +135,17 @@ void Controller::timerEvent(QTimerEvent *event)
 
 void Controller::on_start_toggled(bool checked)
 {
-    //TODO: change image start/stop
+    static int id = 0;
+
     if(checked)
     {
-        m->Connect();
-        startTimer(20);
+        m->SetImageOnOff(1);
+        id = startTimer(20);
     }
     else
     {
-        m->Disconnect();
+        m->SetImageOnOff(0);
+        killTimer(id);
     }
 }
 
@@ -181,14 +214,16 @@ void Controller::on_verticalSlider_sliderMoved()
 
 
 // mode control
-void Controller::on_auto_2_clicked()
+void Controller::on_auto_2_clicked(bool checked)
 {
-    m->SetRobotMode(RobotMode::AUTO_MODE);
+    if(checked)
+        m->SetRobotMode(RobotMode::AUTO_MODE);
 }
 
-void Controller::on_manual_clicked()
+void Controller::on_manual_clicked(bool checked)
 {
-    m->SetRobotMode(RobotMode::MANUAL_MODE);
+    if(checked)
+        m->SetRobotMode(RobotMode::MANUAL_MODE);
 }
 
 
@@ -196,6 +231,7 @@ void Controller::on_send_clicked()
 {
     QString text;
     text = ui->command->text();
+
     //send
 }
 

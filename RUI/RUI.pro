@@ -127,3 +127,8 @@ HEADERS  += \
 FORMS    += \
          ruicontrol.ui
 
+DISTFILES += \
+    assets/bullet_green.png \
+    assets/bullet_red.png \
+    assets/bullet_yellow.png
+

@@ -218,12 +218,12 @@
               <string>Operation Mode</string>
              </property>
             </widget>
-            <widget class="QCheckBox" name="auto_2">
+            <widget class="QRadioButton" name="auto_2">
              <property name="text">
               <string>Autonomous</string>
              </property>
             </widget>
-            <widget class="QCheckBox" name="manual">
+            <widget class="QRadioButton" name="manual">
              <property name="text">
               <string>Manual</string>
              </property>
@@ -312,7 +312,7 @@
            <property name="title">
             <string>Camera Control</string>
            </property>
-           <widget class="QRadioButton" name="start">
+           <widget class="QCheckBox" name="start">
             <property name="geometry">
              <rect>
               <x>10</x>
@@ -322,7 +322,7 @@
              </rect>
             </property>
             <property name="text">
-             <string>Toggle On/Off</string>
+             <string>On/Off</string>
             </property>
            </widget>
            <widget class="QSlider" name="horizontalSlider">
@@ -418,13 +418,13 @@
              <string>Command</string>
             </property>
            </widget>
-           <widget class="QWidget" name="">
+           <widget class="QWidget" name="layoutWidget">
             <property name="geometry">
              <rect>
               <x>13</x>
               <y>30</y>
               <width>421</width>
-              <height>71</height>
+              <height>72</height>
              </rect>
             </property>
             <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -455,7 +455,7 @@
              </item>
             </layout>
            </widget>
-           <widget class="QWidget" name="">
+           <widget class="QWidget" name="layoutWidget">
             <property name="geometry">
              <rect>
               <x>13</x>
@@ -515,6 +515,16 @@
   <action name="actionQuit">
    <property name="text">
     <string>Quit</string>
+   </property>
+  </action>
+  <action name="status_green_2">
+   <property name="text">
+    <string>connected</string>
+   </property>
+  </action>
+  <action name="status_red_2">
+   <property name="text">
+    <string>disconnected</string>
    </property>
   </action>
  </widget>

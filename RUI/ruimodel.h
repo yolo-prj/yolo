@@ -50,17 +50,15 @@ public:
 
     virtual void SetRobotMode(RobotMode mode);
 
-    virtual void Connect();
-    virtual void Disconnect();
+    virtual void SetImageOnOff(int operation);
     virtual void HandlePanOperation();
     virtual void HandleTiltOperation();
-
-    void RobotModeChanged(RobotMode mode);
 
     bool IsEmpty() const;
     int PushImage(cv::Mat&& image);
     cv::Mat GetImage();
 
+    virtual void SendTextInput(QString string);
     void SetRobotHandler(int handle) { cur_robot_handle_ = handle; }
 
 private:

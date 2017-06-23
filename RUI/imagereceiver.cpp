@@ -54,7 +54,7 @@ void ImageReceiver::TransferImage(byte* data, uint length)
             //Size size(320*2,240*2);
             //cv::resize(image,resized,size);
             // OpenCV to QImage datatype to display on labels
-            cv::cvtColor(image,image,CV_BGR2RGB);
+            //cv::cvtColor(image,image,CV_BGR2RGB);
 
             this->image_receive_listener_->OnImageReceived(std::move(image));
         });

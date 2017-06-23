@@ -270,7 +270,10 @@ void RobotControlManager::RobotEventInfoListener::onReceiveMessage(byte* data, u
     if(robot_controller_manager_->robot_controllers_.find(id) == robot_controller_manager_->robot_controllers_.end()) {
         qDebug() << "Invalid Id : " << id;
     } else {
-        if(event.compare("event") == 0) {
+
+        qDebug() << "event : " << event.c_str();
+
+        if(event.compare("mode_changed") == 0) {
             RobotMode mode = static_cast<RobotMode>(state);
             robot_controller_manager_->ChangeMode(id, mode);
             robot_controller_manager_->event_listener_->OnRobotModeChanged(id, mode);

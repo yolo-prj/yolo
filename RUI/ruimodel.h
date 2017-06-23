@@ -110,6 +110,7 @@ private:
         {
             qDebug() << "OnRobotConnected : " << handler;
             // update robot status on RUI
+            ruimodel_->SetRobotHandler(handler);
             emit ruimodel_->UpdateRobotConnectionStatus(1);
 
         }
@@ -118,6 +119,7 @@ private:
         {
             qDebug() << "OnRobotDisconnected : " << handler;
             // update robot status on RUI
+			ruimodel_->SetRobotHandler(-1);
             emit ruimodel_->UpdateRobotConnectionStatus(0);
         }
 

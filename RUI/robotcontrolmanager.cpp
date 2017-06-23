@@ -104,6 +104,8 @@ int RobotControlManager::SendFirstConfig(const int handler)
     msg.set("height", 240);
     msg.set("width", 320);
     msg.set("sampling_rate", 20);
+    msg.set("tilt_angle", 50);
+    msg.set("pan_angle", 50);
     msg.setOpcode(200);
 
     byte* data;

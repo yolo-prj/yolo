@@ -31,6 +31,8 @@ void Controller::RobotModeHandler(RobotMode mode)
 {
     qDebug() << "robot mode is changed";
     // update robot mode to RUI
+
+
 }
 
 // error
@@ -63,6 +65,8 @@ void Controller::RobotErrorHandler(int error)
     {
         // change to manual mode
         m->SetRobotMode(RobotMode::MANUAL_MODE);
+        ui->manual->setChecked(true);
+        ui->auto_2->setChecked(false);
     }
 }
 

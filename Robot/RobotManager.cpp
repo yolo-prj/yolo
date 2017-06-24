@@ -13,7 +13,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "yolo/YFrameWork/YServoController.h"
+#include "yolo/YFramework/YServoController.h"
 
 
 using namespace boost;

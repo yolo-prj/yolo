@@ -74,6 +74,8 @@ public:
 	void initPID() ;
 	double runPID(double ErrorIn) ;
 
+	bool setServoPosition(ServoType type, int& position);
+
 private:
 
     void panControlThread();
@@ -81,7 +83,6 @@ private:
     void leftControlThread();
     void rightControlThread();
 
-    bool setServoPosition(ServoType type, int& position);
 
 	bool openServos();
 	void closeServos();

@@ -165,6 +165,10 @@ void CRobotMgr::StopRobot()
 
 bool CRobotMgr::ChangeRobotMode(E_RBT_MODE mode)
 {
+
+	if (m_current_mode ==  mode)
+		return false;
+		
 	m_current_mode = mode;
 
 	switch (mode)
@@ -190,6 +194,10 @@ bool CRobotMgr::ChangeRobotMode(E_RBT_MODE mode)
 
 		m_vision.ChangeVisionMode(VISION_TRACK,10);
 		
+	break;
+	case RBT_SUSPEND_MODE:
+		m_servo_ctrl.resetServo();
+		m_vision.ChangeVisionMode(VISION_STOP,30);
 	break;
 	case RBT_SIGN_MODE:
 		m_servo_ctrl.resetServo();
@@ -429,8 +437,6 @@ Rect CRobotMgr::onLineDetect(vector<Rect> & linelist)
 	if(m_current_mode != RBT_TRACK_MODE)
 		return Rect(0,0,0,0);
 
-
-
 	if (linelist.size() == 0)
 	{
 		m_unrecognization++;
@@ -519,17 +525,27 @@ bool CRobotMgr::onPushCan()
 
 bool CRobotMgr::MoveForward(int  velocity)
 {
+	m_servo_ctrl.setWheelSpeed(ENUM_SERVO_LEFT_WHEEL, BASESPEED + velocity);
+	m_servo_ctrl.setWheelSpeed(ENUM_SERVO_RIGHT_WHEEL, BASESPEED + velocity);
+
 }
 
 bool CRobotMgr::MoveBackward(int velocity)
 {
+	m_servo_ctrl.setWheelSpeed(ENUM_SERVO_LEFT_WHEEL, BASESPEED - velocity);
+	m_servo_ctrl.setWheelSpeed(ENUM_SERVO_RIGHT_WHEEL, BASESPEED - velocity);
+
 }
 
 bool CRobotMgr::TurnLeft(int velocity)
 {
+	m_servo_ctrl.setWheelSpeed(ENUM_SERVO_LEFT_WHEEL, BASESPEED - velocity);
+	return m_servo_ctrl.setWheelSpeed(ENUM_SERVO_RIGHT_WHEEL, BASESPEED + velocity);
 }
 bool CRobotMgr::TurnRight(int velocity)
 {
+	m_servo_ctrl.setWheelSpeed(ENUM_SERVO_LEFT_WHEEL, BASESPEED + velocity);
+	return m_servo_ctrl.setWheelSpeed(ENUM_SERVO_RIGHT_WHEEL, BASESPEED - velocity);
 }
 bool CRobotMgr::TurnAround()
 {
@@ -537,9 +553,12 @@ bool CRobotMgr::TurnAround()
 
 bool CRobotMgr::SetCameraTilt(int degree)
 {
+	return m_servo_ctrl.setServoPosition(ENUM_SERVO_PAN, degree);
 }
 bool CRobotMgr::SetCameraPan(int degree)
 {
+	
+	return m_servo_ctrl.setServoPosition(ENUM_SERVO_TILT, degree);
 }
 
 
@@ -552,115 +571,136 @@ void CRobotMgr::onReceiveDistance(double distanceCm)
 
 void CRobotMgr::onReceiveCommand(YMessage msg)
 {
-    cout << "[RobotManager] received command" << endl;
-    int speed = 0;
+	cout << "[RobotManager] received command" << endl;
+	int speed = 0;
 
-    YMessage sendMsg = m_parser->getMessage(1001);
+	YMessage sendMsg = m_parser->getMessage(1001);
 
 
 
 	switch(msg.getOpcode())
-	  {
-	  case OP_RECV_MOVE_CNTR_FORWARD:
-		  cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
-		  break;
-	  case OP_RECV_MOVE_CNTR_BACKWARD:
-		  cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
-	
-		  break;
-	  case OP_RECV_MOVE_CNTR_LEFT:
-		  cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
-	
-		  break;
-	  case OP_RECV_MOVE_CNTR_RIGHT:
-		  cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
-	
-		  break;
-	  case OP_RECV_MOVE_CNTR_UTERN:
-		  cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
-	
-		  break;
-	  case 6:
-		  cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
-	  
-		  break;
-	  case 7:
-		  cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
-	  
-		  break;
-	  case 8:
-		  cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
-	  
-		  break;
-	  case 9:
-		  cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
-	  
-		  break;
-	  case 10:
-		  cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
-		  break;
-	  case OP_RECV_CAMERA_CNTR_PAN:
-		  cout << "[RobotManager] " << msg.getString("command") << ", angle : " << msg.getInt("state") << endl;
-	
-		  break;
-	  case OP_RECV_CAMERA_CNTR_TILT:
-		  cout << "[RobotManager] " << msg.getString("command") << ", angle : " << msg.getInt("state") << endl;
-	
-		  break;
-	  case 13:
-		  cout << "[RobotManager] Start Robot!!" << endl;
-  //	  _run = true;
-		  break;
-	  case 14:
-		  cout << "[RobotManager] Stop Robot!!" << endl;
-  
-		  sendMsg.setOpcode(1001);
-		  sendMsg.set("id", _id);
-		  sendMsg.set("event", 2);
-		  sendMsg.set("state", 3);
-		  m_eventSender->send(sendMsg);
-		  break;
-	
-	  case OP_RECV_MODE_CHANGE:
-		  cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
-		  sendMsg.setOpcode(1001);
-		  sendMsg.set("id", _id);
-		  sendMsg.set("event", "mode_changed");
-		  sendMsg.set("state", msg.getInt("state"));
-		  m_eventSender->send(sendMsg);
-		  break;
-		  
-	  case OP_RECV_IMAGE_SEND:
-		  cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
-		  break;
-	
-	
-	  case OP_RECV_INIT_COMMAND:
-		  _id = msg.getInt("id");
-		  cout << "[RobotManager] Robot ID : " << _id <<endl;
-		  break;
-	
-	  case OP_RECV_DEGUG:
-		  cout << "[RobotManager] " << msg.getString("debug") << ", state : " << msg.getInt("state") << endl;
-		  sendMsg.setOpcode(1300);
-		  sendMsg.set("id", _id);
-		  sendMsg.set("debug_info", "Robot Debug Info");
-		  sendMsg.set("state", 0);
-		  m_eventSender->send(sendMsg);
-		  break;
-	  }
+	{
+	case OP_RECV_MOVE_CNTR_FORWARD:
+		cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
+		if (msg.getInt("state")==1)
+			MoveForward(5);
+		else
+			MoveForward(0);
+	break;
+	case OP_RECV_MOVE_CNTR_BACKWARD:
+		cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
+		if (msg.getInt("state")==1)
+			MoveBackward(5);
+		else
+			MoveBackward(0);
+
+	break;
+	case OP_RECV_MOVE_CNTR_LEFT:
+		cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
+		if (msg.getInt("state")==1)
+			TurnLeft(5);
+		else
+			TurnLeft(0);
+
+	break;
+	case OP_RECV_MOVE_CNTR_RIGHT:
+		cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
+		if (msg.getInt("state")==1)
+			TurnRight(5);
+		else
+			TurnRight(0);
+
+	break;
+	case OP_RECV_MOVE_CNTR_UTERN:
+		cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
+
+	break;
+	case 6:
+		cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
+
+	break;
+	case 7:
+		cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
+
+	break;
+	case 8:
+		cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
+
+	break;
+	case 9:
+		cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
+
+	break;
+	case 10:
+		cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
+	break;
+	case OP_RECV_CAMERA_CNTR_PAN:
+		cout << "[RobotManager] " << msg.getString("command") << ", angle : " << msg.getInt("state") << endl;
+		SetCameraPan(msg.getInt("state"));
+
+	break;
+	case OP_RECV_CAMERA_CNTR_TILT:
+		cout << "[RobotManager] " << msg.getString("command") << ", angle : " << msg.getInt("state") << endl;
+		SetCameraTilt(msg.getInt("state"));
+
+	break;
+	case 13:
+		cout << "[RobotManager] Start Robot!!" << endl;
+		ChangeRobotMode(RBT_TRACK_MODE);
+	break;
+	case 14:
+		cout << "[RobotManager] Stop Robot!!" << endl;
+		ChangeRobotMode(RBT_NORMAL_MODE);
+
+		sendMsg.setOpcode(1001);
+		sendMsg.set("id", _id);
+		sendMsg.set("event", 2);
+		sendMsg.set("state", 3);
+		m_eventSender->send(sendMsg);
+	break;
+
+	case OP_RECV_MODE_CHANGE:
+		cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
+
+		switch(msg.getInt("state"))
+		{
+			case 1:
+				ChangeRobotMode(RBT_TRACK_MODE);
+			break;
+			case 2:
+				ChangeRobotMode(RBT_NORMAL_MODE);
+			break;
+			case 3:
+				ChangeRobotMode(RBT_SUSPEND_MODE);
+			break;
+		}
+
+		sendMsg.setOpcode(1001);
+		sendMsg.set("id", _id);
+		sendMsg.set("event", "mode_changed");
+		sendMsg.set("state", msg.getInt("state"));
+		m_eventSender->send(sendMsg);
+	break;
+
+	case OP_RECV_IMAGE_SEND:
+		cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
+	break;
 
 
+	case OP_RECV_INIT_COMMAND:
+		_id = msg.getInt("id");
+		cout << "[RobotManager] Robot ID : " << _id <<endl;
+	break;
 
-
-
-
-
-
-
-
-
-
+	case OP_RECV_DEGUG:
+		cout << "[RobotManager] " << msg.getString("debug") << ", state : " << msg.getInt("state") << endl;
+		sendMsg.setOpcode(1300);
+		sendMsg.set("id", _id);
+		sendMsg.set("debug_info", "Robot Debug Info");
+		sendMsg.set("state", 0);
+		m_eventSender->send(sendMsg);
+	break;
+	}
 
 
 

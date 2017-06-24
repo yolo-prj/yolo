@@ -5,6 +5,13 @@
 #include <unistd.h>
 #include <algorithm>
 
+#include <time.h>
+#include <math.h>
+
+#include <stdio.h>
+#include <fcntl.h>
+#include <string.h>
+#include <unistd.h>
 
 namespace yolo
 {
@@ -14,7 +21,7 @@ YServoController::YServoController()
     _servoLimits.resize(NUM_SERVOS);
 
     for(int i=0; i<NUM_SERVOS; i++) {
-	_servoLimits[i].resize(2);
+		_servoLimits[i].resize(2);
     }
 
     _updated.resize(NUM_SERVOS);
@@ -42,6 +49,7 @@ YServoController::YServoController()
 
 YServoController::~YServoController()
 {
+	stop();
 }
 
 bool
@@ -51,12 +59,12 @@ YServoController::openServos()
 
     if(_servoFd == -1)
     {
-	_servoFd = open("/dev/servoblaster", O_RDWR);
+		_servoFd = open("/dev/servoblaster", O_RDWR);
 
-	if(_servoFd >= 0)
-	{
-	    success = true;
-	}
+		if(_servoFd >= 0)
+		{
+		    success = true;
+		}
     }
 
 
@@ -66,8 +74,6 @@ YServoController::openServos()
 void
 YServoController::closeServos()
 {
-    stop();
-
     if(_servoFd != -1)
 	close(_servoFd);
 }
@@ -86,7 +92,7 @@ YServoController::start()
     }
 
     resetServo();
-    boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
+    boost::this_thread::sleep(boost::posix_time::milliseconds(100));
 
     /*
     _continueThread = true;
@@ -101,6 +107,7 @@ void
 YServoController::stop()
 {
     _continueThread = false;
+	closeServos();
 
     /*
     if(_panControlThread) {
@@ -253,7 +260,7 @@ YServoController::rightControlThread()
     }
 }
 
-void
+bool
 YServoController::setServoPosition(ServoType type, int& position)
 {
     bool success = false;
@@ -261,10 +268,14 @@ YServoController::setServoPosition(ServoType type, int& position)
     const int LIMIT_MIN = 0;
     char buf[256];
 
-    if(position > _servoLimits[type][LIMIT_MAX])
-	position = _servoLimits[type][LIMIT_MAX];
-    else if(position < _servoLimits[type][LIMIT_MIN])
-	position = _servoLimits[type][LIMIT_MIN];
+
+	if (_servoFd<=0)
+		return false;
+
+	if(position > _servoLimits[type][LIMIT_MAX])
+		position = _servoLimits[type][LIMIT_MAX];
+	else if(position < _servoLimits[type][LIMIT_MIN])
+		position = _servoLimits[type][LIMIT_MIN];
 
     sprintf(buf, "%d=%d\n", type, position);
 
@@ -280,25 +291,85 @@ YServoController::setServoPosition(ServoType type, int& position)
 	success = true;
     }
     */
+	
+	return true;
 }
 
-void
+
+
+bool
 YServoController::setWheelSpeed(ServoType type, int speed)
 {
     if(type == ENUM_SERVO_LEFT_WHEEL)
     {
-	speed += SERVO_CENTER_OR_STOP;
-	setServoPosition(type, speed);
+		speed += SERVO_CENTER_OR_STOP;
+		return setServoPosition(type, speed);
     }
     else if(type == ENUM_SERVO_RIGHT_WHEEL)
     {
-	speed = -speed + SERVO_CENTER_OR_STOP;
-	setServoPosition(type, speed);
+		speed = -speed + SERVO_CENTER_OR_STOP;
+		return setServoPosition(type, speed);
     }
-    else
-    {
-    }
+
+	return false;
 }
+
+
+
+long YServoController::getTimeMs(void)
+{
+    long            ms; // Milliseconds
+    time_t          s;  // Seconds
+    struct timespec spec;
+
+    clock_gettime(CLOCK_REALTIME, &spec);
+
+    s  = spec.tv_sec;
+    ms = round(spec.tv_nsec / 1.0e6); // Convert nanoseconds to milliseconds
+    return((intmax_t)s*1000+ms);
+}
+
+
+void YServoController::initPID() 
+{
+	pdi.LastErrorTime =getTimeMs();
+	pdi.Kp = KP;
+	pdi.Ki = KI;
+	pdi.Kd = KD;
+
+	pdi.BaseSpeed = BASESPEED;
+	pdi.SpeedFudgeFactor=BASESPEEDFUDGEFACTOR;
+	pdi.LastError = 0.0;
+	pdi.Integral = 0.0;
+}
+
+
+double YServoController::runPID(double ErrorIn) 
+{
+	long iterationTime ;
+	double error;
+	long errortime;
+	double correction;
+	double derivation;
+
+
+	error = (pdi.BaseSpeed / pdi.SpeedFudgeFactor) * ErrorIn;
+	errortime =getTimeMs();
+
+
+	iterationTime = (long) (errortime - pdi.LastErrorTime);
+	pdi.Integral = (error / iterationTime) + pdi.Integral;
+	derivation = (error - pdi.LastError) / iterationTime;
+	correction = pdi.Kp * error + pdi.Ki * pdi.Integral + pdi.Kd * derivation;
+
+	pdi.LastError = error;
+	pdi.LastErrorTime = errortime;
+
+	return(correction);
+}
+
+
+
 
 void
 YServoController::resetServo()
@@ -310,14 +381,16 @@ YServoController::resetServo()
     setServoPosition(ENUM_SERVO_TILT, value);
 }
 
-void
-YServoController::setCameraServosLineTrackMode(int& pan, int& tilt)
+bool
+YServoController::setCameraDirection(int pan, int tilt)
 {
-    pan = TRK_LINE_CAM_PAN;
-    tilt = TRK_LINE_CAM_TILT;
+//    pan = TRK_LINE_CAM_PAN;
+//    tilt = TRK_LINE_CAM_TILT;
 
-    setServoPosition(ENUM_SERVO_PAN, pan);
-    setServoPosition(ENUM_SERVO_TILT, tilt);
+    if (!setServoPosition(ENUM_SERVO_PAN, pan))
+		return false;
+    if (setServoPosition(ENUM_SERVO_TILT, tilt))
+		return false;
 }
 
 } // namespace yolo

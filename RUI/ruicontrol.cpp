@@ -99,14 +99,14 @@ void Controller::RobotConnectionHandler(int status)
 
     if(status) // connected
     {
-        ui->status_green->setPixmap(QPixmap(":assets/bullet_green.png"));
+        //ui->status_green->setPixmap(QPixmap(":assets/bullet_green.png"));
         ui->status_green->show();
 
         text = "Robot is conneted!!!";
     }
     else // disconnected
     {
-        ui->status_red->setPixmap(QPixmap(":assets/bullet_red.png"));
+        //ui->status_red->setPixmap(QPixmap(":assets/bullet_red.png"));
         ui->status_red->show();
         text = "Robot is disconnected!!!";
     }

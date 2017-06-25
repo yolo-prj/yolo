@@ -174,12 +174,12 @@ cv::Mat RUIModel::GetImage()
 void RUIModel::SendTextInput(QString string)
 {
     std::string id = std::to_string(cur_robot_handle_);
-    std::string command = string.toStdString();
+    std::string debug = string.toStdString();
     int state = 0;
 
-    yolo::RobotControlManager::GetInstance().SendCommand(cur_robot_handle_,
-                                                         300,
-                                                         std::make_tuple(id, command, state));
+    yolo::RobotControlManager::GetInstance().SendDebugCommand(cur_robot_handle_,
+                                                         debug,
+                                                         state);
 }
 
 

@@ -51,8 +51,8 @@ public:
     virtual void SetRobotMode(RobotMode mode);
 
     virtual void SetImageOnOff(int operation);
-    virtual void HandlePanOperation();
-    virtual void HandleTiltOperation();
+    virtual void HandlePanOperation(int position);
+    virtual void HandleTiltOperation(int position);
 
     bool IsEmpty() const;
     int PushImage(cv::Mat&& image);

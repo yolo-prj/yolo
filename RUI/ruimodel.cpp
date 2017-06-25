@@ -90,23 +90,23 @@ void RUIModel::HandleRobotUturnOperation()
 }
 
 // camera
-void RUIModel::HandlePanOperation()
+void RUIModel::HandlePanOperation(int position)
 {
 
     std::string id = std::to_string(cur_robot_handle_);
     std::string command = "camera_pan_control";
-    int state = 0;
+    int state = position;
 
     yolo::RobotControlManager::GetInstance().SendCommand(cur_robot_handle_,
                                                          11,
                                                          std::make_tuple(id, command, state));
 }
 
-void RUIModel::HandleTiltOperation()
+void RUIModel::HandleTiltOperation(int position)
 {
     std::string id = std::to_string(cur_robot_handle_);
     std::string command = "camera_tilt_control";
-    int state = 0;
+    int state = position;
 
     yolo::RobotControlManager::GetInstance().SendCommand(cur_robot_handle_,
                                                          12,

@@ -10,7 +10,10 @@ Controller::Controller(QWidget *parent) :
 {
     ui->setupUi(this);
     m = RUIModel::GetInstance();
-    m->SetRobotMode(RobotMode::MANUAL_MODE);
+    ui->manual->setChecked(true);
+    /* start image streaming on as default
+    ui->start->setChecked(true);
+    on_start_toggled(true);*/
 
     QObject::connect(m, SIGNAL(UpdateRobotMode(RobotMode)), this, SLOT(RobotModeHandler(RobotMode)));
     QObject::connect(m, SIGNAL(UpdateRobotError(int)), this, SLOT(RobotErrorHandler(int)));
@@ -221,15 +224,17 @@ void Controller::on_uturn_clicked()
 
 
 // camera
-void Controller::on_horizontalSlider_sliderMoved()
+void Controller::on_horizontalSlider_sliderMoved(int position)
 {
-    m->HandlePanOperation();
+    m->HandlePanOperation(position);
+    m->HandleTiltOperation(ui->verticalSlider->sliderPosition());
 }
 
 
-void Controller::on_verticalSlider_sliderMoved()
+void Controller::on_verticalSlider_sliderMoved(int position)
 {
-    m->HandleTiltOperation();
+    m->HandleTiltOperation(position);
+    m->HandlePanOperation(ui->horizontalSlider->sliderPosition());
 }
 
 
@@ -243,7 +248,11 @@ void Controller::on_auto_2_clicked(bool checked)
 void Controller::on_manual_clicked(bool checked)
 {
     if(checked)
+    {
         m->SetRobotMode(RobotMode::MANUAL_MODE);
+        m->HandlePanOperation(ui->horizontalSlider->sliderPosition());
+        m->HandleTiltOperation(ui->verticalSlider->sliderPosition());
+    }
 }
 
 

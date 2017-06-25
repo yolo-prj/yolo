@@ -45,8 +45,8 @@ private slots:
     void on_left_released();
     void on_uturn_clicked();
 
-    void on_horizontalSlider_sliderMoved();
-    void on_verticalSlider_sliderMoved();
+    void on_horizontalSlider_sliderMoved(int position);
+    void on_verticalSlider_sliderMoved(int position);
 
     void on_auto_2_clicked(bool checked);
     void on_manual_clicked(bool checked);

@@ -6,9 +6,6 @@
 
 #define SERVO_CENTER_OR_STOP	150
 
-#define TRK_LINE_CAM_PAN	149
-#define TRK_LINE_CAM_TILT	211
-
 #define CAMERA_PAN		0
 #define CAMERA_TILT		1
 #define RIGHT_WHEEL		2
@@ -22,10 +19,40 @@
 #define WHEEL_MAX		200
 #define WHEEL_MIN		100
 
+
+
+#define KP        1.0               // defaut 1.0
+#define KI        0.1               // defaut 0.1
+#define KD        0.0               // defaut 0.0
+#define BASESPEED 6.0               // Range 0-50
+#define BASESPEEDFUDGEFACTOR 0.80   // default 1.25
+
+
+
 using namespace std;
 
 namespace yolo
 {
+enum ServoType {
+	ENUM_SERVO_PAN = CAMERA_PAN,
+	ENUM_SERVO_TILT,
+	ENUM_SERVO_RIGHT_WHEEL,
+	ENUM_SERVO_LEFT_WHEEL
+};
+
+typedef struct
+{
+	double Kp ;			 // proportional gain
+	double Ki ;			 // integral gain
+	double Kd ;			 // derivative gain
+
+	double BaseSpeed ; 	 // base speed of the robot used to compute magnigfy the error based on the speed of the robot
+	double LastError;		 // previous error in the setpoint,
+	long	LastErrorTime;	 // previous time of the previous error in the setpoint
+
+	double Integral;		 // computed integral;
+	double SpeedFudgeFactor;// fudge factor correction used in conjuction with the robot base speed
+} TPID;
 
 class YServoController
 {
@@ -33,25 +60,22 @@ public:
     YServoController();
     ~YServoController();
 
-    enum ServoType {
-	ENUM_SERVO_PAN = CAMERA_PAN,
-	ENUM_SERVO_TILT,
-	ENUM_SERVO_RIGHT_WHEEL,
-	ENUM_SERVO_LEFT_WHEEL
-    };
-
-    bool openServos();
-    void closeServos();
-
-    void setServoPosition(ServoType type, int& position);
-    void setWheelSpeed(ServoType type, int speed);
 
     void resetServo();
 
-    void setCameraServosLineTrackMode(int& pan, int& tilt);
+    bool setWheelSpeed(ServoType type, int speed);
+    bool setCameraDirection(int pan, int tilt);
 
     void start();
     void stop();
+
+
+	long getTimeMs(void);
+	void initPID() ;
+	double runPID(double ErrorIn) ;
+
+	bool setServoPosition(ServoType type, int& position);
+
 private:
 
     void panControlThread();
@@ -60,8 +84,14 @@ private:
     void rightControlThread();
 
 
+	bool openServos();
+	void closeServos();
+
+
 private:
     int			    _servoFd;
+    TPID pdi;
+
     vector< vector<int> >   _servoLimits; 
     vector<bool>	    _updated;
     vector<string>	    _position;

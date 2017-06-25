@@ -30,7 +30,7 @@ class RUIModel : public QObject
     Q_OBJECT
 
 signals:
-    void UpdateRobotMode(RobotMode mode);
+    void UpdateRobotMode(int mode);
     void UpdateRobotError(int error);
     void UpdateRobotConnectionStatus(int status);
     void UpdateRobotDebugInfo(QString debug);
@@ -92,9 +92,10 @@ private:
 
         virtual void OnRobotModeChanged(int handler, RobotMode mode)
         {
+            int m = static_cast<int>(mode);
             qDebug() << "OnRobotModeChanged";
             qDebug() << "id : " << handler << " , mode : " << static_cast<int>(mode);
-            emit ruimodel_->UpdateRobotMode(mode);
+            emit ruimodel_->UpdateRobotMode(m);
         }
 
          virtual void OnRobotErrorEventReceived(int handler, int error)

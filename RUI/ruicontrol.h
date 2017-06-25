@@ -23,7 +23,7 @@ public:
     ~Controller();
 
 public slots:
-    void RobotModeHandler(RobotMode mode);
+    void RobotModeHandler(int mode);
     void RobotErrorHandler(int error);
     void RobotConnectionHandler(int status);
     void RobotDebugInfoHandler(QString diag);
@@ -46,7 +46,7 @@ private slots:
     void on_uturn_clicked();
 
     void on_horizontalSlider_sliderMoved(int position);
-    void on_verticalSlider_sliderMoved(int position);
+    void on_horizontalSlider_2_sliderMoved(int position);
 
     void on_auto_2_clicked(bool checked);
     void on_manual_clicked(bool checked);

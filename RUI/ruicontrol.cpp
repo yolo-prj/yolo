@@ -15,7 +15,7 @@ Controller::Controller(QWidget *parent) :
     ui->start->setChecked(true);
     on_start_toggled(true);*/
 
-    QObject::connect(m, SIGNAL(UpdateRobotMode(RobotMode)), this, SLOT(RobotModeHandler(RobotMode)));
+    QObject::connect(m, SIGNAL(UpdateRobotMode(int)), this, SLOT(RobotModeHandler(int)));
     QObject::connect(m, SIGNAL(UpdateRobotError(int)), this, SLOT(RobotErrorHandler(int)));
     QObject::connect(m, SIGNAL(UpdateRobotConnectionStatus(int)), this, SLOT(RobotConnectionHandler(int)));
     QObject::connect(m, SIGNAL(UpdateRobotDebugInfo(QString)), this, SLOT(RobotDebugInfoHandler(QString)));
@@ -29,28 +29,28 @@ Controller::~Controller()
 }
 
 // Robot -> RUI
-// mode_changed
-void Controller::RobotModeHandler(RobotMode mode)
+void Controller::RobotModeHandler(int mode)
 {
     qDebug() << "robot mode is changed";
-    // update robot mode to RUI
 
     switch(mode)
     {
-        case RobotMode::AUTO_MODE:
+        case 1: //RobotMode::AUTO_MODE
             ui->auto_2->setChecked(true);
             ui->manual->setChecked(false);
             break;
-        case RobotMode::MANUAL_MODE:
+        case 2: //RobotMode::MANUAL_MODE:
             ui->manual->setChecked(true);
             ui->auto_2->setChecked(false);
+            m->HandlePanOperation(ui->horizontalSlider->sliderPosition());
+            m->HandleTiltOperation(ui->horizontalSlider_2->sliderPosition());
             break;
-        case RobotMode::IDLE_MODE:
-        case RobotMode::SUSPENDED_MODE:
+        case 0: //RobotMode::IDLE_MODE:
+        case 3: //RobotMode::SUSPENDED_MODE:
         default:
             ui->auto_2->setChecked(false);
             ui->manual->setChecked(false);
-             break;
+            break;
     }
 }
 
@@ -101,7 +101,6 @@ void Controller::RobotConnectionHandler(int status)
     {
         //ui->status_green->setPixmap(QPixmap(":assets/bullet_green.png"));
         ui->status_green->show();
-
         text = "Robot is conneted!!!";
     }
     else // disconnected
@@ -175,66 +174,81 @@ void Controller::on_start_toggled(bool checked)
 // robot operation
 void Controller::on_go_pressed()
 {
-    m->HandleRobotForwardOperation(PRESS);
+    if(ui->manual->isChecked())
+        m->HandleRobotForwardOperation(PRESS);
 }
 
 void Controller::on_go_released()
 {
-    m->HandleRobotForwardOperation(RELEASE);
+    if(ui->manual->isChecked())
+        m->HandleRobotForwardOperation(RELEASE);
 }
 
 
 void Controller::on_back_pressed()
 {
-    m->HandleRobotBackwardOperation(PRESS);
+    if(ui->manual->isChecked())
+        m->HandleRobotBackwardOperation(PRESS);
 }
 
 void Controller::on_back_released()
 {
-    m->HandleRobotBackwardOperation(RELEASE);
+    if(ui->manual->isChecked())
+        m->HandleRobotBackwardOperation(RELEASE);
 }
 
 
 void Controller::on_right_pressed()
 {
-    m->HandleRobotRightOperation(PRESS);
+    if(ui->manual->isChecked())
+        m->HandleRobotRightOperation(PRESS);
 }
 
 void Controller::on_right_released()
 {
-    m->HandleRobotRightOperation(RELEASE);
+    if(ui->manual->isChecked())
+        m->HandleRobotRightOperation(RELEASE);
 }
 
 
 void Controller::on_left_pressed()
 {
-    m->HandleRobotLeftOperation(PRESS);
+    if(ui->manual->isChecked())
+        m->HandleRobotLeftOperation(PRESS);
 }
 
 void Controller::on_left_released()
 {
-    m->HandleRobotLeftOperation(RELEASE);
+    if(ui->manual->isChecked())
+        m->HandleRobotLeftOperation(RELEASE);
 }
 
 
 void Controller::on_uturn_clicked()
 {
-    m->HandleRobotUturnOperation();
+    if(ui->manual->isChecked())
+        m->HandleRobotUturnOperation();
 }
 
 
 // camera
 void Controller::on_horizontalSlider_sliderMoved(int position)
 {
-    m->HandlePanOperation(position);
-    m->HandleTiltOperation(ui->verticalSlider->sliderPosition());
+    if(ui->manual->isChecked())
+    {
+        m->HandlePanOperation(position);
+        m->HandleTiltOperation(ui->horizontalSlider_2->sliderPosition());
+    }
 }
 
 
-void Controller::on_verticalSlider_sliderMoved(int position)
+void Controller::on_horizontalSlider_2_sliderMoved(int position)
 {
-    m->HandleTiltOperation(position);
-    m->HandlePanOperation(ui->horizontalSlider->sliderPosition());
+    if(ui->manual->isChecked())
+    {
+        m->HandleTiltOperation(position);
+        m->HandlePanOperation(ui->horizontalSlider->sliderPosition());
+    }
 }
 
 
@@ -248,11 +262,7 @@ void Controller::on_auto_2_clicked(bool checked)
 void Controller::on_manual_clicked(bool checked)
 {
     if(checked)
-    {
         m->SetRobotMode(RobotMode::MANUAL_MODE);
-        m->HandlePanOperation(ui->horizontalSlider->sliderPosition());
-        m->HandleTiltOperation(ui->verticalSlider->sliderPosition());
-    }
 }
 
 

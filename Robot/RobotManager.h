@@ -19,6 +19,8 @@
 #include "VisionInf.h"
 #include "Vision.h"
 
+#include "SignHandler.h"
+
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
@@ -40,11 +42,17 @@ typedef enum
 	RBT_TRACK_MODE=1,
 	RBT_NORMAL_MODE ,
 	RBT_SUSPEND_MODE ,
-	RBT_SIGN_MODE,
-	RBT_AVOIDCAN_MODE,
-	RBT_PUSHCAN_MODE
 }E_RBT_MODE;
 
+
+typedef enum
+{
+	RBT_TRACK_AUTO,
+	RBT_TRACK_SIGN,
+	RBT_TRACK_AVOIDCAN,
+	RBT_TRACK_PUSHCAN,
+	RBT_TRACK_TURN
+}E_RBT_TRACK_SUB;
 
 
 typedef enum
@@ -73,7 +81,7 @@ typedef enum
 
 
 class CRobotMgr : public CVisionInf, public YSonarDistanceListener
-		     , public YCommandListener, public YConfigListener, public YConnectionLostListener
+		     , public YCommandListener, public YConfigListener, public YConnectionLostListener, public CSignHandler
 {
 private:
     CRobotMgr();
@@ -86,6 +94,7 @@ public:
     void StopRobot();
 
 	bool ChangeRobotMode(E_RBT_MODE mode);
+	bool ChangeRobotTrackMode(E_RBT_TRACK_SUB mode);
 
 
 	int GetStraightLine();
@@ -95,8 +104,17 @@ public:
 
 	void ChangeMode_Thread(E_RBT_MODE mode);
 	void CreateChangModeThread(E_RBT_MODE mode);
+	void TrackMode_Thread(E_RBT_TRACK_SUB mode);
+	void CreateTrackModeThread(E_RBT_TRACK_SUB mode);
 
-	void Assert_TrackMode();
+	void Assert_TrackMode(int error);
+	bool AvoidCanThread(int velocity);
+	bool PushCanThread(int velocity);
+	bool TurnAroundThread(int velocity);
+	bool AutoTurnAroundThread(int velocity);
+	long getPassTime(timespec StartTime, timespec CurrentTime);
+	bool TurnCircular(int velocity, int r);
+
 
 
 
@@ -106,12 +124,12 @@ public:
 	virtual Rect onLineDetect(vector<Rect> & linelist);
 	virtual Vec3f onColorCircle(vector<cv::Vec3f> & linelist);
 	virtual Rect onStopBar(vector<Rect> & linelist);
+	virtual void onSignDetect(bool isdetected);
 
-	
-	bool onObstacle();
-	bool onStopBar();
-	bool onSignDetect();
-	bool onPushCan();
+
+	virtual void onSignAction(int id, string action);
+
+
 
 
 
@@ -121,7 +139,6 @@ public:
 	bool MoveBackward(int velocity);
 	bool TurnLeft(int velocity);
 	bool TurnRight(int velocity);
-	bool TurnAround();
 	
 	bool SetCameraTilt(int degree);
 	bool SetCameraPan(int degree);
@@ -145,16 +162,25 @@ public:
 
 	static CRobotMgr * m_single;
 	E_RBT_NEXT_DIRECTION m_track_direction;
-	
+
+	vector<CSignImage*> m_signlist;
+	double m_last_sonar;
+
+	timespec m_prev_time;
+	timespec m_sign_time;
+
 
 private:
 
 	E_RBT_MODE m_current_mode;
+	E_RBT_TRACK_SUB m_track_sub;
 	E_RBT_STAUTS m_current_status;
 	
 	YServoController m_servo_ctrl;
+	thread m_automode_thread;;
 
-
+	bool m_bImagesend;
+	
 // track recognization
 	Rect m_lasttrack;
 	int  m_lastx;

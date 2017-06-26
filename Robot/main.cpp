@@ -45,7 +45,7 @@ int main(int argc, char** argv)
 	robot.StartRobot();
 
 
-	cin.get();
+	while(1);
 
 	hb->stopHeartbeat();
 	robot.StopRobot();

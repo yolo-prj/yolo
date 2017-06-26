@@ -15,7 +15,7 @@ LIB_PATH=$(LIB_RASPICAM) -L/usr/local/lib
 
 BIN=Robot
 
-OPTION=-std=c++11
+OPTION=-std=c++11 -o3
 
 
 ifeq ($(DEFINE), ROBOT)
@@ -42,13 +42,12 @@ LINK_LIB=$(BOOSTLIB) -lYComm -lYFramework $(LINK_OPENCV) $(LINK_RASPICAM)
 
 
 
-SRCS=YMessageSender.cpp YMessageReceiver.cpp RobotManager.cpp LineDetect.cpp Vision.cpp main.cpp
+SRCS=YMessageSender.cpp YMessageReceiver.cpp RobotManager.cpp LineDetect.cpp Vision.cpp main.cpp SignHandler.cpp
 
 OBJS = $(SRCS:.cpp=.o)
 
 all: $(OBJS)
 	$(CC) $(OPTION) -o $(BIN) $(INCLUDE) $(LIB_PATH) $(OBJS) $(LINK_LIB)
-	rm $(OBJS)
 
 %.o:%.cpp
 	$(CC) $(OPTION) -c $(INCLUDE) -c $< -o $@

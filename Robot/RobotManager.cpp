@@ -272,6 +272,8 @@ bool CRobotMgr::ChangeRobotTrackMode(E_RBT_TRACK_SUB mode)
 		m_servo_ctrl.resetServo();
 		m_servo_ctrl.setCameraDirection(123,SERVO_CENTER_OR_STOP);
 		m_vision.ChangeVisionMode(VISION_SIGN,30);
+		clock_gettime(CLOCK_REALTIME, &m_sign_time);
+		
 	break;
 	case RBT_TRACK_AVOIDCAN:
 		m_servo_ctrl.setCameraDirection(TRK_LINE_CAM_PAN,TRK_LINE_CAM_TILT);
@@ -289,7 +291,7 @@ bool CRobotMgr::ChangeRobotTrackMode(E_RBT_TRACK_SUB mode)
 		m_servo_ctrl.setCameraDirection(TRK_LINE_CAM_PAN,TRK_LINE_CAM_TILT);
 		m_lasttrack=Rect(m_trackregion.x ,m_trackregion.y, LINE_WIDTH*2, m_trackregion.height);
 		m_lastx = m_trackregion.x + m_lasttrack.width/2;
-		m_automode_thread = thread(&CRobotMgr::TurnAroundThread, this,6);
+		m_automode_thread = thread(&CRobotMgr::AutoTurnAroundThread, this,6);
 	break;
 	default:
 		return false;
@@ -514,8 +516,8 @@ void CRobotMgr::Assert_TrackMode(int error)
 	YMessage sendMsg;
 	printf("Lost Track \n");
 
-	sendMsg = m_parser->getMessage(OP_SEND_ERROR);
-	sendMsg.setOpcode(OP_SEND_ERROR);
+	sendMsg = m_parser->getMessage(OP_SEND_MODE);
+	sendMsg.setOpcode(OP_SEND_MODE);
 	sendMsg.set("id", _id);
 	sendMsg.set("event", "error");
 	sendMsg.set("state", error);
@@ -551,6 +553,22 @@ void CRobotMgr::onVisionImage(Mat & image)
 	
 }
 
+
+void CRobotMgr::onSignDetect(bool isdetected)
+{
+	timespec currentTime;
+	if (isdetected)
+		return;
+	
+	clock_gettime(CLOCK_REALTIME, &currentTime);
+	if (getPassTime(m_sign_time, currentTime)>1000)
+		m_servo_ctrl.setCameraDirection(183,SERVO_CENTER_OR_STOP);
+
+	
+	if (getPassTime(m_sign_time, currentTime)>2000)
+		Assert_TrackMode(1);
+
+}
 
 
 Rect CRobotMgr::onLineDetect(vector<Rect> & linelist)
@@ -611,7 +629,6 @@ Rect CRobotMgr::onLineDetect(vector<Rect> & linelist)
 		case RBT_TRACK_SIGN:
 		break;
 		case RBT_TRACK_PUSHCAN:
-		break;
 		case RBT_TRACK_AVOIDCAN:
 		case RBT_TRACK_TURN:
 			if (linelist.size() == 0)
@@ -693,15 +710,15 @@ void CRobotMgr::onSignAction(int id, string action)
 		break;
 
 		case 3:
-			ChangeRobotTrackMode(RBT_TRACK_TURN);
+			CreateTrackModeThread(RBT_TRACK_TURN);
 		break;
 
 		case 4:
-			ChangeRobotTrackMode(RBT_TRACK_PUSHCAN);
+			CreateTrackModeThread(RBT_TRACK_PUSHCAN);
 		break;
 
 		case 5:
-			CreateChangModeThread(RBT_NORMAL_MODE);;
+			CreateChangModeThread(RBT_NORMAL_MODE);
 		break;
 	}
 }
@@ -765,6 +782,8 @@ bool CRobotMgr::AvoidCanThread(int velocity)
 					}
 					else
 					{
+						if(getPassTime(stratTime, currentTime) > 3000)
+							m_vision.ChangeVisionMode(VISION_TRACK,10);
 						TurnCircular(3, 6);
 					}
 		
@@ -835,7 +854,7 @@ bool CRobotMgr::PushCanThread(int velocity)
 					{
 						clock_gettime(CLOCK_REALTIME, &stratTime);
 						step++;
-						TurnAroundThread(6);
+						AutoTurnAroundThread(6);
 					}
 					else
 					{
@@ -861,6 +880,67 @@ bool CRobotMgr::PushCanThread(int velocity)
 }	
 
 
+
+bool CRobotMgr::AutoTurnAroundThread(int velocity)
+{
+	int step = 0;
+	timespec stratTime , currentTime;
+
+	clock_gettime(CLOCK_REALTIME, &stratTime);
+	try{
+		while(step < 2)
+		{
+			this_thread::interruption_point();
+			switch(step)
+			{
+				case 0:
+					clock_gettime(CLOCK_REALTIME, &currentTime);
+					
+					if(getPassTime(stratTime, currentTime) > 800)
+					{
+						step++;
+					}
+					else
+					{
+						MoveForward(6);
+					}
+		
+					break;
+				case 1:
+					clock_gettime(CLOCK_REALTIME, &currentTime);
+
+					
+					if(getPassTime(stratTime, currentTime) > 2000)
+					{
+						step++;
+					}
+					else
+					{
+						if(getPassTime(stratTime, currentTime) > 1000)
+							m_vision.ChangeVisionMode(VISION_TRACK,10);
+						TurnLeft(6);
+					}
+				
+					break;
+		
+				default:
+					break;
+			}
+			this_thread::sleep(posix_time::millisec(1));
+		}
+
+	}
+
+
+	catch(thread_interrupted &)
+	{
+		m_servo_ctrl.setWheelSpeed(ENUM_SERVO_LEFT_WHEEL, 0);
+		m_servo_ctrl.setWheelSpeed(ENUM_SERVO_RIGHT_WHEEL, 0);
+	}
+
+	m_servo_ctrl.setWheelSpeed(ENUM_SERVO_LEFT_WHEEL, 0);
+	m_servo_ctrl.setWheelSpeed(ENUM_SERVO_RIGHT_WHEEL, 0);
+}	
 
 
 bool CRobotMgr::TurnAroundThread(int velocity)
@@ -910,6 +990,8 @@ bool CRobotMgr::TurnAroundThread(int velocity)
 
 
 
+
+
 bool CRobotMgr::MoveForward(int  velocity)
 {
 	m_servo_ctrl.setWheelSpeed(ENUM_SERVO_LEFT_WHEEL, velocity);
@@ -951,7 +1033,7 @@ void CRobotMgr::onReceiveDistance(double distanceCm)
 {
 	m_last_sonar = distanceCm;
 
-	if(m_current_mode == RBT_TRACK_MODE && m_track_sub == RBT_TRACK_AUTO && distanceCm < 5.00)
+	if(m_current_mode == RBT_TRACK_MODE && m_track_sub == RBT_TRACK_AUTO && distanceCm < 10.00)
 	{
 		ChangeRobotTrackMode(RBT_TRACK_AVOIDCAN);
 	}
@@ -1032,8 +1114,8 @@ void CRobotMgr::onReceiveCommand(YMessage msg)
 			break;
 		}
 
-		sendMsg = m_parser->getMessage(1001);
-		sendMsg.setOpcode(1001);
+		sendMsg = m_parser->getMessage(OP_SEND_MODE);
+		sendMsg.setOpcode(OP_SEND_MODE);
 		sendMsg.set("id", _id);
 		sendMsg.set("event", "mode_changed");
 		sendMsg.set("state", msg.getInt("state"));

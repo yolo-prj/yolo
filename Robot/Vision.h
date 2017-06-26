@@ -40,6 +40,7 @@ private :
 	boost::mutex m_mut;
 	bool m_data_ready;
 
+	E_VISION_MODE m_vision_mode;
 
 
 

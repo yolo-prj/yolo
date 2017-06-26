@@ -13,9 +13,9 @@ Controller::Controller(QWidget *parent) :
     ui->setupUi(this);
     m = RUIModel::GetInstance();
     ui->manual->setChecked(true);
-    /* start image streaming on as default
-    ui->start->setChecked(true);
-    on_start_toggled(true);*/
+
+    ui->status_green->hide();
+    ui->status_red->show();
 
     QObject::connect(m, SIGNAL(UpdateRobotMode(int)), this, SLOT(RobotModeHandler(int)));
     QObject::connect(m, SIGNAL(UpdateRobotError(int)), this, SLOT(RobotErrorHandler(int)));
@@ -101,13 +101,16 @@ void Controller::RobotConnectionHandler(int status)
 
     if(status) // connected
     {
-        //ui->status_green->setPixmap(QPixmap(":assets/bullet_green.png"));
         ui->status_green->show();
+        ui->status_red->hide();
         text = "Robot is conneted!!!";
+
+        m->SetRobotMode(RobotMode::MANUAL_MODE);
     }
     else // disconnected
     {
-        //ui->status_red->setPixmap(QPixmap(":assets/bullet_red.png"));
+
+        ui->status_green->hide();
         ui->status_red->show();
         text = "Robot is disconnected!!!";
     }
@@ -136,8 +139,6 @@ void Controller::RobotInvalidDisconnectionHandler()
 // image
 void Controller::timerEvent(QTimerEvent *event)
 {
-    //cv::Mat image;
-    //int retvalue = m->GetImage(&image);
 
     if(m->IsEmpty())
     {

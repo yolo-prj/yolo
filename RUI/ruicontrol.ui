@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>989</width>
-    <height>664</height>
+    <height>650</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -39,6 +39,9 @@
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
          <widget class="QGroupBox" name="Camera">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
           <property name="sizePolicy">
            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -48,7 +51,7 @@
           <property name="title">
            <string>Camera</string>
           </property>
-          <layout class="QVBoxLayout" name="verticalLayout_7">
+          <layout class="QVBoxLayout" name="verticalLayout">
            <item>
             <widget class="CQtOpenCVViewerGl" name="openCVviewer" native="true"/>
            </item>
@@ -103,7 +106,7 @@
        </size>
       </property>
       <property name="features">
-       <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
+       <set>QDockWidget::NoDockWidgetFeatures</set>
       </property>
       <property name="allowedAreas">
        <set>Qt::RightDockWidgetArea</set>
@@ -137,7 +140,7 @@
               <property name="geometry">
                <rect>
                 <x>170</x>
-                <y>40</y>
+                <y>34</y>
                 <width>89</width>
                 <height>25</height>
                </rect>
@@ -150,7 +153,7 @@
               <property name="geometry">
                <rect>
                 <x>170</x>
-                <y>100</y>
+                <y>94</y>
                 <width>89</width>
                 <height>25</height>
                </rect>
@@ -163,7 +166,7 @@
               <property name="geometry">
                <rect>
                 <x>76</x>
-                <y>70</y>
+                <y>64</y>
                 <width>89</width>
                 <height>25</height>
                </rect>
@@ -176,7 +179,7 @@
               <property name="geometry">
                <rect>
                 <x>264</x>
-                <y>70</y>
+                <y>64</y>
                 <width>89</width>
                 <height>25</height>
                </rect>
@@ -189,7 +192,7 @@
               <property name="geometry">
                <rect>
                 <x>170</x>
-                <y>70</y>
+                <y>64</y>
                 <width>89</width>
                 <height>25</height>
                </rect>
@@ -202,9 +205,9 @@
               <property name="geometry">
                <rect>
                 <x>10</x>
-                <y>132</y>
+                <y>112</y>
                 <width>321</width>
-                <height>31</height>
+                <height>51</height>
                </rect>
               </property>
               <property name="orientation">
@@ -229,51 +232,61 @@
              <widget class="QLabel" name="status_red">
               <property name="geometry">
                <rect>
-                <x>390</x>
+                <x>389</x>
                 <y>2</y>
                 <width>31</width>
                 <height>17</height>
                </rect>
               </property>
               <property name="text">
-               <string/>
+               <string extracomment="test"/>
               </property>
               <property name="pixmap">
-               <pixmap>assets/bullet_red.png</pixmap>
+               <pixmap resource="res.qrc">:/new/prefix1/assets/bullet_red.png</pixmap>
               </property>
              </widget>
              <widget class="QLabel" name="status_green">
               <property name="geometry">
                <rect>
-                <x>367</x>
+                <x>366</x>
                 <y>2</y>
                 <width>31</width>
                 <height>17</height>
                </rect>
               </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Robot connection&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
               <property name="text">
                <string/>
               </property>
               <property name="pixmap">
-               <pixmap>assets/bullet_green.png</pixmap>
+               <pixmap resource="res.qrc">:/new/prefix1/assets/bullet_green.png</pixmap>
               </property>
              </widget>
-             <widget class="QLabel" name="status_yellow">
+             <widget class="QLabel" name="label_3">
               <property name="geometry">
                <rect>
-                <x>412</x>
-                <y>2</y>
-                <width>31</width>
-                <height>17</height>
+                <x>300</x>
+                <y>1</y>
+                <width>81</width>
+                <height>20</height>
                </rect>
               </property>
               <property name="text">
-               <string/>
-              </property>
-              <property name="pixmap">
-               <pixmap>assets/bullet_yellow.png</pixmap>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Connection&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
              </widget>
+             <zorder>go</zorder>
+             <zorder>back</zorder>
+             <zorder>left</zorder>
+             <zorder>right</zorder>
+             <zorder>uturn</zorder>
+             <zorder>splitter</zorder>
+             <zorder>status_red</zorder>
+             <zorder>status_green</zorder>
+             <zorder>tab_manager</zorder>
+             <zorder>label_3</zorder>
             </widget>
            </item>
           </layout>
@@ -311,19 +324,6 @@
            <property name="title">
             <string>Camera Control</string>
            </property>
-           <widget class="QCheckBox" name="start">
-            <property name="geometry">
-             <rect>
-              <x>10</x>
-              <y>30</y>
-              <width>124</width>
-              <height>23</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>On/Off</string>
-            </property>
-           </widget>
            <widget class="QLabel" name="label_5">
             <property name="geometry">
              <rect>
@@ -421,6 +421,34 @@
              </property>
              <property name="tickInterval">
               <number>50</number>
+             </property>
+            </widget>
+           </widget>
+           <widget class="QSplitter" name="splitter_3">
+            <property name="geometry">
+             <rect>
+              <x>10</x>
+              <y>40</y>
+              <width>251</width>
+              <height>23</height>
+             </rect>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <widget class="QLabel" name="label_2">
+             <property name="text">
+              <string>Image Streaming</string>
+             </property>
+            </widget>
+            <widget class="QRadioButton" name="start">
+             <property name="text">
+              <string>Play</string>
+             </property>
+            </widget>
+            <widget class="QRadioButton" name="stop">
+             <property name="text">
+              <string>Pause</string>
              </property>
             </widget>
            </widget>
@@ -527,7 +555,6 @@
    </widget>
    <addaction name="menuMenu"/>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
@@ -536,19 +563,10 @@
     <bool>false</bool>
    </attribute>
   </widget>
+  <widget class="QStatusBar" name="statusBar"/>
   <action name="actionQuit">
    <property name="text">
     <string>Quit</string>
-   </property>
-  </action>
-  <action name="status_green_2">
-   <property name="text">
-    <string>connected</string>
-   </property>
-  </action>
-  <action name="status_red_2">
-   <property name="text">
-    <string>disconnected</string>
    </property>
   </action>
  </widget>
@@ -561,7 +579,9 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="res.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>actionQuit</sender>

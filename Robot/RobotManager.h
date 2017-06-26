@@ -111,6 +111,7 @@ public:
 	bool AvoidCanThread(int velocity);
 	bool PushCanThread(int velocity);
 	bool TurnAroundThread(int velocity);
+	bool AutoTurnAroundThread(int velocity);
 	long getPassTime(timespec StartTime, timespec CurrentTime);
 	bool TurnCircular(int velocity, int r);
 
@@ -123,6 +124,7 @@ public:
 	virtual Rect onLineDetect(vector<Rect> & linelist);
 	virtual Vec3f onColorCircle(vector<cv::Vec3f> & linelist);
 	virtual Rect onStopBar(vector<Rect> & linelist);
+	virtual void onSignDetect(bool isdetected);
 
 
 	virtual void onSignAction(int id, string action);
@@ -165,6 +167,7 @@ public:
 	double m_last_sonar;
 
 	timespec m_prev_time;
+	timespec m_sign_time;
 
 
 private:

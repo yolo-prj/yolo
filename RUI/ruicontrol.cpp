@@ -102,6 +102,8 @@ void Controller::RobotConnectionHandler(int status)
         ui->status_green->show();
         ui->status_red->hide();
         text = "Robot is conneted!!!";
+
+        m->SetRobotMode(RobotMode::MANUAL_MODE);
     }
     else // disconnected
     {
@@ -135,8 +137,6 @@ void Controller::RobotInvalidDisconnectionHandler()
 // image
 void Controller::timerEvent(QTimerEvent *event)
 {
-    //cv::Mat image;
-    //int retvalue = m->GetImage(&image);
 
     if(m->IsEmpty())
     {

@@ -29,6 +29,9 @@ void RobotControlManager::Initialize(const std::string config, const std::string
     listener_->SetParent(this);
     manager_->addNetworkMessageListener(1, listener_.get());
 
+    hbmanager_ = make_shared<YHeartbeatManager>(manager_.get());
+    manager_->setHeartbeatManager(hbmanager_.get());
+
     connection_listener_ = make_shared<NetworkConnectionListener>();
     connection_listener_->SetParent(this);
     manager_->addNetworkMessageListener(100, connection_listener_.get());
@@ -54,11 +57,15 @@ bool RobotControlManager::Start()
         return false;
     }
 
+    hbmanager_->startHeartbeat();
+
+
     return true;
 }
 
 void RobotControlManager::Stop()
 {
+    hbmanager_->stopHeartbeat();
     manager_->stop();
     robot_controllers_.clear();
     qDebug() << "Stop Network Manager";

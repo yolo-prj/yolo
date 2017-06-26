@@ -2,6 +2,8 @@
 #include "ui_ruicontrol.h"
 #include <QDebug>
 #include <QMessageBox>
+#include <QCloseEvent>
+#include "robotcontrolmanager.h"
 
 Controller::Controller(QWidget *parent) :
     QMainWindow(parent),
@@ -275,4 +277,17 @@ void Controller::on_send_clicked()
 }
 
 
+void Controller::closeEvent (QCloseEvent *event)
+{
+    QMessageBox::StandardButton resBtn = QMessageBox::question( this, "RUI",
+                                                                tr("Are you sure?\n"),
+                                                                QMessageBox::Cancel | QMessageBox::No | QMessageBox::Yes,
+                                                                QMessageBox::Yes);
+    if (resBtn != QMessageBox::Yes) {
+        event->ignore();
+    } else {
+        yolo::RobotControlManager::GetInstance().Stop();
+        event->accept();
+    }
+}
 

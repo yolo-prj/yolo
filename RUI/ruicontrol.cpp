@@ -105,6 +105,7 @@ void Controller::RobotConnectionHandler(int status)
     }
     else // disconnected
     {
+
         ui->status_green->hide();
         ui->status_red->show();
         text = "Robot is disconnected!!!";

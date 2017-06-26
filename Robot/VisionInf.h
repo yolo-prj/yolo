@@ -39,6 +39,9 @@ public:
 	{
 	}
 
+	virtual void onSignDetect(bool isdetected)
+	{
+	}
 
 
 };

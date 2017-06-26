@@ -116,6 +116,8 @@ void CVision::SetCameraParam(int width, int height, Rect track_region)
 
 void CVision::ChangeVisionMode(E_VISION_MODE mode,int refresh_rate)
 {
+	if (mode == mode)
+		return;
 	Stop_Vision();
 	if (mode != VISION_STOP)
 		Start_Vision(mode, refresh_rate, TIMER_ID);
@@ -268,12 +270,12 @@ void CVision::RecogTrack(Mat & camimage, Rect rect)
 //	cout<<"<< black >>"<< rect <<" "<<endl;
 	m_line_detector.SetRegion(rect);
 	m_line_detector.SetParam( cv::Scalar(0, 0, 0), cv::Scalar(179, 255, 80),100.0,640.0);
-	count = m_line_detector.GetBar(camimage,detectline,2);
+	count = m_line_detector.GetBlackBar(camimage,detectline,2);
 //	cout<<"<< black >>"<<endl;
 
 //	cout<<"<< red >>"<<endl;
-	m_line_detector.SetParam( cv::Scalar(0, 50, 00), cv::Scalar(15, 255, 255),001.0,600.0);
-	count = m_line_detector.GetBar(camimage,stopbar,0);
+	m_line_detector.SetParam( cv::Scalar(0, 50, 00), cv::Scalar(15, 255, 255),050.0,600.0);
+	count = m_line_detector.GetColorBar(camimage,cv::Scalar(165, 50, 00), cv::Scalar(179, 255, 255),stopbar,0);
 //	cout<<"<< red >>"<<endl;
 
 //	m_line_detector.SetParam( cv::Scalar(0, 100, 100), cv::Scalar(15, 255, 255),50.0,400.0);
@@ -296,10 +298,12 @@ void CVision::RecogTrack(Mat & camimage, Rect rect)
 		rectangle(camimage, detectline[i], cv::Scalar(200,200,200),2); 
 	}
 
-
 	for(i = 0; i<stopbar.size();i++)	 
 	{
-		rectangle(camimage, stopbar[i], cv::Scalar(20,200,20),2); 
+		if (stopbar[i].width > 400)
+			rectangle(camimage, stopbar[i], cv::Scalar(20,200,20),2); 
+		if ((stopbar[i].width > 90) && (stopbar[i].width < 200))
+			circle(camimage, Point(stopbar[i].x+stopbar[i].width/2, stopbar[i].y+stopbar[i].height/2),stopbar[i].width/2, cv::Scalar(20,200,20),2); 
 	}
 
 //	for(i = 0; i<directtion_circle.size();i++)	 
@@ -495,9 +499,18 @@ void CVision::RecogSign(Mat & camimage)
 				{
 					printf("Match %s\n", (*m_signlist)[match]->m_actionname.c_str());
 					(*m_signlist)[match]->CallHandler();
+					if (m_vision_interface)
+						m_vision_interface->onSignDetect(true);
+					return;
 					
  				}
-				else printf("No Match\n");
+				else
+				{	
+					printf("No Match\n");
+					if (m_vision_interface)
+						m_vision_interface->onSignDetect(false);
+					return;
+				}
 
 
 			}

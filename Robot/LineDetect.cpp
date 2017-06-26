@@ -51,19 +51,22 @@ void CLineDetector::SetParam(Scalar startshv, Scalar endshv, double min, double 
 }
 
 
-int CLineDetector::GetBar(Mat image, vector<Rect> & coutrect, int bar_max)
+int CLineDetector::GetBar(Mat &image, vector<Rect> & coutrect, int bar_max)
 {
 	vector<vector<Point> > contours;
 	vector<Vec4i> hierarchy;
 
 	Rect rc_bound;
 	Mat mono,blur,thresh,erodeImg,dilateImg;
-	Mat mono2;
+	Mat hsv;
 
 	int ct;
 
 	Mat roi(image,m_region); 
-	inRange(roi, m_hsv_start, m_hsv_end, mono);
+
+	
+	cvtColor(roi,hsv,COLOR_BGR2HSV);
+	inRange(hsv, m_hsv_start, m_hsv_end, mono);
 
 
 	GaussianBlur(mono,blur, Size(5,5),0);
@@ -83,8 +86,10 @@ int CLineDetector::GetBar(Mat image, vector<Rect> & coutrect, int bar_max)
 
 		rc_bound = rc_bound + m_region.tl();
 		
-		if (rc_bound.width > m_min && rc_bound.width < m_max && rc_bound.height>m_region.height/2) 
+//		cout << " bar "<< rc_bound << endl;
+		if (rc_bound.width > m_min && rc_bound.width < m_max && rc_bound.height>5) //rc_bound.height>m_region.height/2) 
 		{
+//			cout << boundingRect(contours[i]) << endl;
 			for(ct=0; ct< (bar_max)?bar_max:coutrect.size(); ct++)
 			{
 				if (ct>=coutrect.size())
@@ -103,9 +108,11 @@ int CLineDetector::GetBar(Mat image, vector<Rect> & coutrect, int bar_max)
 #endif
 	
 
-	if (bar_max<coutrect.size())
+	if (bar_max && bar_max<coutrect.size())
 		coutrect.erase(coutrect.begin()+bar_max,coutrect.end());
 
+//	erodeImg.copyTo(image);
+	
 	return coutrect.size();
 
 }
@@ -116,17 +123,18 @@ int CLineDetector::GetBar(Mat image, vector<Rect> & coutrect, int bar_max)
 
 
 
-int CLineDetector::GetCircle(Mat image, vector<cv::Vec3f> & coutrect, int bar_max)
+int CLineDetector::GetCircle(Mat &image, vector<cv::Vec3f> & coutrect, int bar_max)
 {
 	Vec3f sel_circle;
 	
 	Mat mono,blur,thresh,erodeImg,dilateImg;
-	Mat mono2;
+	Mat hsv;
 
 	int ct;
 
 	Mat roi(image,m_region); 
-	inRange(roi, m_hsv_start, m_hsv_end, mono);
+	cvtColor(roi,hsv,COLOR_BGR2HSV);
+	inRange(hsv, m_hsv_start, m_hsv_end, mono);
 
 
 
@@ -172,10 +180,8 @@ int CLineDetector::GetCircle(Mat image, vector<cv::Vec3f> & coutrect, int bar_ma
 #if(!IsPi3)
 	imshow("camera2", erodeImg );
 #endif
-	
-#if(TEST)
-	UdpSendImageAsJpeg(UdpLocalPort,UdpDest,erodeImg);   // Send processed UDP image to detination
-#endif
+
+
 
 	if (bar_max<coutrect.size())
 		coutrect.erase(coutrect.begin()+bar_max,coutrect.end());

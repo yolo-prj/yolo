@@ -13,6 +13,7 @@
 #include "LineDetect.h"
 #include "VisionInf.h"
 
+#include "SignHandler.h"
 
 #include "PI3OpencvCompat.h"
 
@@ -49,6 +50,7 @@ private :
 
 	CLineDetector m_line_detector;
 	CVisionInf * m_vision_interface;
+	vector<CSignImage *> * m_signlist;
 
 public:
 	static CVision * m_single;
@@ -62,14 +64,14 @@ public:
 
 
 	CVision();
-	CVision(CVisionInf *intf);
+	CVision(CVisionInf *intf,vector<CSignImage*> * signlist);
 	~CVision();
 
 
 public:
 	void SetCameraParam(int width, int height, Rect track_region);
 
-	void SetInterface(CVisionInf *intf);
+	void SetInterface(CVisionInf *intf,vector<CSignImage*> * signlist);
 	void ChangeVisionMode(E_VISION_MODE mode,int refresh_rate);
 
 
@@ -81,6 +83,8 @@ public:
 	void RecogSign(Mat & camimage);
 	void CameraSurveillance(Mat & camimage);
 
+	void Start_Vision(E_VISION_MODE mode, int msec, int timer_id);
+	void Stop_Vision();
 
 
 private:
@@ -88,13 +92,16 @@ private:
 	CvCapture * Start_Camera();
 	void Stop_Camera(CvCapture* capture);
 
-	void Start_Vision(E_VISION_MODE mode, int msec, int timer_id);
-	void Stop_Vision();
 
 	void Vision_Thread(E_VISION_MODE mode, int msec, int sig_id);
 
 	static void Timer_Handler(int sig, siginfo_t *si, void *uc );
 	bool Timer_Start(int msec, int signo);
+
+
+	static double median(cv::Mat channel);
+	static void sortCorners(std::vector<cv::Point2f>& corners, cv::Point2f center);
+
 	
 
 };

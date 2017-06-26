@@ -61,7 +61,7 @@ CVision::CVision()
 
 }
 
-CVision::CVision(CVisionInf *intf)
+CVision::CVision(CVisionInf *intf,vector<CSignImage *> * signlist)
 {
 	if (!m_single)
 		m_single = this;
@@ -78,6 +78,8 @@ CVision::CVision(CVisionInf *intf)
 	red_min=cv::Scalar(160, 100, 100);
 	red_max=cv::Scalar(179, 179, 179);
 
+
+	m_signlist = signlist;
 
 	m_capture = Start_Camera();
 	if(!m_capture)
@@ -96,9 +98,10 @@ CVision::~CVision()
 }
 
 
-void CVision::SetInterface(CVisionInf *intf)
+void CVision::SetInterface(CVisionInf *intf,vector<CSignImage *> * signlist)
 {
 	m_vision_interface=intf;
+	m_signlist = signlist;
 }
 
 
@@ -131,6 +134,7 @@ void CVision::Start_Vision(E_VISION_MODE mode, int msec, int timer_id)
 void CVision::Stop_Vision()
 {
 	m_vision_thread.interrupt();
+	cout<<"join Stop_Vision"<<endl;
 	m_vision_thread.join();
 }
 
@@ -163,6 +167,7 @@ void CVision::Vision_Thread(E_VISION_MODE mode, int msec, int sig_id)
 {
 	IplImage * iplCameraImage;
 	Mat 	   image;
+	Mat 	   hsv;
 	Rect 	   track_rec;
 
 
@@ -198,8 +203,7 @@ void CVision::Vision_Thread(E_VISION_MODE mode, int msec, int sig_id)
 			iplCameraImage = cvQueryFrame(m_capture); // Get Camera image
 			image= cv::cvarrToMat(iplCameraImage);	// Convert Camera image to Mat format
 			flip(image, image,-1);		// if running on PI3 flip(-1)=180 degrees
-
-
+//			cvtColor(image,hsv,COLOR_BGR2HSV);
 			
 			switch (mode)
 			{
@@ -215,6 +219,10 @@ void CVision::Vision_Thread(E_VISION_MODE mode, int msec, int sig_id)
 				CameraSurveillance(image);
 				break;
 			}
+
+
+//			cvtColor(hsv,image,COLOR_HSV2BGR);
+
 
 #if(!IsPi3)
 			imshow("camera", image );
@@ -257,24 +265,31 @@ void CVision::RecogTrack(Mat & camimage, Rect rect)
 	static const cv::Scalar NAV_COLOR	(  0.0, 255.0, 255.0);
 
 
+//	cout<<"<< black >>"<< rect <<" "<<endl;
 	m_line_detector.SetRegion(rect);
-	m_line_detector.SetParam( cv::Scalar(0, 0, 0), cv::Scalar(179, 100, 80),80.0,640.0);
+	m_line_detector.SetParam( cv::Scalar(0, 0, 0), cv::Scalar(179, 255, 80),100.0,640.0);
 	count = m_line_detector.GetBar(camimage,detectline,2);
+//	cout<<"<< black >>"<<endl;
 
-	m_line_detector.SetParam( cv::Scalar(160, 100, 100), cv::Scalar(179, 179, 179),200.0,300.0);
-	count = m_line_detector.GetBar(camimage,stopbar,1);
+//	cout<<"<< red >>"<<endl;
+	m_line_detector.SetParam( cv::Scalar(0, 50, 00), cv::Scalar(15, 255, 255),001.0,600.0);
+	count = m_line_detector.GetBar(camimage,stopbar,0);
+//	cout<<"<< red >>"<<endl;
 
-	m_line_detector.SetParam( cv::Scalar(160, 100, 100), cv::Scalar(179, 179, 179),50.0,100.0);
-	count = m_line_detector.GetCircle(camimage,directtion_circle,1);
+//	m_line_detector.SetParam( cv::Scalar(0, 100, 100), cv::Scalar(15, 255, 255),50.0,400.0);
+//	count = m_line_detector.GetCircle(camimage,directtion_circle,1);
 
 
 	if (m_vision_interface)
 		lastline = m_vision_interface->onLineDetect(detectline);
+
 	if (m_vision_interface)
 		laststop = m_vision_interface->onStopBar(stopbar);
 
-	if (m_vision_interface)
-		lastcircle = m_vision_interface->onColorCircle(directtion_circle);
+
+	
+//	if ( m_vision_interface)
+//		lastcircle = m_vision_interface->onColorCircle(directtion_circle);
 
 	for(i = 0; i<detectline.size();i++)	 
 	{
@@ -287,10 +302,10 @@ void CVision::RecogTrack(Mat & camimage, Rect rect)
 		rectangle(camimage, stopbar[i], cv::Scalar(20,200,20),2); 
 	}
 
-	for(i = 0; i<directtion_circle.size();i++)	 
-	{
-		circle(camimage, Point(directtion_circle[i][0],directtion_circle[i][1]),directtion_circle[i][2], cv::Scalar(20,200,20),2); 
-	}
+//	for(i = 0; i<directtion_circle.size();i++)	 
+//	{
+//		circle(camimage, Point(directtion_circle[i][0],directtion_circle[i][1]),directtion_circle[i][2], cv::Scalar(20,200,20),2); 
+//	}
 
 
 	if(lastline.y != 0)
@@ -308,20 +323,244 @@ void CVision::RecogTrack(Mat & camimage, Rect rect)
 }
 
 
+double CVision::median(cv::Mat channel)
+{
+	double m = (channel.rows*channel.cols) / 2;
+	int    bin = 0;
+	double med = -1.0;
+
+	int histSize = 256;
+	float range[] = { 0, 256 };
+	const float* histRange = { range };
+	bool uniform = true;
+	bool accumulate = false;
+	cv::Mat hist;
+	cv::calcHist(&channel, 1, 0, cv::Mat(), hist, 1, &histSize, &histRange, uniform, accumulate);
+
+	for (int i = 0; i < histSize && med < 0.0; ++i)
+	{
+		bin += cvRound(hist.at< float >(i));
+		if (bin > m && med < 0.0)
+			med = i;
+	}
+
+	return med;
+}
+
+void CVision::sortCorners(std::vector<cv::Point2f>& corners, cv::Point2f center)
+{
+	std::vector<cv::Point2f> top, bot;
+
+	for (unsigned int i = 0; i < corners.size(); i++)
+	{
+		if (corners[i].y < center.y)
+			top.push_back(corners[i]);
+		else
+			bot.push_back(corners[i]);
+	}
+
+	cv::Point2f tl = top[0].x > top[1].x ? top[1] : top[0];
+	cv::Point2f tr = top[0].x > top[1].x ? top[0] : top[1];
+	cv::Point2f bl = bot[0].x > bot[1].x ? bot[1] : bot[0];
+	cv::Point2f br = bot[0].x > bot[1].x ? bot[0] : bot[1];
+
+	corners.clear();
+	corners.push_back(tl);
+	corners.push_back(tr);
+	corners.push_back(br);
+	corners.push_back(bl);
+}
+
+
 void CVision::RecogSign(Mat & camimage)
 {
+	Mat 			   greyImg, new_image;
+	double med;
+	double sigma = 0.33;
+	int lower, upper;
+
+	cvtColor(camimage, greyImg, CV_RGB2GRAY);
+
+	Mat canny_output;
+	vector<vector<Point> > contours;
+	vector<Vec4i> hierarchy;
+
+	GaussianBlur(greyImg, greyImg, Size(9, 9), 2, 2);
+
+
+	/// Detect edges using canny
+	med = median(greyImg);
+	lower = int(max(0, (int)((1.0 - sigma) * med)));
+	upper = int(min(255, (int)((1.0 + sigma) * med)));
+	Canny(greyImg, canny_output, lower, upper);
+
+
+	/// Find contours
+	findContours(canny_output, contours, hierarchy, CV_RETR_TREE,
+	CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
+
+	vector<Point> approxRect;
+
+	for (size_t i = 0; i < contours.size(); i++) 
+	{
+		approxPolyDP(contours[i], approxRect,
+		arcLength(Mat(contours[i]), true) * 0.01, true);
+
+		if (approxRect.size() == 4) 
+		{
+			double area = contourArea(contours[i]);
+ 
+			if (area > 2000)
+
+			{
+				std::vector<cv::Point2f> corners;
+				double minVal, maxVal, medVal;
+				vector<Point>::iterator vertex;
+				Moments mu;
+				// Define the destination image
+				Mat correctedImg = ::Mat::zeros(195, 271, CV_8UC3);
+				Mat diffImg;
+
+				int match, minDiff, diff;
+				Mat correctedImgBin;
+				Mat transmtx;
+
+				
+				vertex = approxRect.begin();
+				//vertex++;
+				circle(camimage, *vertex, 2, Scalar(0, 0, 255), -1, 8, 0);
+				corners.push_back(*vertex);
+				vertex++;
+				circle(camimage, *vertex, 2, Scalar(0, 0, 255), -1, 8, 0);
+				corners.push_back(*vertex);
+				vertex++;
+				circle(camimage, *vertex, 2, Scalar(0, 0, 255), -1, 8, 0);
+				corners.push_back(*vertex);
+				vertex++;
+				circle(camimage, *vertex, 2, Scalar(0, 0, 255), -1, 8, 0);
+				corners.push_back(*vertex);
+
+				mu = moments(contours[i], false);
+
+				sortCorners(corners, Point2f((float)(mu.m10 / mu.m00), (float)(mu.m01 / mu.m00)));
+
+
+				// Corners of the destination image
+				std::vector<cv::Point2f> quad_pts;
+				quad_pts.push_back(Point2f(0, 0));
+				quad_pts.push_back(Point2f((float)correctedImg.cols, 0.0f));
+				quad_pts.push_back(Point2f((float)correctedImg.cols, (float)correctedImg.rows));
+				quad_pts.push_back(Point2f(0.0f, (float)correctedImg.rows));
+
+				// Get transformation matrix
+				transmtx = getPerspectiveTransform(corners, quad_pts);
+
+				// Apply perspective transformation
+				warpPerspective(camimage, correctedImg, transmtx,
+				correctedImg.size());
+
+
+				cvtColor(correctedImg, correctedImgBin, CV_RGB2GRAY);
+
+				//equalizeHist(correctedImgBin, correctedImgBin);
+
+				correctedImgBin.copyTo(new_image);
+
+				threshold(correctedImgBin, correctedImgBin, 140, 255, 0);
+
+
+				minMaxLoc(new_image, &minVal, &maxVal);
+
+				medVal = (maxVal - minVal) / 2;
+
+				threshold(new_image, new_image, medVal, 255, 0);
+
+
+				minDiff = 12000;
+				match = -1;
+
+				for (int i = 0; i <m_signlist->size(); i++)
+				{
+					diff=(*m_signlist)[i]->GetDiff(new_image);
+
+					if (diff < minDiff) 
+					{
+						minDiff = diff;
+						match = i;
+					}
+
+ 				}
+ 
+				if (match != -1) 
+				{
+					printf("Match %s\n", (*m_signlist)[match]->m_actionname.c_str());
+					(*m_signlist)[match]->CallHandler();
+					
+ 				}
+				else printf("No Match\n");
+
+
+			}
+
+		}
+	}
+
+
 
 }
 
 
 void CVision::CameraSurveillance(Mat & camimage)
 {
+#if 0
+	vector<Rect> detectline,stopbar;
+	m_line_detector.SetRegion(Rect(0,0,camimage.cols,camimage.rows));
+	m_line_detector.SetParam( cv::Scalar(0, 50, 00), cv::Scalar(15, 255, 255),100.0,700.0);
+	m_line_detector.GetBar(camimage,stopbar,0);
+
+	Mat temp;
+	vector<vector<Point> > contours;
+	vector<Vec4i> hierarchy;
+
+	Mat mono,blur,thresh,erodeImg,dilateImg;
+	Mat hsv;
+
+
+	cvtColor(camimage,temp,COLOR_BGR2HSV);
+	inRange(temp, cv::Scalar(0, 50, 00), cv::Scalar(15, 255, 255), mono);
+
+
+
+	GaussianBlur(mono,blur, Size(5,5),0);
+	Mat erodeElmt1 = getStructuringElement(MORPH_RECT, Size(3,3));
+	Mat dilateElmt1 = getStructuringElement(MORPH_RECT, Size(9,9));
+	dilate(blur, dilateImg,dilateElmt1);
+	morphologyEx(dilateImg,erodeImg, MORPH_CLOSE, dilateElmt1);
+	
+	findContours(erodeImg, contours, hierarchy, RETR_LIST,CHAIN_APPROX_SIMPLE);
+
+
+//	cvtColor(camimage,camimage,COLOR_HSV2RGB);
+
+	for(int i = 0; i<contours.size();i++)	 
+	{
+//		cout << boundingRect(contours[i]) << endl;
+		rectangle(camimage, boundingRect(contours[i]), cv::Scalar(20,200,20),2); 
+	}
+
+/*
+
 	vector<cv::Vec3f> directtion_circle;
 	m_line_detector.SetRegion(Rect(0,0,camimage.cols,camimage.rows));
 	m_line_detector.SetParam( red_min, red_max,50.0,100.0);
 	m_line_detector.GetCircle(camimage,directtion_circle,1);
-
+*/
+#endif
 }
+
+
+
+
 
 
 

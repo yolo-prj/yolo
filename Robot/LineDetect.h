@@ -33,8 +33,8 @@ public:
 	void SetRegion(Rect rc);
 	Rect GetRegion();
 	void SetParam(Scalar startshv, Scalar endshv, double min, double max );
-	int GetBar(Mat image, vector<Rect> & coutrect, int bar_max);
-	int GetCircle(Mat image, vector<cv::Vec3f> & coutrect, int bar_max);
+	int GetBar(Mat &image, vector<Rect> & coutrect, int bar_max);
+	int GetCircle(Mat &image, vector<cv::Vec3f> & coutrect, int bar_max);
 	
 };
 

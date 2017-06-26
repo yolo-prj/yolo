@@ -53,9 +53,10 @@
 	"command" : "image_streaming_control",
 	"state" : 1
     },
-    "100" : {
+    "300" : {
 	"id" : "allocated robot id",
-	"debug" : "input text"
+	"debug" : "input text",
+	"state" : "debug command"
     },
     "200" : {
 	"id" : "allocated robot id",
@@ -76,7 +77,7 @@
 	"event" : "error",
 	"state" : 1    
     },
-    "1100" : {
+    "1300" : {
 	"id" : "allocated robot id",
 	"debug_info" : "response for debug input",
 	"state" : 0

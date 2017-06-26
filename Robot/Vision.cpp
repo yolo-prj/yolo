@@ -56,6 +56,7 @@ CVision::CVision()
 		printf("Camera fail\n");
 	}
 
+	m_vision_mode=VISION_STOP;
 
 	
 
@@ -86,6 +87,8 @@ CVision::CVision(CVisionInf *intf,vector<CSignImage *> * signlist)
 	{
 		printf("Camera fail\n");
 	}
+
+	m_vision_mode=VISION_STOP;
 }
 
 CVision::~CVision()
@@ -116,9 +119,10 @@ void CVision::SetCameraParam(int width, int height, Rect track_region)
 
 void CVision::ChangeVisionMode(E_VISION_MODE mode,int refresh_rate)
 {
-	if (mode == mode)
+	if (m_vision_mode == mode)
 		return;
 	Stop_Vision();
+	m_vision_mode = mode;
 	if (mode != VISION_STOP)
 		Start_Vision(mode, refresh_rate, TIMER_ID);
 }

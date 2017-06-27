@@ -259,6 +259,7 @@ void CVision::RecogTrack(Mat & camimage, Rect rect)
 	float offsetfromcenter;
 	vector<Rect> detectline,stopbar;
 	vector<cv::Vec3f> directtion_circle;
+	vector<cv::Vec3f> temp_circle;
 	Vec3f lastcircle;
 	Rect lastline,laststop;
 	int count;
@@ -271,6 +272,7 @@ void CVision::RecogTrack(Mat & camimage, Rect rect)
 	static const cv::Scalar NAV_COLOR	(  0.0, 255.0, 255.0);
 
 
+
 //	cout<<"<< black >>"<< rect <<" "<<endl;
 	m_line_detector.SetRegion(rect);
 	m_line_detector.SetParam( cv::Scalar(0, 0, 0), cv::Scalar(179, 255, 80),100.0,640.0);
@@ -278,13 +280,31 @@ void CVision::RecogTrack(Mat & camimage, Rect rect)
 //	cout<<"<< black >>"<<endl;
 
 //	cout<<"<< red >>"<<endl;
-	m_line_detector.SetParam( cv::Scalar(0, 50, 00), cv::Scalar(15, 255, 255),050.0,600.0);
-	count = m_line_detector.GetColorBar(camimage,cv::Scalar(165, 50, 00), cv::Scalar(179, 255, 255),stopbar,0);
+	m_line_detector.SetParam( cv::Scalar(0, 80, 50), cv::Scalar(15, 255, 255),80.0,600.0);
+//	count = m_line_detector.GetColorBar(camimage,cv::Scalar(165, 50, 00), cv::Scalar(179, 255, 255),stopbar,0);
+	count = m_line_detector.GetBlackBar(camimage,stopbar,0);
 //	cout<<"<< red >>"<<endl;
 
-//	m_line_detector.SetParam( cv::Scalar(0, 100, 100), cv::Scalar(15, 255, 255),50.0,400.0);
-//	count = m_line_detector.GetCircle(camimage,directtion_circle,1);
 
+/*
+	for (i=0; i<stopbar.size(); i++)
+	{
+		Rect temp;
+		temp = Rect(stopbar[i].x+stopbar[i].width/2-100 ,stopbar[i].y+stopbar[i].height/2-100,200,200) & Rect(0,0,m_cam_width,m_cam_height);
+		if (temp.width>90 && stopbar[i].width>90 && stopbar[i].width<200)
+		{
+			m_line_detector.SetRegion(temp);
+			m_line_detector.SetParam( cv::Scalar(0, 100, 100), cv::Scalar(15, 255, 255),45.0,100.0);
+			m_line_detector.GetCircle(camimage,temp_circle,1);
+			directtion_circle.insert(directtion_circle.end(),temp_circle.begin(),temp_circle.end());
+			cout<<" Circle " << directtion_circle.size()<< " " << temp_circle.size()<<endl;
+			rectangle(camimage, temp, cv::Scalar(20,200,200),2); 
+		}
+	}
+
+*/
+
+	cout<<"<< Line >>"<< detectline.size() <<" "<<stopbar.size()<<" "<<directtion_circle.size()<<endl;
 
 	if (m_vision_interface)
 		lastline = m_vision_interface->onLineDetect(detectline);
@@ -292,8 +312,6 @@ void CVision::RecogTrack(Mat & camimage, Rect rect)
 	if (m_vision_interface)
 		laststop = m_vision_interface->onStopBar(stopbar);
 
-
-	
 //	if ( m_vision_interface)
 //		lastcircle = m_vision_interface->onColorCircle(directtion_circle);
 
@@ -307,7 +325,7 @@ void CVision::RecogTrack(Mat & camimage, Rect rect)
 		if (stopbar[i].width > 400)
 			rectangle(camimage, stopbar[i], cv::Scalar(20,200,20),2); 
 		if ((stopbar[i].width > 90) && (stopbar[i].width < 200))
-			circle(camimage, Point(stopbar[i].x+stopbar[i].width/2, stopbar[i].y+stopbar[i].height/2),stopbar[i].width/2, cv::Scalar(20,200,20),2); 
+			circle(camimage, Point(stopbar[i].x+stopbar[i].width/2, stopbar[i].y+stopbar[i].height/2),stopbar[i].width/2, cv::Scalar(20,20,200),2); 
 	}
 
 //	for(i = 0; i<directtion_circle.size();i++)	 
@@ -511,9 +529,7 @@ void CVision::RecogSign(Mat & camimage)
 				else
 				{	
 					printf("No Match\n");
-					if (m_vision_interface)
-						m_vision_interface->onSignDetect(false);
-					return;
+//					return;
 				}
 
 
@@ -522,6 +538,8 @@ void CVision::RecogSign(Mat & camimage)
 		}
 	}
 
+	if (m_vision_interface)
+		m_vision_interface->onSignDetect(false);
 
 
 }

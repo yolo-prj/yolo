@@ -78,6 +78,14 @@ typedef enum
 
 
 
+typedef enum
+{
+	RBT_MAN_FORWARD = 0x0,
+	RBT_MAN_BACKWARD = 0x1,
+	RBT_MAN_LEFT = 0x2,
+	RBT_MAN_RIGHT = 0x3,
+	RBT_MAN_TURN = 0x4
+}E_RBT_MANUAL_MOVE;
 
 
 class CRobotMgr : public CVisionInf, public YSonarDistanceListener
@@ -143,6 +151,9 @@ public:
 	bool SetCameraTilt(int degree);
 	bool SetCameraPan(int degree);
 
+	bool ManualMoveThread(E_RBT_MANUAL_MOVE move);
+	bool CreateManualMove(E_RBT_MANUAL_MOVE move);
+	bool StopManualMove();
 
 
     // interface overrides (implementation)
@@ -179,7 +190,14 @@ private:
 	YServoController m_servo_ctrl;
 	thread m_automode_thread;;
 
+	thread m_manual_thread;;
+
+
 	bool m_bImagesend;
+	bool m_bRedbarDiscard;
+	
+	int m_signfailcount;
+
 	
 // track recognization
 	Rect m_lasttrack;

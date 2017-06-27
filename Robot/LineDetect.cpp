@@ -119,7 +119,6 @@ int CLineDetector::GetBlackBar(Mat &image, vector<Rect> & coutrect, int bar_max)
 
 
 
-
 int CLineDetector::GetColorBar(Mat &image, Scalar startshv, Scalar endshv, vector<Rect> & coutrect, int bar_max)
 {
 	vector<vector<Point> > contours;
@@ -209,10 +208,13 @@ int CLineDetector::GetCircle(Mat &image, vector<cv::Vec3f> & coutrect, int bar_m
 
 	Mat erodeElmt1 = getStructuringElement(MORPH_RECT, Size(3,3));
 	Mat dilateElmt1 = getStructuringElement(MORPH_RECT, Size(5,5));
-	dilate(mono, dilateImg,dilateElmt1);
-	morphologyEx(dilateImg,erodeImg, MORPH_CLOSE, dilateElmt1);
-	GaussianBlur(erodeImg,erodeImg, Size(5,5),0);
 
+
+
+	GaussianBlur(mono,erodeImg, Size(5,5),0);
+
+	erode(erodeImg, dilateImg,dilateElmt1);
+	morphologyEx(dilateImg,erodeImg, MORPH_CLOSE, dilateElmt1);
 
 	
 	 std::vector<cv::Vec3f> circles;

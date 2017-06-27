@@ -44,7 +44,7 @@ public:
         RobotControlManager* robot_controller_manager_;
     };
 
-    class NetworkConnectionListener : public YNetworkMessageListener, public YConnectionLostListener
+    class NetworkConnectionListener : public YConnectionLostListener
     {
     public:
         virtual void connectionLost(string addr, ushort port);
@@ -52,8 +52,6 @@ public:
         {
             robot_controller_manager_ = robot_controller_manager;
         }
-
-        virtual void onReceiveMessage(byte* data, uint length) {}
 
     private:
         RobotControlManager* robot_controller_manager_;

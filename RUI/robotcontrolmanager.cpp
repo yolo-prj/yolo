@@ -278,7 +278,7 @@ void RobotControlManager::NetworkConnectionListener::reconnected(string addr, us
     }
 
     //robot_controller_manager_->ProcessRobotDisconncetion(handler);
-    //robot_controller_manager_->event_listener_->OnRobotInvalidDisconnected(handler);
+    robot_controller_manager_->event_listener_->OnRobotReconnected(handler);
 }
 
 void RobotControlManager::RobotEventInfoListener::onReceiveMessage(byte* data, uint length)

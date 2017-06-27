@@ -133,7 +133,13 @@ private:
         {
             qDebug() << "OnRobotInvalidDisconnected : " << handler;
             emit ruimodel_->UpdateRobotInvalidDisconnection();
+        }
 
+        virtual void OnRobotReconnected(int handler)
+        {
+            qDebug() << "OnRobotReconnected : " << handler;
+            // TODO :
+            //emit ruimodel_->UpdateRobotInvalidDisconnection();
         }
     };
 

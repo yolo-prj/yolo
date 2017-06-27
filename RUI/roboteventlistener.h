@@ -16,6 +16,7 @@ public:
     virtual void OnRobotDisconnected(int handler) = 0;
 
     virtual void OnRobotInvalidDisconnected(int handler) = 0;
+    virtual void OnRobotReconnected(int handler) = 0;
 
     virtual void OnRobotDebugInfoReceived(int handler, const std::string debug_info, int state) = 0;
 };

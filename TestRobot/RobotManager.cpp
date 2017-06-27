@@ -168,7 +168,7 @@ RobotManager::onReceiveCommand(YMessage msg)
 		YMessage sendMsg1 = _parser->getMessage(1300);
 		sendMsg1.setOpcode(1300);
 		sendMsg1.set("id", _id);
-		sendMsg1.set("debug_info", "<<Debug Info>> 1 2 3 4 5");
+		sendMsg1.set("debug_info", " : Robot Movement : AVOIDING CAN");
 		sendMsg1.set("state", 0);
 	    _eventSender->send(sendMsg1);
 	}

@@ -105,6 +105,7 @@ private:
     std::map<int, RobotController> robot_controllers_;
     int selected_robot_;
 
+
     std::shared_ptr<YMessageFormatParser> parser_;
 
     int FindRobotHandler(const std::string addr);
@@ -123,6 +124,7 @@ public :
     int SendDebugCommand(const int handler, const std::string debug_command, int state);
     int SendCommand(const int handler, const int opcode, std::tuple<std::string, std::string, int>&& command);
     int SelectRobot(const int handler);
+    void EnableStreaming(bool enable);
 
     std::tuple<int, std::string, unsigned int, RobotMode> GetRobotInfo(int handler);
 

@@ -13,7 +13,7 @@ using namespace cv;
 
 namespace yolo {
 
-ImageReceiver::ImageReceiver()
+ImageReceiver::ImageReceiver() : image_streaming_(false)
 {
     image_message_listener_ = std::make_shared<ImageMessageListener>();
     image_message_listener_->SetParent(this);
@@ -27,12 +27,14 @@ ImageReceiver::~ImageReceiver()
 int ImageReceiver::StartReceiving()
 {
     qDebug() << "StartReceiving()";
+    image_streaming_ = true;
     return 0;
 }
 
 int ImageReceiver::StopReceiving()
 {
     qDebug() << "StopReceiving()";
+    image_streaming_ = false;
     return 0;
 }
 
@@ -86,7 +88,10 @@ void ImageReceiver::SetTimePeriod(int ms)
 void ImageReceiver::ImageMessageListener::onReceiveMessage(byte* data, uint length)
 {
     //qDebug() << "message received :" << length;
-    parent_->TransferImage(data, length);
+    if(parent_->image_streaming_)
+    {
+        parent_->TransferImage(data, length);
+    }
     //delete[] data;
 }
 

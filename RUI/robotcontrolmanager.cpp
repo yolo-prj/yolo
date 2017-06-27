@@ -302,7 +302,7 @@ void RobotControlManager::RobotDebugInfoListener::onReceiveMessage(byte* data, u
     msg.deserialize(data, length);
 
     int id = msg.getInt("id");
-    std::string debug_info = msg.getString("event");
+    std::string debug_info = msg.getString("debug_info");
     int state = msg.getInt("state");
 
     robot_controller_manager_->event_listener_->OnRobotDebugInfoReceived(id, debug_info, state);

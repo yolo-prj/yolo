@@ -31,10 +31,11 @@ void RobotControlManager::Initialize(const std::string config, const std::string
 
     hbmanager_ = make_shared<YHeartbeatManager>(manager_.get());
     manager_->setHeartbeatManager(hbmanager_.get());
+    hbmanager_->setConnectionLostListener(connection_listener_.get());
 
-    connection_listener_ = make_shared<NetworkConnectionListener>();
-    connection_listener_->SetParent(this);
-    manager_->addNetworkMessageListener(100, connection_listener_.get());
+    //connection_listener_ = make_shared<NetworkConnectionListener>();
+    //connection_listener_->SetParent(this);
+    //manager_->addNetworkMessageListener(100, connection_listener_.get());
 
     event_info_listener_ = make_shared<RobotEventInfoListener>();
     event_info_listener_->SetParent(this);

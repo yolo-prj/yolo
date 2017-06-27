@@ -29,6 +29,8 @@ RobotManager::RobotManager(YNetworkManager* manager, string msgFormatFile)
     _parser = new YMessageFormatParser(msgFormatFile);
     _parser->parse();
 
+    _cameraController->setWidthHeight(320, 240);
+
     _pan = 0;
     _tilt = 0;
 
@@ -79,7 +81,13 @@ RobotManager::start()
     _servoController->start();
     _sonarController->init(30000);
 
-    _servoController->setCameraServosLineTrackMode(_pan, _tilt);
+    const int TRK_LINE_CAM_PAN = 149;
+    const int TRK_LINE_CAM_TILT = 211;
+
+    _pan = TRK_LINE_CAM_PAN;
+    _tilt = TRK_LINE_CAM_TILT;
+    _servoController->setCameraDirection(_pan, _tilt);
+//    _servoController->setCameraServosLineTrackMode(_pan, _tilt);
 
 }
 
@@ -111,13 +119,13 @@ RobotManager::onReceiveImage(Mat image)
 
 	if(_distance > MIN_DISTANCE)
 	{
-	    _servoController->setWheelSpeed(YServoController::ENUM_SERVO_LEFT_WHEEL, left);
-	    _servoController->setWheelSpeed(YServoController::ENUM_SERVO_RIGHT_WHEEL, right);
+	    _servoController->setWheelSpeed(ENUM_SERVO_LEFT_WHEEL, left);
+	    _servoController->setWheelSpeed(ENUM_SERVO_RIGHT_WHEEL, right);
 	}
 	else
 	{
-	    _servoController->setWheelSpeed(YServoController::ENUM_SERVO_LEFT_WHEEL, 0);
-	    _servoController->setWheelSpeed(YServoController::ENUM_SERVO_RIGHT_WHEEL, 0);
+	    _servoController->setWheelSpeed(ENUM_SERVO_LEFT_WHEEL, 0);
+	    _servoController->setWheelSpeed(ENUM_SERVO_RIGHT_WHEEL, 0);
 	}
     }
 
@@ -211,8 +219,8 @@ RobotManager::onReceiveCommand(YMessage msg)
 	    cout << "[RobotManager] Stop Robot!!" << endl;
 	    _run = false;
 	    speed = 0;
-	    _servoController->setWheelSpeed(YServoController::ENUM_SERVO_LEFT_WHEEL, speed);
-	    _servoController->setWheelSpeed(YServoController::ENUM_SERVO_RIGHT_WHEEL, speed);
+	    _servoController->setWheelSpeed(ENUM_SERVO_LEFT_WHEEL, speed);
+	    _servoController->setWheelSpeed(ENUM_SERVO_RIGHT_WHEEL, speed);
 	    sendMsg.setOpcode(1001);
 	    sendMsg.set("id", _id);
 	    sendMsg.set("event", 2);
@@ -298,50 +306,50 @@ RobotManager::commandLoop()
 		break;
 	    case 'j':
 		_pan++;
-		_servoController->setServoPosition(YServoController::ENUM_SERVO_PAN, _pan);
+		_servoController->setServoPosition(ENUM_SERVO_PAN, _pan);
 		break;
 	    case 'l':
 		_pan--;
-		_servoController->setServoPosition(YServoController::ENUM_SERVO_PAN, _pan);
+		_servoController->setServoPosition(ENUM_SERVO_PAN, _pan);
 		break;
 	    case 'i':
 		_tilt--;
-		_servoController->setServoPosition(YServoController::ENUM_SERVO_TILT, _tilt);
+		_servoController->setServoPosition(ENUM_SERVO_TILT, _tilt);
 		break;
 	    case 'm':
 		_tilt++;
-		_servoController->setServoPosition(YServoController::ENUM_SERVO_TILT, _tilt);
+		_servoController->setServoPosition(ENUM_SERVO_TILT, _tilt);
 		break;
 	    case 'k':
 		_pan = SERVO_CENTER_OR_STOP;
 		_tilt = SERVO_CENTER_OR_STOP;
-		_servoController->setServoPosition(YServoController::ENUM_SERVO_PAN, _pan);
-		_servoController->setServoPosition(YServoController::ENUM_SERVO_TILT, _tilt);
+		_servoController->setServoPosition(ENUM_SERVO_PAN, _pan);
+		_servoController->setServoPosition(ENUM_SERVO_TILT, _tilt);
 		break;
 	    case 'q':
 		speed--;
 		if(speed < MIN_WHEEL_SPEED)
 		    speed = MIN_WHEEL_SPEED;
-		_servoController->setWheelSpeed(YServoController::ENUM_SERVO_RIGHT_WHEEL, speed);
-		_servoController->setWheelSpeed(YServoController::ENUM_SERVO_LEFT_WHEEL, speed);
+		_servoController->setWheelSpeed(ENUM_SERVO_RIGHT_WHEEL, speed);
+		_servoController->setWheelSpeed(ENUM_SERVO_LEFT_WHEEL, speed);
 		break;
 	    case 'e':
 		speed++;
 		if(speed > MAX_WHEEL_SPEED)
 		    speed = MAX_WHEEL_SPEED;
-		_servoController->setWheelSpeed(YServoController::ENUM_SERVO_RIGHT_WHEEL, speed);
-		_servoController->setWheelSpeed(YServoController::ENUM_SERVO_LEFT_WHEEL, speed);
+		_servoController->setWheelSpeed(ENUM_SERVO_RIGHT_WHEEL, speed);
+		_servoController->setWheelSpeed(ENUM_SERVO_LEFT_WHEEL, speed);
 		break;
 	    case 'w':
 		speed = 0;
-		_servoController->setWheelSpeed(YServoController::ENUM_SERVO_LEFT_WHEEL, speed);
-		_servoController->setWheelSpeed(YServoController::ENUM_SERVO_RIGHT_WHEEL, speed);
+		_servoController->setWheelSpeed(ENUM_SERVO_LEFT_WHEEL, speed);
+		_servoController->setWheelSpeed(ENUM_SERVO_RIGHT_WHEEL, speed);
 		break;
 	    case 's':
 		_run = false;
 		speed = 0;
-		_servoController->setWheelSpeed(YServoController::ENUM_SERVO_LEFT_WHEEL, speed);
-		_servoController->setWheelSpeed(YServoController::ENUM_SERVO_RIGHT_WHEEL, speed);
+		_servoController->setWheelSpeed(ENUM_SERVO_LEFT_WHEEL, speed);
+		_servoController->setWheelSpeed(ENUM_SERVO_RIGHT_WHEEL, speed);
 		break;
 	    case 'u':
 		uturnLeft();
@@ -360,8 +368,8 @@ RobotManager::uturnLeft()
 {
     int leftSpeed = -5;
     int rightSpeed = 5;
-    _servoController->setWheelSpeed(YServoController::ENUM_SERVO_RIGHT_WHEEL, rightSpeed);
-    _servoController->setWheelSpeed(YServoController::ENUM_SERVO_LEFT_WHEEL, leftSpeed);
+    _servoController->setWheelSpeed(ENUM_SERVO_RIGHT_WHEEL, rightSpeed);
+    _servoController->setWheelSpeed(ENUM_SERVO_LEFT_WHEEL, leftSpeed);
 }
 
 void
@@ -369,6 +377,6 @@ RobotManager::uturnRight()
 {
     int leftSpeed = 5;
     int rightSpeed = -5;
-    _servoController->setWheelSpeed(YServoController::ENUM_SERVO_RIGHT_WHEEL, rightSpeed);
-    _servoController->setWheelSpeed(YServoController::ENUM_SERVO_LEFT_WHEEL, leftSpeed);
+    _servoController->setWheelSpeed(ENUM_SERVO_RIGHT_WHEEL, rightSpeed);
+    _servoController->setWheelSpeed(ENUM_SERVO_LEFT_WHEEL, leftSpeed);
 }

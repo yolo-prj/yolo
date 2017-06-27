@@ -1,6 +1,7 @@
 #ifndef _YOLO_PID_H_
 #define _YOLO_PID_H_
 
+/*
 typedef struct
 {
     double Kp ;             // proportional gain
@@ -17,6 +18,10 @@ typedef struct
     double Derivative;      // computed derivative
     double SpeedFudgeFactor;// fudge factor correction used in conjuction with the 
 } TPID;
+*/
+#include <yolo/YFramework/YServoController.h>
+
+using namespace yolo;
 
 class PID
 {

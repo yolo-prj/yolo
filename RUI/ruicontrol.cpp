@@ -121,8 +121,8 @@ void Controller::RobotConnectionHandler(int status)
 // debug info
 void Controller::RobotDebugInfoHandler(QString diag)
 {
-    ui->diag->setPlainText(diag);
-
+    //ui->diag->setPlainText(diag);
+    ui->diag->appendPlainText(diag);
 }
 
 // invalid disconnection

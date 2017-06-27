@@ -76,7 +76,7 @@
 	"event" : "error",
 	"state" : 1    
     },
-    "1100" : {
+    "1300" : {
 	"id" : "allocated robot id",
 	"debug_info" : "response for debug input",
 	"state" : 0

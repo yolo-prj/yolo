@@ -163,13 +163,15 @@ RobotManager::onReceiveCommand(YMessage msg)
 	case 1:
 	    cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
 	    break;
-	case 2:
+	case 2: {
 		cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
-	    sendMsg.setOpcode(1300);
-	    sendMsg.set("id", _id);
-	    sendMsg.set("debug_info", "<<Debug Info>> 1 2 3 4 5");
-	    sendMsg.set("state", 0);
-	    _eventSender->send(sendMsg);
+		YMessage sendMsg1 = _parser->getMessage(1300);
+		sendMsg1.setOpcode(1300);
+		sendMsg1.set("id", _id);
+		sendMsg1.set("debug_info", "<<Debug Info>> 1 2 3 4 5");
+		sendMsg1.set("state", 0);
+	    _eventSender->send(sendMsg1);
+	}
 	    break;
 	case 3:
 	    cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
@@ -251,13 +253,17 @@ RobotManager::onReceiveCommand(YMessage msg)
 	    break;
 	    */
 	case 300:
+	{
 		cout << "[RobotManager] " << msg.getString("debug") << ", state : " << msg.getInt("state") << endl;
-	    sendMsg.setOpcode(1300);
-	    sendMsg.set("id", _id);
-	    sendMsg.set("debug_info", "Robot Debug Info");
-	    sendMsg.set("state", 0);
-	    _eventSender->send(sendMsg);
+		YMessage sendMsg2 = _parser->getMessage(1300);
+		sendMsg2.setOpcode(1300);
+		sendMsg2.set("id", _id);
+		sendMsg2.set("debug_info", "Robot Debug Info");
+		sendMsg2.set("state", 0);
+	    _eventSender->send(sendMsg2);
+	}
 		break;
+
     }
 }
 

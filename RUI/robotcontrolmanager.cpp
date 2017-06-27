@@ -262,8 +262,23 @@ void RobotControlManager::NetworkConnectionListener::connectionLost(string addr,
         return;
     }
 
-    robot_controller_manager_->ProcessRobotDisconncetion(handler);
+    //robot_controller_manager_->ProcessRobotDisconncetion(handler);
     robot_controller_manager_->event_listener_->OnRobotInvalidDisconnected(handler);
+}
+
+void RobotControlManager::NetworkConnectionListener::reconnected(string addr, ushort port)
+{
+    qDebug() << "reconnected!!! : " << addr.c_str() << ", port : " << port << endl;
+
+    int handler = robot_controller_manager_->FindRobotHandler(addr);
+    if( handler == -1)
+    {
+        qDebug() << "No matched controllers";
+        return;
+    }
+
+    //robot_controller_manager_->ProcessRobotDisconncetion(handler);
+    //robot_controller_manager_->event_listener_->OnRobotInvalidDisconnected(handler);
 }
 
 void RobotControlManager::RobotEventInfoListener::onReceiveMessage(byte* data, uint length)

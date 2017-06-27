@@ -48,6 +48,8 @@ public:
     {
     public:
         virtual void connectionLost(string addr, ushort port);
+        virtual void reconnected(string addr, ushort port);
+
         void SetParent(RobotControlManager* robot_controller_manager)
         {
             robot_controller_manager_ = robot_controller_manager;

@@ -162,6 +162,7 @@ public:
     virtual void onReceiveConfig(YMessage msg);
     virtual void connectionLost(string addr, ushort port);
 
+	void DebugPrint(string message);
 
 private:
     byte* convertImageToJPEG(Mat image, uint& length);

@@ -218,6 +218,16 @@ void RobotControlManager::ProcessRobotDisconncetion(int handler)
     RemoveController(handler);
 }
 
+void RobotControlManager::EnableStreaming(bool enable)
+{
+    qDebug() << "EnableStreaming() : " << enable;
+
+    if(enable)
+        ImageReceiver::GetInstance().StartReceiving();
+    else
+        ImageReceiver::GetInstance().StopReceiving();
+}
+
 void RobotControlManager::RegisterListener(const std::shared_ptr<RobotEventListener>& listener)
 {
     event_listener_ = listener;

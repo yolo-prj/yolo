@@ -93,6 +93,7 @@ public slots:
 
 private:
     std::shared_ptr<YNetworkManager> manager_;
+    std::shared_ptr<YHeartbeatManager> hbmanager_;
 
     std::shared_ptr<NetworkEventListener> listener_;
     std::shared_ptr<NetworkConnectionListener> connection_listener_;

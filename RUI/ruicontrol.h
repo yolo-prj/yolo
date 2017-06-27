@@ -54,6 +54,10 @@ private slots:
     void on_send_clicked();
 
 private:
+    void closeEvent(QCloseEvent *bar);
+
+
+private:
     Ui::Controller *ui;
     RUIModel *m;
 };

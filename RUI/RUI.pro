@@ -132,3 +132,6 @@ DISTFILES += \
     assets/bullet_red.png \
     assets/bullet_yellow.png
 
+RESOURCES += \
+    res.qrc
+

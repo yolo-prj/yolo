@@ -194,6 +194,7 @@ bool CRobotMgr::ChangeRobotMode(E_RBT_MODE mode)
 	case RBT_NORMAL_MODE:
 		m_servo_ctrl.resetServo();
 		m_vision.ChangeVisionMode(VISION_SURVEAIL,30);
+		DebugPrint("<<Normal Mode>>");
 	break;
 	case RBT_TRACK_MODE:
  		
@@ -220,10 +221,14 @@ bool CRobotMgr::ChangeRobotMode(E_RBT_MODE mode)
 
 		m_vision.ChangeVisionMode(VISION_TRACK,10);
 		
+		DebugPrint("<<Autonomous Mode>>");
+		DebugPrint(string(": Robot Movement : STRAIGHT"));
+		
 	break;
 	case RBT_SUSPEND_MODE:
 		m_servo_ctrl.resetServo();
 		m_vision.ChangeVisionMode(VISION_STOP,30);
+		DebugPrint("<<Suspend Mode>>");
 	break;
 
 	default:
@@ -275,6 +280,9 @@ bool CRobotMgr::ChangeRobotTrackMode(E_RBT_TRACK_SUB mode)
 			m_average[i]=Point(0,0);
 		m_averageindex = 0;
 		m_vision.ChangeVisionMode(VISION_TRACK,10);
+		if (m_track_direction == RBT_STRAIGHT) 		DebugPrint(string(": Robot Movement : STRAIGHT"));
+		if (m_track_direction == RBT_LEFT) 		DebugPrint(string(": Robot Movement : LEFT"));
+		if (m_track_direction == RBT_RIGHT) 		DebugPrint(string(": Robot Movement : RIGHT"));
 	break;
 	case RBT_TRACK_SIGN:
 		m_servo_ctrl.resetServo();
@@ -285,6 +293,7 @@ bool CRobotMgr::ChangeRobotTrackMode(E_RBT_TRACK_SUB mode)
 		
 //		m_bRedbarDiscard=false;
 		clock_gettime(CLOCK_REALTIME, &m_sign_time);
+		DebugPrint(string(": Robot Movement : ROAD SIGN"));
 		
 	break;
 	case RBT_TRACK_AVOIDCAN:
@@ -293,6 +302,8 @@ bool CRobotMgr::ChangeRobotTrackMode(E_RBT_TRACK_SUB mode)
 		m_lasttrack=Rect(m_trackregion.x ,m_trackregion.y, LINE_WIDTH*2, m_trackregion.height);
 		m_lastx = m_trackregion.x + m_lasttrack.width/2;
 		m_automode_thread = thread(&CRobotMgr::AvoidCanThread, this,6);
+		DebugPrint(string(": Robot Movement : AVOIDING CAN"));
+
 	break;
 	case RBT_TRACK_PUSHCAN:
 		m_vision.ChangeVisionMode(VISION_SURVEAIL,30);
@@ -300,6 +311,7 @@ bool CRobotMgr::ChangeRobotTrackMode(E_RBT_TRACK_SUB mode)
 		m_lasttrack=Rect(m_trackregion.x ,m_trackregion.y, LINE_WIDTH*2, m_trackregion.height);
 		m_lastx = m_trackregion.x + m_lasttrack.width/2;
 		m_automode_thread = thread(&CRobotMgr::PushCanThread, this,6);
+		DebugPrint(string(": Robot Movement : PUSHING CAN"));
 	break;
 	case RBT_TRACK_TURN:
 		m_vision.ChangeVisionMode(VISION_SURVEAIL,30);
@@ -307,6 +319,7 @@ bool CRobotMgr::ChangeRobotTrackMode(E_RBT_TRACK_SUB mode)
 		m_lasttrack=Rect(m_trackregion.x ,m_trackregion.y, LINE_WIDTH*2, m_trackregion.height);
 		m_lastx = m_trackregion.x + m_lasttrack.width/2;
 		m_automode_thread = thread(&CRobotMgr::AutoTurnAroundThread, this,6);
+		DebugPrint(string(": Robot Movement : U-TURN"));
 	break;
 	default:
 		return false;
@@ -733,9 +746,15 @@ Rect CRobotMgr::onStopBar(vector<Rect> & linelist)
 		if (linelist[i].width<200 && linelist[i].width>90)
 		{
 			if ((linelist[i].x + linelist[i].width/2) < m_lastx-(LINE_WIDTH)/2)
+			{
+				DebugPrint(string(": Track dot : LEFT DOT"));
 				m_track_direction=RBT_LEFT;
+			}
 			if ((linelist[i].x + linelist[i].width/2) > m_lastx+(LINE_WIDTH)/2)
+			{
+				DebugPrint(string(": Track dot : RIGHT DOT"));
 				m_track_direction=RBT_RIGHT;
+			}
 		}
 		else if (linelist[i].width>400)
 		{
@@ -743,6 +762,7 @@ Rect CRobotMgr::onStopBar(vector<Rect> & linelist)
 //			m_servo_ctrl.setWheelSpeed(ENUM_SERVO_RIGHT_WHEEL, 5);
 //			this_thread::sleep(posix_time::millisec(300));
 			m_bRedbarDiscard=true;
+			DebugPrint(string(": Track bar : STOP"));
 			CreateTrackModeThread(RBT_TRACK_SIGN);
 			return linelist[i];
 		}
@@ -759,29 +779,35 @@ void CRobotMgr::onSignAction(int id, string action)
 	switch(id)
 	{
 		case 0:
+			DebugPrint(string(": Recognized Sign : STRAIGHT"));
 			m_track_direction=RBT_STRAIGHT;
 			CreateTrackModeThread(RBT_TRACK_AUTO);
 		break;
 		
 		case 1:
+			DebugPrint(string(": Recognized Sign : LEFT"));
 			m_track_direction=RBT_LEFT;
 			CreateTrackModeThread(RBT_TRACK_AUTO);
 		break;
 
 		case 2:
+			DebugPrint(string(": Recognized Sign : RIGHT"));
 			m_track_direction=RBT_RIGHT;
 			CreateTrackModeThread(RBT_TRACK_AUTO);
 		break;
 
 		case 3:
+			DebugPrint(string(": Recognized Sign : U-TURN"));
 			CreateTrackModeThread(RBT_TRACK_TURN);
 		break;
 
 		case 4:
+			DebugPrint(string(": Recognized Sign : PUSHCAN"));
 			CreateTrackModeThread(RBT_TRACK_PUSHCAN);
 		break;
 
 		case 5:
+			DebugPrint(string(": Recognized Sign : STOP"));
 			CreateChangModeThread(RBT_NORMAL_MODE);
 		break;
 	}
@@ -1289,14 +1315,7 @@ void CRobotMgr::onReceiveCommand(YMessage msg)
 	case OP_RECV_DEGUG:
 		cout << "[RobotManager] " << msg.getString("debug") << ", state : " << msg.getString("state") << endl;
 
-//		m_vision.ChangeVisionMode(VISION_TRACK,30);
-		
-		sendMsg = m_parser->getMessage(OP_SEND_DEBUG);
-		sendMsg.setOpcode(OP_SEND_DEBUG);
-		sendMsg.set("id", _id);
-		sendMsg.set("debug_info", "Robot Debug Info");
-		sendMsg.set("state", 0);
-		m_eventSender->send(sendMsg);
+		DebugPrint(msg.getString("debug"));
 	break;
 	}
 
@@ -1335,3 +1354,18 @@ byte* CRobotMgr::convertImageToJPEG(Mat image, uint& length)
     return data;
 }
 
+
+void CRobotMgr::DebugPrint(string message)
+{
+	YMessage sendMsg;
+
+	if (_id == 0)
+		return;
+	
+	sendMsg = m_parser->getMessage(OP_SEND_DEBUG);
+	sendMsg.setOpcode(OP_SEND_DEBUG);
+	sendMsg.set("id", _id);
+	sendMsg.set("debug_info", message);
+	sendMsg.set("state", 0);
+	m_eventSender->send(sendMsg);
+}

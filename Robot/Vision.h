@@ -102,7 +102,7 @@ private:
 
 	static double median(cv::Mat channel);
 	static void sortCorners(std::vector<cv::Point2f>& corners, cv::Point2f center);
-
+	void DownsizeImage(Mat& src, Mat& dst, int DownsizeRate);
 	
 
 };

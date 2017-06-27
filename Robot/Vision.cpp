@@ -172,7 +172,7 @@ void CVision::Stop_Camera(CvCapture* capture)
 void CVision::Vision_Thread(E_VISION_MODE mode, int msec, int sig_id)
 {
 	IplImage * iplCameraImage;
-	Mat 	   image;
+	Mat 	   image, DownSizeImage;
 	Mat 	   hsv;
 	Rect 	   track_rec;
 
@@ -234,8 +234,11 @@ void CVision::Vision_Thread(E_VISION_MODE mode, int msec, int sig_id)
 			imshow("camera", image );
 			cv::waitKey(1);			
 #else
-	if (m_vision_interface)
-		m_vision_interface->onVisionImage(image);
+			if (m_vision_interface)
+			{
+				DownsizeImage(image, DownSizeImage, 50);
+				m_vision_interface->onVisionImage(DownSizeImage);
+			}
 #endif
 		}
 
@@ -595,6 +598,10 @@ void CVision::CameraSurveillance(Mat & camimage)
 
 
 
+void CVision::DownsizeImage(Mat& src, Mat& dst, int DownsizeRate)
+{
+	resize(src, dst, Size(src.cols * ((100 - DownsizeRate) /100), src.rows * ((100 - DownsizeRate) /100)), 0, 0, CV_INTER_LINEAR);
+}
 
 
 

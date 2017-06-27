@@ -165,7 +165,11 @@ RobotManager::onReceiveCommand(YMessage msg)
 	    break;
 	case 2:
 		cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
-
+	    sendMsg.setOpcode(1300);
+	    sendMsg.set("id", _id);
+	    sendMsg.set("debug_info", "<<Debug Info>> 1 2 3 4 5");
+	    sendMsg.set("state", 0);
+	    _eventSender->send(sendMsg);
 	    break;
 	case 3:
 	    cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;

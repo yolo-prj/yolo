@@ -31,11 +31,12 @@ void RobotControlManager::Initialize(const std::string config, const std::string
 
     hbmanager_ = make_shared<YHeartbeatManager>(manager_.get());
     manager_->setHeartbeatManager(hbmanager_.get());
-    hbmanager_->setConnectionLostListener(connection_listener_.get());
+    //hbmanager_->setConnectionLostListener(connection_listener_.get());
 
-    //connection_listener_ = make_shared<NetworkConnectionListener>();
-    //connection_listener_->SetParent(this);
+    connection_listener_ = make_shared<NetworkConnectionListener>();
+    connection_listener_->SetParent(this);
     //manager_->addNetworkMessageListener(100, connection_listener_.get());
+    hbmanager_->setConnectionLostListener(connection_listener_.get());
 
     event_info_listener_ = make_shared<RobotEventInfoListener>();
     event_info_listener_->SetParent(this);
@@ -203,7 +204,7 @@ int RobotControlManager::FindRobotHandler(const std::string addr)
     for(auto item : robot_controllers_)
     {
         auto controller = static_cast<RobotController>(item.second);
-        if(controller.addr().compare(addr)) {
+        if(controller.addr().compare(addr) == 0) {
             return item.first;
         }
     }

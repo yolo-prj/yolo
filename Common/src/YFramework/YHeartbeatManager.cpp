@@ -60,6 +60,17 @@ YHeartbeatManager::receivedHeartbeat(string addr, ushort port, byte* data, uint 
 
 	boost::mutex::scoped_lock lock(_mutex);
 	_timeoutMap.insert( make_pair(key, 0) );
+
+	// if received from lost peer, send reconnected message to listener
+	auto itrLost = _lostSet.find(key);
+	if(itrLost != _lostSet.end())
+	{
+	    _lostSet.erase(itrLost);
+
+	    if(_connLostListener != nullptr) {
+		_connLostListener->reconnected(addr, port);
+	    }
+	}
     }
     else
     {
@@ -166,6 +177,7 @@ YHeartbeatManager::checkHeartbeatThread()
 		    }
 
 		    removed.push_back(e.first);
+		    _lostSet.insert(e.first);
 		}
 	    }
 

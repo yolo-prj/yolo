@@ -38,6 +38,7 @@ public:
     virtual void onReceiveCommand(YMessage msg);
     virtual void onReceiveConfig(YMessage msg);
     virtual void connectionLost(string addr, ushort port);
+    virtual void reconnected(string addr, ushort port);
 
     void start();
     void stop();

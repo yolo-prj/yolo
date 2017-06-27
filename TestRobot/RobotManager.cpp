@@ -277,6 +277,12 @@ RobotManager::connectionLost(string addr, ushort port)
     cout << "[RobotManager] CONNECTION LOST : " << addr << ", port: " << port << endl;
 }
 
+void
+RobotManager::reconnected(string addr, ushort port)
+{
+    cout << "[RobotManager] RECONNECTED : " << addr << ", port: " << port << endl;
+}
+
 byte*
 RobotManager::convertImageToJPEG(Mat image, uint& length)
 {

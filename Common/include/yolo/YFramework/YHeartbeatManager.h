@@ -5,6 +5,7 @@
 #include <yolo/YFramework/YConnectionLostListener.h>
 #include <boost/thread.hpp>
 #include <map>
+#include <set>
 
 using namespace std;
 
@@ -48,6 +49,8 @@ private:
     map<string, uint>		_timeoutMap;
     boost::mutex		_mutex;
     bool			_started;
+
+    set<string>			_lostSet;
 };
 
 }

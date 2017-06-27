@@ -1,6 +1,6 @@
 CC=g++
-DEFINE=ROBOT
-#DEFINE=RUI
+#DEFINE=ROBOT
+DEFINE=RUI
 ifeq ($(DEFINE), ROBOT)
 	INCLUDE_RASPICAM=-I/home/pi/git/robidouille/raspicam_cv
 	LIB_RASPICAM=-L/home/pi/git/robidouille/raspicam_cv
@@ -32,7 +32,7 @@ LINK_OPENCV=-lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_video -lope
 endif
 
 ifeq ($(OS),Linux)
-BOOSTLIB=-lboost_system -lboost_thread -lrt -lpthread
+BOOSTLIB=-lboost_system -lboost_thread -lrt -lpthread -lYFramework
 LINK_OPENCV=-lopencv_core -lopencv_highgui -lopencv_imgcodecs -lopencv_imgproc -lopencv_video -lopencv_videoio
 endif
 
@@ -44,11 +44,12 @@ LINK_LIB=$(BOOSTLIB) -lYComm -lYFramework $(LINK_OPENCV) $(LINK_RASPICAM)
 
 SRCS=YMessageSender.cpp YMessageReceiver.cpp RobotManager.cpp LineDetect.cpp Vision.cpp main.cpp SignHandler.cpp
 
+
 OBJS = $(SRCS:.cpp=.o)
 
 all: $(OBJS)
 	$(CC) $(OPTION) -o $(BIN) $(INCLUDE) $(LIB_PATH) $(OBJS) $(LINK_LIB)
-
+ 
 %.o:%.cpp
 	$(CC) $(OPTION) -c $(INCLUDE) -c $< -o $@
 

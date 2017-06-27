@@ -8,6 +8,7 @@ class YConnectionLostListener
 {
 public:
     virtual void connectionLost(string addr, ushort port) = 0;
+    virtual void reconnected(string addr, ushort port) {}
 };
 
 

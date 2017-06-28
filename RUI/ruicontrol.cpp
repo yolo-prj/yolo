@@ -22,6 +22,7 @@ Controller::Controller(QWidget *parent) :
     QObject::connect(m, SIGNAL(UpdateRobotConnectionStatus(int)), this, SLOT(RobotConnectionHandler(int)));
     QObject::connect(m, SIGNAL(UpdateRobotDebugInfo(QString)), this, SLOT(RobotDebugInfoHandler(QString)));
     QObject::connect(m, SIGNAL(UpdateRobotInvalidDisconnection(int)), this, SLOT(RobotInvalidDisconnectionHandler(int)));
+    QObject::connect(m, SIGNAL(UpdateRobotDecision(int)), this, SLOT(RobotDecisionHandler(int)));
 
 }
 
@@ -46,6 +47,7 @@ void Controller::RobotModeHandler(int mode)
             ui->auto_2->setChecked(false);
             m->HandlePanOperation(ui->horizontalSlider->sliderPosition());
             m->HandleTiltOperation(ui->horizontalSlider_2->sliderPosition());
+            this->on_start_toggled(ui->start->isChecked());
             break;
         case 0: //RobotMode::IDLE_MODE:
         case 3: //RobotMode::SUSPENDED_MODE:
@@ -121,7 +123,7 @@ void Controller::RobotConnectionHandler(int status)
 // debug info
 void Controller::RobotDebugInfoHandler(QString diag)
 {
-    //ui->diag->setPlainText(diag);
+
     ui->diag->appendPlainText(diag);
 }
 
@@ -146,6 +148,40 @@ void Controller::RobotInvalidDisconnectionHandler(int status)
 
     }
     msgBox.exec();
+}
+
+
+void Controller::RobotDecisionHandler(int sign)
+{
+    switch(sign)
+    {
+        case 1: // straight
+            ui->sign->setPixmap(QPixmap(":/new/prefix1/assets/arrowS.png"));
+            break;
+        case 2: // turn right
+            ui->sign->setPixmap(QPixmap(":/new/prefix1/assets/arrowR.png"));
+            break;
+        case 3: // turn left
+            ui->sign->setPixmap(QPixmap(":/new/prefix1/assets/arrowL.png"));
+            break;
+        case 4: // U Turn
+            ui->sign->setPixmap(QPixmap(":/new/prefix1/assets/arrowT.png"));
+            break;
+        case 5: // Avoid
+            ui->sign->setPixmap(QPixmap(":/new/prefix1/assets/arrowB.png"));
+            break;
+        case 6: // Push can
+            ui->sign->setPixmap(QPixmap(":/new/prefix1/assets/arrowPush.png"));
+            break;
+        case 7: // Stop
+            ui->sign->setPixmap(QPixmap(":/new/prefix1/assets/arrowStop.png"));
+            break;
+        case 8: // Go
+            ui->sign->setPixmap(QPixmap(":/new/prefix1/assets/arrowGo.png"));
+            break;
+    }
+
+    ui->sign->show();
 }
 
 

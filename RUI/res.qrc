@@ -3,5 +3,13 @@
         <file>assets/bullet_red.png</file>
         <file>assets/bullet_green.png</file>
         <file>assets/bullet_yellow.png</file>
+        <file>assets/arrowT.png</file>
+        <file>assets/arrowStop.png</file>
+        <file>assets/arrowR.png</file>
+        <file>assets/arrowL.png</file>
+        <file>assets/arrowGo.png</file>
+        <file>assets/arrowS.png</file>
+        <file>assets/arrowPush.png</file>
+        <file>assets/arrowB.png</file>
     </qresource>
 </RCC>

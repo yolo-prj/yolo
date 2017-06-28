@@ -35,6 +35,7 @@ signals:
     void UpdateRobotConnectionStatus(int status);
     void UpdateRobotDebugInfo(QString debug);
     void UpdateRobotInvalidDisconnection(int status);
+    void UpdateRobotDecision(int sign);
 
 public:
     explicit RUIModel(QObject *parent = 0);

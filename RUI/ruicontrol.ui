@@ -232,7 +232,7 @@
              <widget class="QLabel" name="status_red">
               <property name="geometry">
                <rect>
-                <x>389</x>
+                <x>370</x>
                 <y>2</y>
                 <width>31</width>
                 <height>17</height>
@@ -248,7 +248,7 @@
              <widget class="QLabel" name="status_green">
               <property name="geometry">
                <rect>
-                <x>366</x>
+                <x>347</x>
                 <y>2</y>
                 <width>31</width>
                 <height>17</height>
@@ -267,7 +267,7 @@
              <widget class="QLabel" name="label_3">
               <property name="geometry">
                <rect>
-                <x>300</x>
+                <x>281</x>
                 <y>1</y>
                 <width>81</width>
                 <height>20</height>
@@ -277,16 +277,22 @@
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Connection&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
              </widget>
-             <zorder>go</zorder>
-             <zorder>back</zorder>
-             <zorder>left</zorder>
-             <zorder>right</zorder>
-             <zorder>uturn</zorder>
-             <zorder>splitter</zorder>
-             <zorder>status_red</zorder>
-             <zorder>status_green</zorder>
-             <zorder>tab_manager</zorder>
-             <zorder>label_3</zorder>
+             <widget class="QLabel" name="status_yellow">
+              <property name="geometry">
+               <rect>
+                <x>393</x>
+                <y>2</y>
+                <width>31</width>
+                <height>17</height>
+               </rect>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="pixmap">
+               <pixmap resource="res.qrc">:/new/prefix1/assets/bullet_yellow.png</pixmap>
+              </property>
+             </widget>
             </widget>
            </item>
           </layout>

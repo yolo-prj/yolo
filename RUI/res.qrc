@@ -2,5 +2,6 @@
     <qresource prefix="/new/prefix1">
         <file>assets/bullet_red.png</file>
         <file>assets/bullet_green.png</file>
+        <file>assets/bullet_yellow.png</file>
     </qresource>
 </RCC>

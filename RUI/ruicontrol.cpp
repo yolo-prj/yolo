@@ -12,16 +12,16 @@ Controller::Controller(QWidget *parent) :
 {
     ui->setupUi(this);
     m = RUIModel::GetInstance();
-    ui->manual->setChecked(true);
 
     ui->status_green->hide();
     ui->status_red->show();
+    ui->status_yellow->hide();
 
     QObject::connect(m, SIGNAL(UpdateRobotMode(int)), this, SLOT(RobotModeHandler(int)));
     QObject::connect(m, SIGNAL(UpdateRobotError(int)), this, SLOT(RobotErrorHandler(int)));
     QObject::connect(m, SIGNAL(UpdateRobotConnectionStatus(int)), this, SLOT(RobotConnectionHandler(int)));
     QObject::connect(m, SIGNAL(UpdateRobotDebugInfo(QString)), this, SLOT(RobotDebugInfoHandler(QString)));
-    QObject::connect(m, SIGNAL(UpdateRobotInvalidDisconnection()), this, SLOT(RobotInvalidDisconnectionHandler()));
+    QObject::connect(m, SIGNAL(UpdateRobotInvalidDisconnection(int)), this, SLOT(RobotInvalidDisconnectionHandler(int)));
 
 }
 
@@ -126,12 +126,25 @@ void Controller::RobotDebugInfoHandler(QString diag)
 }
 
 // invalid disconnection
-void Controller::RobotInvalidDisconnectionHandler()
+void Controller::RobotInvalidDisconnectionHandler(int status)
 {
     QMessageBox msgBox;
 
-    msgBox.setText("Network connection is lost!!!");
-    msgBox.setInformativeText("Please wait for connection re-establishment.");
+    if(status)
+    {
+        ui->status_yellow->hide();
+        ui->status_green->show();
+        msgBox.setText("Network connection is re-established!!!");
+
+    }
+    else
+    {
+        ui->status_green->hide();
+        ui->status_yellow->show();
+        msgBox.setText("Network connection is lost!!!");
+        msgBox.setInformativeText("Please wait for connection re-establishment.");
+
+    }
     msgBox.exec();
 }
 

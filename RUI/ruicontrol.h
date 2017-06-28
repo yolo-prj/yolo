@@ -27,7 +27,7 @@ public slots:
     void RobotErrorHandler(int error);
     void RobotConnectionHandler(int status);
     void RobotDebugInfoHandler(QString diag);
-    void RobotInvalidDisconnectionHandler();
+    void RobotInvalidDisconnectionHandler(int status);
 
 protected:
     void timerEvent(QTimerEvent *event);

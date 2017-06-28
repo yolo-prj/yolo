@@ -34,7 +34,7 @@ signals:
     void UpdateRobotError(int error);
     void UpdateRobotConnectionStatus(int status);
     void UpdateRobotDebugInfo(QString debug);
-    void UpdateRobotInvalidDisconnection();
+    void UpdateRobotInvalidDisconnection(int status);
 
 public:
     explicit RUIModel(QObject *parent = 0);
@@ -100,7 +100,7 @@ private:
 
          virtual void OnRobotErrorEventReceived(int handler, int error)
         {
-            qDebug() << "OnRobotModeChanged";
+            qDebug() << "OnRobotErrorReceived";
             qDebug() << "id : " << handler << " , error : " << error;
             emit ruimodel_->UpdateRobotError(error);
         }
@@ -132,14 +132,13 @@ private:
         virtual void OnRobotInvalidDisconnected(int handler)
         {
             qDebug() << "OnRobotInvalidDisconnected : " << handler;
-            emit ruimodel_->UpdateRobotInvalidDisconnection();
+            emit ruimodel_->UpdateRobotInvalidDisconnection(0);
         }
 
         virtual void OnRobotReconnected(int handler)
         {
             qDebug() << "OnRobotReconnected : " << handler;
-            // TODO :
-            //emit ruimodel_->UpdateRobotInvalidDisconnection();
+            emit ruimodel_->UpdateRobotInvalidDisconnection(1);
         }
     };
 

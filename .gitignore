@@ -4,3 +4,9 @@ lib/
 *.so
 *.ini
 *test
+**/build
+TestRobot/Robot
+RUI/RUI.pro.user
+RUI.pro.user
+build-RUI-Desktop_Qt_5_9_0_clang_64bit-Debug
+build-RUI-Desktop_Qt_5_8_0_GCC_64bit-Debug

@@ -12,7 +12,7 @@ class RobotEventListener
 public:
     virtual void OnRobotModeChanged(int handler, RobotMode state) = 0;
     virtual void OnRobotErrorEventReceived(int handler, int error) = 0;
-    virtual void OnRobotMoveEventReceived(int handler, RobotMovement move) = 0;
+    virtual void OnRobotMoveEventReceived(int handler, int move) = 0;
 
     virtual void OnRobotConnected(int handler) = 0;
     virtual void OnRobotDisconnected(int handler) = 0;

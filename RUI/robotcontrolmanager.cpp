@@ -1,5 +1,6 @@
 #include "robotcontrolmanager.h"
 #include "imagereceiver.h"
+#include "robotmovement.h"
 #include <memory>
 #include <QtDebug>
 #include <tuple>
@@ -315,6 +316,9 @@ void RobotControlManager::RobotEventInfoListener::onReceiveMessage(byte* data, u
             robot_controller_manager_->event_listener_->OnRobotModeChanged(id, mode);
         } else if(event.compare("error") == 0) {
             robot_controller_manager_->event_listener_->OnRobotErrorEventReceived(id, state);
+        } else if(event.compare("move_event") == 0) {
+            RobotMovement move = static_cast<RobotMovement>(state);
+            robot_controller_manager_->event_listener_->OnRobotMoveEventReceived(id, move);
         }
         else {
 

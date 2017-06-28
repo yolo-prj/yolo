@@ -122,7 +122,9 @@ HEADERS  += \
         imagereceivelistener.h \
         robotmode.h \
         templatesingletone.h \
-    imagereceiver.h
+    imagereceiver.h \
+    robotmovement.h \
+    robotmovement.h
 
 FORMS    += \
          ruicontrol.ui

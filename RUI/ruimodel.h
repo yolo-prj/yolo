@@ -105,6 +105,13 @@ private:
             emit ruimodel_->UpdateRobotError(error);
         }
 
+        virtual void OnRobotMoveEventReceived(int handler, RobotMovement move)
+        {
+            qDebug() << "OnRobotMoveEventReceived : " << static_cast<int>(move);
+
+            //TODO : need to implementation
+        }
+
         virtual void OnRobotConnected(int handler)
         {
             qDebug() << "OnRobotConnected : " << handler;

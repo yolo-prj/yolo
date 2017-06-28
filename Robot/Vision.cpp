@@ -236,7 +236,7 @@ void CVision::Vision_Thread(E_VISION_MODE mode, int msec, int sig_id)
 #else
 			if (m_vision_interface)
 			{
-				DownsizeImage(image, DownSizeImage, 50);
+				DownsizeImage(image, DownSizeImage, 2);
 				m_vision_interface->onVisionImage(DownSizeImage);
 			}
 #endif
@@ -600,7 +600,7 @@ void CVision::CameraSurveillance(Mat & camimage)
 
 void CVision::DownsizeImage(Mat& src, Mat& dst, int DownsizeRate)
 {
-	resize(src, dst, Size(src.cols * ((100 - DownsizeRate) /100), src.rows * ((100 - DownsizeRate) /100)), 0, 0, CV_INTER_LINEAR);
+	resize(src, dst, Size(src.cols/2, src.rows/2), 0, 0, CV_INTER_LINEAR);
 }
 
 

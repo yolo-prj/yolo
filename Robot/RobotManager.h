@@ -32,8 +32,57 @@ using namespace cv;
 
 
 
+
+
+
+#define RBT_CAM_WIDTH	(640)
+#define RBT_CAM_HEIGHT	(480)
+
+
+#define LINE_WIDTH	(120)
+
+
+
+#define OP_RECV_MOVE_CNTR_FORWARD   1
+#define OP_RECV_MOVE_CNTR_BACKWARD  2
+#define OP_RECV_MOVE_CNTR_LEFT      3
+#define OP_RECV_MOVE_CNTR_RIGHT     4
+#define OP_RECV_MOVE_CNTR_UTERN	    5
+
+#define OP_RECV_CAMERA_CNTR_PAN	    11
+#define OP_RECV_CAMERA_CNTR_TILT	12
+
+#define OP_RECV_MODE_CHANGE         21
+#define OP_RECV_IMAGE_SEND          31
+
+#define OP_RECV_DEGUG               300
+#define OP_RECV_INIT_COMMAND        200
+
+#define OP_SEND_MODE                1001
+#define OP_SEND_ERROR               1002
+#define OP_SEND_DEBUG               1300
+
+
+#define RBT_SIGN_RIGHT_PAN			(120)
+#define RBT_SIGN_LEFT_PAN			(180)
+
+#define RBT_SIGN_LEFT_TILT			(SERVO_CENTER_OR_STOP-2)
+
+
+#if 0
+
+#define RBT_AUTO_SPEED				(10)
+#define TRK_LINE_CAM_PAN	156
+#define TRK_LINE_CAM_TILT	205
+
+#else
+
+#define RBT_AUTO_SPEED				(6)
 #define TRK_LINE_CAM_PAN	156
 #define TRK_LINE_CAM_TILT	211
+#endif
+
+
 
 
 typedef enum
@@ -127,19 +176,6 @@ public:
 
 
 
-	virtual void onVisionImage(Mat & image);
-// autonomouse 
-	virtual Rect onLineDetect(vector<Rect> & linelist);
-	virtual Vec3f onColorCircle(vector<cv::Vec3f> & linelist);
-	virtual Rect onStopBar(vector<Rect> & linelist);
-	virtual void onSignDetect(bool isdetected);
-
-
-	virtual void onSignAction(int id, string action);
-
-
-
-
 
 
 // manual mode command
@@ -156,18 +192,32 @@ public:
 	bool StopManualMove();
 
 
-    // interface overrides (implementation)
+
+	void DebugPrint(string message);
+
+	
+	
+	// callback functions (CVision interface overrides )
+	virtual void onVisionImage(Mat & image); 
+	virtual Rect onLineDetect(vector<Rect> & linelist);
+	virtual Vec3f onColorCircle(vector<cv::Vec3f> & linelist);
+	virtual Rect onStopBar(vector<Rect> & linelist);
+	virtual void onSignDetect(bool isdetected);
+	
+	// callback function (CSignHandler interface overrides )
+	virtual void onSignAction(int id, string action);
+	
+
+
+    // callback function (Servo, Event, Network  interface overrides )
     virtual void onReceiveDistance(double distanceCm);
     virtual void onReceiveCommand(YMessage msg);
     virtual void onReceiveConfig(YMessage msg);
     virtual void connectionLost(string addr, ushort port);
 
-	void DebugPrint(string message);
 
 private:
     byte* convertImageToJPEG(Mat image, uint& length);
-
-
 
 public:
 	CVision m_vision;
@@ -193,9 +243,7 @@ private:
 
 	thread m_manual_thread;;
 
-
 	bool m_bImagesend;
-	bool m_bRedbarDiscard;
 	
 	int m_signfailcount;
 
@@ -207,6 +255,7 @@ private:
 	int m_unrecognization;
 	Point m_average[5];
 	int m_averageindex;
+	bool m_bRedbarDiscard;
 ///////
 
     vector<int>		m_image_param;

@@ -168,14 +168,20 @@ RobotManager::onReceiveCommand(YMessage msg)
 		YMessage sendMsg1 = _parser->getMessage(1300);
 		sendMsg1.setOpcode(1300);
 		sendMsg1.set("id", _id);
-		sendMsg1.set("debug_info", " : Robot Movement : AVOIDING CAN");
+		sendMsg1.set("debug_info", " sdlkfasldjflkasjf asdflkjasldkf adslfjlkdf adflaj asdf : Robot Movement : AVOIDING CAN");
 		sendMsg1.set("state", 0);
 	    _eventSender->send(sendMsg1);
 	}
 	    break;
-	case 3:
+	case 3: {
 	    cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;
-
+		YMessage sendMsg1 = _parser->getMessage(1001);
+		sendMsg1.setOpcode(1001);
+		sendMsg1.set("id", _id);
+		sendMsg1.set("event", "move_event");
+		sendMsg1.set("state", 5);
+	    _eventSender->send(sendMsg1);
+		}
 	    break;
 	case 4:
 		cout << "[RobotManager] " << msg.getString("command") << ", state : " << msg.getInt("state") << endl;

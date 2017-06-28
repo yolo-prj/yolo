@@ -4,6 +4,7 @@
 #include <QMessageBox>
 #include <QCloseEvent>
 #include "robotcontrolmanager.h"
+#include "robotmovement.h"
 
 Controller::Controller(QWidget *parent) :
     QMainWindow(parent),
@@ -35,22 +36,23 @@ Controller::~Controller()
 void Controller::RobotModeHandler(int mode)
 {
     qDebug() << "robot mode is changed";
+    RobotMode rmode = (RobotMode)mode;
 
-    switch(mode)
+    switch(rmode)
     {
-        case 1: //RobotMode::AUTO_MODE
+        case RobotMode::AUTO_MODE:
             ui->auto_2->setChecked(true);
             ui->manual->setChecked(false);
             break;
-        case 2: //RobotMode::MANUAL_MODE:
+        case RobotMode::MANUAL_MODE:
             ui->manual->setChecked(true);
             ui->auto_2->setChecked(false);
             m->HandlePanOperation(ui->horizontalSlider->sliderPosition());
             m->HandleTiltOperation(ui->horizontalSlider_2->sliderPosition());
             this->on_start_toggled(ui->start->isChecked());
             break;
-        case 0: //RobotMode::IDLE_MODE:
-        case 3: //RobotMode::SUSPENDED_MODE:
+        case RobotMode::IDLE_MODE:
+        case RobotMode::SUSPENDED_MODE:
         default:
             ui->auto_2->setChecked(false);
             ui->manual->setChecked(false);
@@ -153,30 +155,32 @@ void Controller::RobotInvalidDisconnectionHandler(int status)
 
 void Controller::RobotDecisionHandler(int sign)
 {
-    switch(sign)
+    RobotMovement move = (RobotMovement)sign;
+
+    switch(move)
     {
-        case 1: // straight
+        case RobotMovement::MOVE_STRAIGHT:
             ui->sign->setPixmap(QPixmap(":/new/prefix1/assets/arrowS.png"));
             break;
-        case 2: // turn right
+        case RobotMovement::MOVE_TURNRIGHT:
             ui->sign->setPixmap(QPixmap(":/new/prefix1/assets/arrowR.png"));
             break;
-        case 3: // turn left
+        case RobotMovement::MOVE_TURNLEFT:
             ui->sign->setPixmap(QPixmap(":/new/prefix1/assets/arrowL.png"));
             break;
-        case 4: // U Turn
+        case RobotMovement::MOVE_UTURN:
             ui->sign->setPixmap(QPixmap(":/new/prefix1/assets/arrowT.png"));
             break;
-        case 5: // Avoid
+        case RobotMovement::MOVE_AVOID:
             ui->sign->setPixmap(QPixmap(":/new/prefix1/assets/arrowB.png"));
             break;
-        case 6: // Push can
+        case RobotMovement::MOVE_PUSHCAN:
             ui->sign->setPixmap(QPixmap(":/new/prefix1/assets/arrowPush.png"));
             break;
-        case 7: // Stop
+        case RobotMovement::MOVE_STOP:
             ui->sign->setPixmap(QPixmap(":/new/prefix1/assets/arrowStop.png"));
             break;
-        case 8: // Go
+        case RobotMovement::MOVE_GO:
             ui->sign->setPixmap(QPixmap(":/new/prefix1/assets/arrowGo.png"));
             break;
     }

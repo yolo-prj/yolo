@@ -521,7 +521,7 @@
              <rect>
               <x>14</x>
               <y>31</y>
-              <width>346</width>
+              <width>331</width>
               <height>70</height>
              </rect>
             </property>
@@ -532,9 +532,9 @@
            <widget class="QLabel" name="sign">
             <property name="geometry">
              <rect>
-              <x>366</x>
+              <x>352</x>
               <y>31</y>
-              <width>67</width>
+              <width>81</width>
               <height>71</height>
              </rect>
             </property>

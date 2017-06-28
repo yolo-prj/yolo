@@ -108,9 +108,9 @@ private:
 
         virtual void OnRobotMoveEventReceived(int handler, RobotMovement move)
         {
+            int m = static_cast<int>(move);
             qDebug() << "OnRobotMoveEventReceived : " << static_cast<int>(move);
-
-            //TODO : need to implementation
+            emit ruimodel_->UpdateRobotDecision(m);
         }
 
         virtual void OnRobotConnected(int handler)

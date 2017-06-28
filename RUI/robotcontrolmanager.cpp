@@ -313,7 +313,7 @@ void RobotControlManager::RobotEventInfoListener::onReceiveMessage(byte* data, u
         if(event.compare("mode_changed") == 0) {
             RobotMode mode = static_cast<RobotMode>(state);
             robot_controller_manager_->ChangeMode(id, mode);
-            robot_controller_manager_->event_listener_->OnRobotModeChanged(id, mode);
+            robot_controller_manager_->event_listener_->OnRobotModeChanged(id, state);
         } else if(event.compare("error") == 0) {
             robot_controller_manager_->event_listener_->OnRobotErrorEventReceived(id, state);
         } else if(event.compare("move_event") == 0) {           

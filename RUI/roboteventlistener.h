@@ -10,7 +10,7 @@ class YMessage;
 class RobotEventListener
 {
 public:
-    virtual void OnRobotModeChanged(int handler, RobotMode state) = 0;
+    virtual void OnRobotModeChanged(int handler, int mode) = 0;
     virtual void OnRobotErrorEventReceived(int handler, int error) = 0;
     virtual void OnRobotMoveEventReceived(int handler, int move) = 0;
 

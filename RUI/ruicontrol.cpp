@@ -179,11 +179,13 @@ void Controller::on_start_toggled(bool checked)
     {
         m->SetImageOnOff(1);
         id = startTimer(20);
+        yolo::RobotControlManager::GetInstance().EnableStreaming(true);
     }
     else
     {
         m->SetImageOnOff(0);
         killTimer(id);
+        yolo::RobotControlManager::GetInstance().EnableStreaming(false);
     }
 }
 

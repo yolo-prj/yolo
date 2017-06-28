@@ -51,6 +51,8 @@ using namespace yolo;
 #define RBT_SIGN_RIGHT_PAN			(120)
 #define RBT_SIGN_LEFT_PAN			(180)
 
+#define RBT_SIGN_LEFT_TILT			(SERVO_CENTER_OR_STOP-2)
+
 CRobotMgr::CRobotMgr()
 {
 	
@@ -286,7 +288,7 @@ bool CRobotMgr::ChangeRobotTrackMode(E_RBT_TRACK_SUB mode)
 	break;
 	case RBT_TRACK_SIGN:
 		m_servo_ctrl.resetServo();
-		m_servo_ctrl.setCameraDirection(RBT_SIGN_RIGHT_PAN,SERVO_CENTER_OR_STOP);
+		m_servo_ctrl.setCameraDirection(RBT_SIGN_RIGHT_PAN,RBT_SIGN_LEFT_TILT);
 		
 		m_vision.ChangeVisionMode(VISION_SIGN,30);
 		m_signfailcount=0;
@@ -594,18 +596,18 @@ void CRobotMgr::onSignDetect(bool isdetected)
 		return;
 
 
-	m_signfailcount++;
 
 	right = RBT_SIGN_RIGHT_PAN-((m_signfailcount/2)*5);
 	left = RBT_SIGN_LEFT_PAN+(PAN_CAMERA_MIN-right);
 	
 
 	if (right>=PAN_CAMERA_MIN)
-		m_servo_ctrl.setCameraDirection(right,SERVO_CENTER_OR_STOP);
+		m_servo_ctrl.setCameraDirection(right,RBT_SIGN_LEFT_TILT);
 	else if (left<PAN_CAMERA_MAX)
-		m_servo_ctrl.setCameraDirection(left,SERVO_CENTER_OR_STOP);
+		m_servo_ctrl.setCameraDirection(left,RBT_SIGN_LEFT_TILT);
 	else
 		Assert_TrackMode(1);
+	m_signfailcount++;
 	this_thread::sleep(posix_time::millisec(100));
 
 #if 0
@@ -1367,5 +1369,5 @@ void CRobotMgr::DebugPrint(string message)
 	sendMsg.set("id", _id);
 	sendMsg.set("debug_info", message);
 	sendMsg.set("state", 0);
-	m_eventSender->send(sendMsg);
+//	m_eventSender->send(sendMsg);
 }

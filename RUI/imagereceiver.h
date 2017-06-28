@@ -31,6 +31,7 @@ private:
     std::shared_ptr<ImageReceiveListener> image_receive_listener_;
 
     int time_period_;
+    bool image_streaming_;
 
     class ImageMessageListener : public YNetworkMessageListener
     {

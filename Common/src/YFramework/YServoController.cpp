@@ -343,6 +343,18 @@ void YServoController::initPID()
 	pdi.Integral = 0.0;
 }
 
+void YServoController::initPID(double kp, double ki, double kd, double basespeed, double fudge) 
+{
+	pdi.LastErrorTime =getTimeMs();
+	pdi.Kp = kp;
+	pdi.Ki = ki;
+	pdi.Kd = kd;
+
+	pdi.BaseSpeed = basespeed;
+	pdi.SpeedFudgeFactor=fudge;
+	pdi.LastError = 0.0;
+	pdi.Integral = 0.0;
+}
 
 double YServoController::runPID(double ErrorIn) 
 {

@@ -72,6 +72,7 @@ public:
 
 	long getTimeMs(void);
 	void initPID() ;
+	void initPID(double kp, double ki, double kd, double basespeed, double fudge);
 	double runPID(double ErrorIn) ;
 
 	bool setServoPosition(ServoType type, int& position);

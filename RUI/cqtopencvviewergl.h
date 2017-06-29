@@ -12,6 +12,8 @@ class CQtOpenCVViewerGl : public QOpenGLWidget, protected QOpenGLFunctions_2_0
     Q_OBJECT
 public:
     explicit CQtOpenCVViewerGl(QWidget *parent = 0);
+    void showNoVideoImage();
+    void recalculatePosition(int width, int height);
 
 signals:
     void    imageSizeChanged( int outW, int outH ); /// Used to resize the image outside the widget

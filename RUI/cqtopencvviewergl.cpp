@@ -16,6 +16,8 @@ void CQtOpenCVViewerGl::initializeGL()
     float g = ((float)mBgColor.darker().green())/255.0f;
     float b = ((float)mBgColor.darker().blue())/255.0f;
     glClearColor(r,g,b,1.0f);
+
+    showNoVideoImage();
 }
 
 void CQtOpenCVViewerGl::resizeGL(int width, int height)
@@ -30,7 +32,7 @@ void CQtOpenCVViewerGl::resizeGL(int width, int height)
 
     glMatrixMode(GL_MODELVIEW);
 
-    recalculatePosition();
+    recalculatePosition(width, height);
 
     emit imageSizeChanged(mRenderWidth, mRenderHeight);
 
@@ -114,6 +116,27 @@ void CQtOpenCVViewerGl::recalculatePosition()
     mResizedImg = QImage();
 }
 
+void CQtOpenCVViewerGl::recalculatePosition(int width, int height)
+{
+    mImgRatio = (float)width/(float)height;
+
+    mRenderWidth = this->size().width() * this->devicePixelRatio();
+    mRenderHeight = floor(mRenderWidth / mImgRatio);
+
+    if (mRenderHeight > this->size().height() * this->devicePixelRatio())
+    {
+        mRenderHeight = this->size().height() * this->devicePixelRatio();
+        mRenderWidth = floor(mRenderHeight * mImgRatio);
+    }
+
+    mRenderPosX = floor((this->size().width() * this->devicePixelRatio() - mRenderWidth) / 2);
+    mRenderPosY = -floor((this->size().height() * this->devicePixelRatio() - mRenderHeight) / 2);
+    mRenderPosY = (mRenderPosY < -100) ? -100 : mRenderPosY;
+
+    mResizedImg = QImage();
+}
+
+
 bool CQtOpenCVViewerGl::showImage(const cv::Mat& image)
 {
 	drawMutex.lock();
@@ -134,4 +157,19 @@ bool CQtOpenCVViewerGl::showImage(const cv::Mat& image)
     updateScene();
 	drawMutex.unlock();
     return true;
+}
+
+void CQtOpenCVViewerGl::showNoVideoImage()
+{
+    drawMutex.lock();
+
+    QImage myImage;
+    myImage.load(":/new/prefix1/assets/no-video.jpg");
+
+    mRenderQtImg = myImage;
+
+    recalculatePosition(mRenderQtImg.width(), mRenderQtImg.height());
+
+    updateScene();
+    drawMutex.unlock();
 }

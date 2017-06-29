@@ -126,6 +126,8 @@ void Controller::RobotConnectionHandler(int status)
         ui->status_green->hide();
         ui->status_red->show();
         text = "Robot is disconnected!!!";
+
+        ui->openCVviewer->showNoVideoImage();
     }
     msgBox.setText(text);
     msgBox.exec();

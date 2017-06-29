@@ -89,7 +89,8 @@ void Controller::RobotErrorHandler(int error)
     msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
     msgBox.setDefaultButton(QMessageBox::Yes);
 
-    player.setMedia(QUrl::fromLocalFile("/usr/share/sounds/freedesktop/stereo/phone-incoming-call.oga"));
+    //player.setMedia(QUrl::fromLocalFile("/usr/share/sounds/freedesktop/stereo/phone-incoming-call.oga"));
+    player.setMedia(QUrl::fromLocalFile("alarm.oga"));
     player.setVolume(50);
     player.play();
 
@@ -204,7 +205,7 @@ void Controller::timerEvent(QTimerEvent *event)
 
     if(m->IsEmpty())
     {
-        qDebug() << "No Data";
+        //qDebug() << "No Data";
         return;
     }
 

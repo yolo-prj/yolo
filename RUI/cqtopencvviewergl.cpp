@@ -65,6 +65,7 @@ void CQtOpenCVViewerGl::renderImage()
 
         glPushMatrix();
         {
+
             if (mResizedImg.width() <= 0)
             {
                 if (mRenderWidth == mRenderQtImg.width() && mRenderHeight == mRenderQtImg.height())
@@ -97,17 +98,18 @@ void CQtOpenCVViewerGl::recalculatePosition()
 {
     mImgRatio = (float)mOrigImage.cols/(float)mOrigImage.rows;
 
-    mRenderWidth = this->size().width();
+    mRenderWidth = this->size().width() * this->devicePixelRatio();
     mRenderHeight = floor(mRenderWidth / mImgRatio);
 
-    if (mRenderHeight > this->size().height())
+    if (mRenderHeight > this->size().height() * this->devicePixelRatio())
     {
-        mRenderHeight = this->size().height();
+        mRenderHeight = this->size().height() * this->devicePixelRatio();
         mRenderWidth = floor(mRenderHeight * mImgRatio);
     }
 
-    mRenderPosX = floor((this->size().width() - mRenderWidth) / 2);
-    mRenderPosY = -floor((this->size().height() - mRenderHeight) / 2);
+    mRenderPosX = floor((this->size().width() * this->devicePixelRatio() - mRenderWidth) / 2);
+    mRenderPosY = -floor((this->size().height() * this->devicePixelRatio() - mRenderHeight) / 2);
+    mRenderPosY = (mRenderPosY < -100) ? -100 : mRenderPosY;
 
     mResizedImg = QImage();
 }

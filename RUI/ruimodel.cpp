@@ -156,7 +156,7 @@ int RUIModel::PushImage(cv::Mat &&image)
 cv::Mat RUIModel::GetImage()
 {
     std::lock_guard<std::mutex> lock(image_mutex_);
-    qDebug() << "GetImage() : " << image_queue_.size();
+    //qDebug() << "GetImage() : " << image_queue_.size();
 
     if(image_queue_.size() == 0)
     {

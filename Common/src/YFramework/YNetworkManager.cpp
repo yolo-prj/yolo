@@ -463,8 +463,10 @@ YNetworkManager::onReceiveDatagram(string remoteaddr, ushort port, byte* data, u
     {
 	// call-back data receive
 	// Heartbeat
-	if(_heartbeat != nullptr)
-	    _heartbeat->receivedHeartbeat(remoteaddr, port, data, length);
+	if(_heartbeat != nullptr) {
+	    if(remoteaddr == _hbPeerAddr && port == _hbPeerPort)
+		_heartbeat->receivedHeartbeat(remoteaddr, port, data, length);
+	}
     }
 }
 

@@ -4,6 +4,7 @@
 #include <QMessageBox>
 #include <QCloseEvent>
 #include <QMediaPlayer>
+#include <QSound>
 #include "robotcontrolmanager.h"
 #include "robotmovement.h"
 
@@ -66,7 +67,7 @@ void Controller::RobotErrorHandler(int error)
 {
     QMessageBox msgBox;
     QString text;
-    QMediaPlayer player;
+    //QMediaPlayer player;
 
     msgBox.setText("Autonomous mode is failed!!! Do you want to change Manual mode? ");
 
@@ -90,10 +91,8 @@ void Controller::RobotErrorHandler(int error)
     msgBox.setDefaultButton(QMessageBox::Yes);
 
     //player.setMedia(QUrl::fromLocalFile("/usr/share/sounds/freedesktop/stereo/phone-incoming-call.oga"));
-    player.setMedia(QUrl::fromLocalFile("alarm.oga"));
-    player.setVolume(50);
+    QSound player(":/new/prefix1/assets/boing_x.wav");
     player.play();
-
 
     if(msgBox.exec() == QMessageBox::Yes)
     {

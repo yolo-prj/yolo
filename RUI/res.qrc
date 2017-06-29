@@ -11,5 +11,6 @@
         <file>assets/arrowS.png</file>
         <file>assets/arrowPush.png</file>
         <file>assets/arrowB.png</file>
+        <file>assets/boing_x.wav</file>
     </qresource>
 </RCC>

@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QCloseEvent>
+#include <QMediaPlayer>
 #include "robotcontrolmanager.h"
 #include "robotmovement.h"
 
@@ -65,6 +66,7 @@ void Controller::RobotErrorHandler(int error)
 {
     QMessageBox msgBox;
     QString text;
+    QMediaPlayer player;
 
     msgBox.setText("Autonomous mode is failed!!! Do you want to change Manual mode? ");
 
@@ -86,12 +88,19 @@ void Controller::RobotErrorHandler(int error)
     msgBox.setInformativeText(text);
     msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
     msgBox.setDefaultButton(QMessageBox::Yes);
+
+    player.setMedia(QUrl::fromLocalFile("/usr/share/sounds/freedesktop/stereo/phone-incoming-call.oga"));
+    player.setVolume(50);
+    player.play();
+
+
     if(msgBox.exec() == QMessageBox::Yes)
     {
         // change to manual mode
         m->SetRobotMode(RobotMode::MANUAL_MODE);
         ui->manual->setChecked(true);
         ui->auto_2->setChecked(false);
+        player.stop();
     }
 }
 
@@ -139,7 +148,7 @@ void Controller::RobotInvalidDisconnectionHandler(int status)
         ui->status_yellow->hide();
         ui->status_green->show();
         msgBox.setText("Network connection is re-established!!!");
-
+        m->SetRobotMode(RobotMode::MANUAL_MODE);
     }
     else
     {

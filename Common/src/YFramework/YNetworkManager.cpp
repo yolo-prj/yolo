@@ -386,9 +386,9 @@ YNetworkManager::onReceiveData(YTcpSession& session)
 	    if(info.buffer == NULL)
 	    {
 		//info.buffer = new byte[msgLength];
-		boost::shared_ptr<byte[]> newptr = boost::make_shared<byte[]>(msgLength);
+        boost::shared_ptr<byte[]> newptr = boost::make_shared<byte[]>(msgLength+1024);
 		info.buffer = newptr;
-		memset(info.buffer.get(), 0, msgLength);
+        memset(info.buffer.get(), 0, msgLength+1024);
 	    }	    
 	    memcpy(info.buffer.get(), info.msgHeader.get(), msgHeaderSize);
 

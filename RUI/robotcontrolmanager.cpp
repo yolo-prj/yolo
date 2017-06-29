@@ -249,9 +249,8 @@ void RobotControlManager::NetworkEventListener::onTcpClientConnected(int handle,
     qDebug() << "tcp client connected : " << handle << ", "<< addr.c_str() << ", " << port;
 
     robot_controller_manager_->AddController(handle, addr, port);
-    robot_controller_manager_->event_listener_->OnRobotConnected(handle);
-
     robot_controller_manager_->SendFirstConfig(handle);
+    robot_controller_manager_->event_listener_->OnRobotConnected(handle);
 }
 
 void RobotControlManager::NetworkEventListener::onTcpClientDisconnected(int handle, string addr, ushort port)

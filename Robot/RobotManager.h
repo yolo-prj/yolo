@@ -63,13 +63,13 @@ using namespace cv;
 #define OP_SEND_DEBUG               1300
 
 
-#define RBT_SIGN_RIGHT_PAN			(120)
-#define RBT_SIGN_LEFT_PAN			(180)
+#define RBT_SIGN_RIGHT_PAN			(110)
+#define RBT_SIGN_LEFT_PAN			(120)
 
 #define RBT_SIGN_LEFT_TILT			(SERVO_CENTER_OR_STOP-2)
 
 
-#if 0
+#if 1
 
 #define RBT_AUTO_SPEED				(10)
 #define TRK_LINE_CAM_PAN	156
@@ -194,6 +194,8 @@ public:
 
 
 	void DebugPrint(string message);
+	void SendModeChangeEvt(int type);
+	void SendMoveEvt(int type);
 
 	
 	
@@ -255,8 +257,13 @@ private:
 	int m_unrecognization;
 	Point m_average[5];
 	int m_averageindex;
-	bool m_bRedbarDiscard;
+	int m_bRedbarDiscard;
 ///////
+	bool m_bRedBar;
+	Rect m_redbar;
+	int m_redcount;
+
+
 
     vector<int>		m_image_param;
     vector<byte>	m_image_buffer;

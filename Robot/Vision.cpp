@@ -119,16 +119,13 @@ void CVision::SetCameraParam(int width, int height, Rect track_region)
 
 void CVision::ChangeVisionMode(E_VISION_MODE mode,int refresh_rate)
 {
-	if (m_vision_mode == mode)
+	if (m_vision_mode == mode && m_vision_thread.get_id() !=  thread::id() )
 		return;
 	Stop_Vision();
 	m_vision_mode = mode;
 	if (mode != VISION_STOP)
 		Start_Vision(mode, refresh_rate, TIMER_ID);
 }
-
-
-
 
 
 void CVision::Start_Vision(E_VISION_MODE mode, int msec, int timer_id)
@@ -307,7 +304,7 @@ void CVision::RecogTrack(Mat & camimage, Rect rect)
 
 */
 
-	cout<<"<< Line >>"<< detectline.size() <<" "<<stopbar.size()<<" "<<directtion_circle.size()<<endl;
+//	cout<<"<< Line >>"<< detectline.size() <<" "<<stopbar.size()<<" "<<directtion_circle.size()<<endl;
 
 	if (m_vision_interface)
 		lastline = m_vision_interface->onLineDetect(detectline);
@@ -327,8 +324,8 @@ void CVision::RecogTrack(Mat & camimage, Rect rect)
 	{
 		if (stopbar[i].width > 400)
 			rectangle(camimage, stopbar[i], cv::Scalar(20,200,20),2); 
-		if ((stopbar[i].width > 90) && (stopbar[i].width < 200))
-			circle(camimage, Point(stopbar[i].x+stopbar[i].width/2, stopbar[i].y+stopbar[i].height/2),stopbar[i].width/2, cv::Scalar(20,20,200),2); 
+//		if ((stopbar[i].width > 90) && (stopbar[i].width < 200))
+//			circle(camimage, Point(stopbar[i].x+stopbar[i].width/2, stopbar[i].y+stopbar[i].height/2),stopbar[i].width/2, cv::Scalar(20,20,200),2); 
 	}
 
 //	for(i = 0; i<directtion_circle.size();i++)	 

@@ -34,10 +34,10 @@ CRobotMgr::CRobotMgr(YNetworkManager* manager, string msgFormatFile)
 	m_current_status = RBT_STOP_ST;
 
 
-	m_trackregion = Rect(10, 2*RBT_CAM_HEIGHT/3, RBT_CAM_WIDTH-20, RBT_CAM_HEIGHT/12);
+	m_trackregion = Rect(10, 2*RBT_CAM_HEIGHT/3, RBT_CAM_WIDTH-20, RBT_CAM_HEIGHT/14);
 	m_vision.SetCameraParam(RBT_CAM_WIDTH,RBT_CAM_HEIGHT, m_trackregion);
 	m_vision.ChangeVisionMode(VISION_STOP,50);
-	m_lasttrack=Rect(m_trackregion.x + (m_trackregion.width-LINE_WIDTH),m_trackregion.y,LINE_WIDTH*2,m_trackregion.height);
+	m_lasttrack=Rect(m_trackregion.x + (m_trackregion.width/2-LINE_WIDTH),m_trackregion.y,LINE_WIDTH*2,m_trackregion.height);
 
 	m_unrecognization = 0;
 	m_track_direction = RBT_STRAIGHT;
@@ -70,7 +70,7 @@ CRobotMgr::CRobotMgr(YNetworkManager* manager, string msgFormatFile)
 
 	m_bImagesend = true;
 	
-	m_bRedbarDiscard=false;
+	m_bRedbarDiscard=0;
 
     // fix below for the msg interfaces
     manager->addNetworkMessageListener(OP_RECV_MOVE_CNTR_FORWARD, m_cmdReceiver);
@@ -158,6 +158,7 @@ bool CRobotMgr::ChangeRobotMode(E_RBT_MODE mode)
 
 
 	m_vision.Stop_Vision();
+	m_current_mode = mode;
 
 	switch (mode)
 	{
@@ -165,6 +166,8 @@ bool CRobotMgr::ChangeRobotMode(E_RBT_MODE mode)
 		m_servo_ctrl.resetServo();
 		m_vision.ChangeVisionMode(VISION_SURVEAIL,30);
 		DebugPrint("<<Normal Mode>>");
+		SendMoveEvt(7);
+		SendModeChangeEvt(2);
 	break;
 	case RBT_TRACK_MODE:
  		
@@ -176,10 +179,13 @@ bool CRobotMgr::ChangeRobotMode(E_RBT_MODE mode)
 		m_servo_ctrl.initPID(KP, KI, KD, RBT_AUTO_SPEED, BASESPEEDFUDGEFACTOR) ;
 
 		m_unrecognization = 0;
-		m_bRedbarDiscard=false;
+		m_bRedbarDiscard=0;
+		m_redcount = 0;
 
+		m_bRedBar = false;
+		m_redbar = Rect(0,0,0,0);
 
-		m_lasttrack=Rect(m_trackregion.x + (m_trackregion.width-LINE_WIDTH),m_trackregion.y,LINE_WIDTH*2,m_trackregion.height);
+		m_lasttrack=Rect(m_trackregion.x + (m_trackregion.width/2-LINE_WIDTH),m_trackregion.y,LINE_WIDTH*2,m_trackregion.height);
 		m_lastx = m_trackregion.x + m_trackregion.width/2;
 
 		m_track_sub = RBT_TRACK_AUTO;
@@ -191,24 +197,26 @@ bool CRobotMgr::ChangeRobotMode(E_RBT_MODE mode)
 
 		m_vision.ChangeVisionMode(VISION_TRACK,10);
 		
+		SendModeChangeEvt(1);		
 		DebugPrint("<<Autonomous Mode>>");
+		SendMoveEvt(1);
 		DebugPrint(string(": Robot Movement : STRAIGHT"));
-		
 	break;
 	case RBT_SUSPEND_MODE:
 		m_servo_ctrl.resetServo();
 		m_vision.ChangeVisionMode(VISION_STOP,30);
 		DebugPrint("<<Suspend Mode>>");
+		SendModeChangeEvt(3);		
 	break;
 
 	default:
 		m_current_mode = RBT_NORMAL_MODE;
 		m_servo_ctrl.resetServo();
 		m_vision.ChangeVisionMode(VISION_SURVEAIL,30);
+		SendModeChangeEvt(3);		
 	break;
 	}
 
-	m_current_mode = mode;
 	
 }
 
@@ -231,6 +239,8 @@ bool CRobotMgr::ChangeRobotTrackMode(E_RBT_TRACK_SUB mode)
 		m_automode_thread.join();
 	}
 
+	m_vision.Stop_Vision();
+
 	m_track_sub = mode;
 	switch (mode)
 	{
@@ -238,11 +248,18 @@ bool CRobotMgr::ChangeRobotTrackMode(E_RBT_TRACK_SUB mode)
 		m_servo_ctrl.setCameraDirection(TRK_LINE_CAM_PAN,TRK_LINE_CAM_TILT);
 		m_servo_ctrl.setWheelSpeed(ENUM_SERVO_LEFT_WHEEL, 0);
 		m_servo_ctrl.setWheelSpeed(ENUM_SERVO_RIGHT_WHEEL, 0);
-		this_thread::sleep(posix_time::millisec(500));
+		this_thread::sleep(posix_time::millisec(200));
 
 		m_servo_ctrl.initPID(KP, KI, KD, RBT_AUTO_SPEED, BASESPEEDFUDGEFACTOR) ;
 
 		m_unrecognization = 0;
+
+		m_bRedBar = false;
+		m_redbar = Rect(0,0,0,0);
+		m_redcount = 0;
+
+
+
 //		m_lasttrack=Rect(m_trackregion.x + (m_trackregion.width-LINE_WIDTH),m_trackregion.y,LINE_WIDTH*2,m_trackregion.height);
 //		m_lastx = m_trackregion.x + m_trackregion.width/2;
 		
@@ -250,6 +267,9 @@ bool CRobotMgr::ChangeRobotTrackMode(E_RBT_TRACK_SUB mode)
 			m_average[i]=Point(0,0);
 		m_averageindex = 0;
 		m_vision.ChangeVisionMode(VISION_TRACK,10);
+		if (m_track_direction == RBT_STRAIGHT) 		SendMoveEvt(1);
+		if (m_track_direction == RBT_LEFT) 		SendMoveEvt(3);
+		if (m_track_direction == RBT_RIGHT) 		SendMoveEvt(2);
 		if (m_track_direction == RBT_STRAIGHT) 		DebugPrint(string(": Robot Movement : STRAIGHT"));
 		if (m_track_direction == RBT_LEFT) 		DebugPrint(string(": Robot Movement : LEFT"));
 		if (m_track_direction == RBT_RIGHT) 		DebugPrint(string(": Robot Movement : RIGHT"));
@@ -269,26 +289,29 @@ bool CRobotMgr::ChangeRobotTrackMode(E_RBT_TRACK_SUB mode)
 	case RBT_TRACK_AVOIDCAN:
 		m_vision.ChangeVisionMode(VISION_SURVEAIL,30);
 		m_servo_ctrl.setCameraDirection(TRK_LINE_CAM_PAN,TRK_LINE_CAM_TILT);
-		m_lasttrack=Rect(m_trackregion.x ,m_trackregion.y, LINE_WIDTH*2, m_trackregion.height);
+		m_lasttrack=Rect(m_trackregion.x ,m_trackregion.y, LINE_WIDTH*3, m_trackregion.height);
 		m_lastx = m_trackregion.x + m_lasttrack.width/2;
 		m_automode_thread = thread(&CRobotMgr::AvoidCanThread, this,6);
+		SendMoveEvt(5);
 		DebugPrint(string(": Robot Movement : AVOIDING CAN"));
 
 	break;
 	case RBT_TRACK_PUSHCAN:
 		m_vision.ChangeVisionMode(VISION_SURVEAIL,30);
 		m_servo_ctrl.setCameraDirection(TRK_LINE_CAM_PAN,TRK_LINE_CAM_TILT);
-		m_lasttrack=Rect(m_trackregion.x ,m_trackregion.y, LINE_WIDTH*2, m_trackregion.height);
+		m_lasttrack=Rect(m_trackregion.x ,m_trackregion.y, LINE_WIDTH*3, m_trackregion.height);
 		m_lastx = m_trackregion.x + m_lasttrack.width/2;
 		m_automode_thread = thread(&CRobotMgr::PushCanThread, this,6);
+		SendMoveEvt(6);
 		DebugPrint(string(": Robot Movement : PUSHING CAN"));
 	break;
 	case RBT_TRACK_TURN:
 		m_vision.ChangeVisionMode(VISION_SURVEAIL,30);
 		m_servo_ctrl.setCameraDirection(TRK_LINE_CAM_PAN,TRK_LINE_CAM_TILT);
-		m_lasttrack=Rect(m_trackregion.x ,m_trackregion.y, LINE_WIDTH*2, m_trackregion.height);
+		m_lasttrack=Rect(m_trackregion.x ,m_trackregion.y, LINE_WIDTH*3, m_trackregion.height);
 		m_lastx = m_trackregion.x + m_lasttrack.width/2;
 		m_automode_thread = thread(&CRobotMgr::AutoTurnAroundThread, this,6);
+		SendMoveEvt(4);
 		DebugPrint(string(": Robot Movement : U-TURN"));
 	break;
 	default:
@@ -417,7 +440,12 @@ Rect CRobotMgr::SelectPath(vector<Rect> & linelist,vector<Rect> & eliminated_lin
 //	{
 
 		if (newregion.width < LINE_WIDTH)
+		{
 			newposition = newregion.x + newregion.width/2;
+
+			newregion.x = newposition- LINE_WIDTH/2;
+			newregion.width = LINE_WIDTH;
+		}
 		else if ( (newposition-LINE_WIDTH/2) < newregion.x)
 			newposition-=(newposition-LINE_WIDTH/2) - newregion.x;
 		else if ( (newposition+LINE_WIDTH/2) > newregion.br().x)
@@ -532,7 +560,7 @@ void CRobotMgr::Assert_TrackMode(int error)
 
 long CRobotMgr::getPassTime(timespec StartTime, timespec CurrentTime)
 {
-	long StartTime_ms, CurrentTime_ms;
+	long long StartTime_ms, CurrentTime_ms;
 
 	StartTime_ms = StartTime.tv_sec * 1000 + (StartTime.tv_nsec /1000000);
 	CurrentTime_ms = CurrentTime.tv_sec * 1000 + (CurrentTime.tv_nsec /1000000);
@@ -578,28 +606,28 @@ bool CRobotMgr::AvoidCanThread(int velocity)
 				case 1:
 					clock_gettime(CLOCK_REALTIME, &currentTime);
 				
-					if(getPassTime(stratTime, currentTime) > 320)
+					if(getPassTime(stratTime, currentTime) > 220)
 					{
 						clock_gettime(CLOCK_REALTIME, &stratTime);
 						step++;
 					}
 					else
 					{
-						TurnRight(6);
+						TurnRight(12);
 					}
 				
 					break;
 				case 2:
 					clock_gettime(CLOCK_REALTIME, &currentTime);
 		
-					if(getPassTime(stratTime, currentTime) > 1000)
+					if(getPassTime(stratTime, currentTime) > 650)
 					{
 						clock_gettime(CLOCK_REALTIME, &stratTime);
 						step++;
 					}
 					else
 					{
-						MoveForward(6);
+						MoveForward(12);
 					}
 		
 					break;
@@ -607,17 +635,17 @@ bool CRobotMgr::AvoidCanThread(int velocity)
 				case 3:
 					clock_gettime(CLOCK_REALTIME, &currentTime);
 		
-					if(getPassTime(stratTime, currentTime) > 4000)
+					if(getPassTime(stratTime, currentTime) > 2700)
 					{
 						clock_gettime(CLOCK_REALTIME, &stratTime);
 						step++;
 					}
 					else
 					{
-						if(getPassTime(stratTime, currentTime) > 3000)
+						if(getPassTime(stratTime, currentTime) > 1700)
 							m_vision.ChangeVisionMode(VISION_TRACK,10);
-						m_servo_ctrl.setWheelSpeed(ENUM_SERVO_LEFT_WHEEL, 2);
-						m_servo_ctrl.setWheelSpeed(ENUM_SERVO_RIGHT_WHEEL, 6);
+						m_servo_ctrl.setWheelSpeed(ENUM_SERVO_LEFT_WHEEL, 3);
+						m_servo_ctrl.setWheelSpeed(ENUM_SERVO_RIGHT_WHEEL, 12);
 					}
 		
 					break;
@@ -670,28 +698,28 @@ bool CRobotMgr::PushCanThread(int velocity)
 			{
 				case 0:
 					clock_gettime(CLOCK_REALTIME, &currentTime);
-					if(getPassTime(stratTime, currentTime) > 2000)
+					if(getPassTime(stratTime, currentTime) > 1200)
 					{
 						clock_gettime(CLOCK_REALTIME, &stratTime);
 						step++;
 					}
 					else
 					{
-						MoveForward(6);
+						MoveForward(12);
 					}
 		
 					break;
 				case 1:
 					clock_gettime(CLOCK_REALTIME, &currentTime);
-					if(getPassTime(stratTime, currentTime) > 2000)
+					if(getPassTime(stratTime, currentTime) > 1000)
 					{
 						clock_gettime(CLOCK_REALTIME, &stratTime);
 						step++;
-						AutoTurnAroundThread(6);
+						AutoTurnAroundThread(12);
 					}
 					else
 					{
-						MoveBackward(6);
+						MoveBackward(12);
 					}
 					break;
 		
@@ -720,6 +748,7 @@ bool CRobotMgr::AutoTurnAroundThread(int velocity)
 	timespec stratTime , currentTime;
 
 	clock_gettime(CLOCK_REALTIME, &stratTime);
+	cout<<"turn around"<<endl;
 	try{
 		while(step < 2)
 		{
@@ -729,28 +758,32 @@ bool CRobotMgr::AutoTurnAroundThread(int velocity)
 				case 0:
 					clock_gettime(CLOCK_REALTIME, &currentTime);
 					
-					if(getPassTime(stratTime, currentTime) > 1000)
+					if(getPassTime(stratTime, currentTime) > 000)
 					{
+						clock_gettime(CLOCK_REALTIME, &stratTime);
+						cout<<"turn 0 end"<<endl;
 						step++;
 					}
 					else
 					{
-						MoveForward(6);
+						MoveForward(12);
 					}
 		
 					break;
 				case 1:
 					clock_gettime(CLOCK_REALTIME, &currentTime);
 
-					if(getPassTime(stratTime, currentTime) > 3500)
+					if(getPassTime(stratTime, currentTime) > 800)
+						m_vision.ChangeVisionMode(VISION_TRACK,10);
+
+					if(getPassTime(stratTime, currentTime) > 1500)
 					{
+						cout<<"turn 2 end"<<endl;
 						step++;
 					}
 					else
 					{
-						if(getPassTime(stratTime, currentTime) > 2000)
-							m_vision.ChangeVisionMode(VISION_TRACK,10);
-						TurnLeft(6);
+						TurnLeft(12);
 					}
 				
 					break;
@@ -767,6 +800,7 @@ bool CRobotMgr::AutoTurnAroundThread(int velocity)
 	catch(thread_interrupted &)
 	{
 		m_servo_ctrl.setWheelSpeed(ENUM_SERVO_LEFT_WHEEL, 0);
+		cout<<"turn interrupted end"<<endl;
 		m_servo_ctrl.setWheelSpeed(ENUM_SERVO_RIGHT_WHEEL, 0);
 	}
 
@@ -790,13 +824,13 @@ bool CRobotMgr::TurnAroundThread(int velocity)
 				case 0:
 					clock_gettime(CLOCK_REALTIME, &currentTime);
 					
-					if(getPassTime(stratTime, currentTime) > 2000)
+					if(getPassTime(stratTime, currentTime) > 1350)
 					{
 						step++;
 					}
 					else
 					{
-						TurnLeft(6);
+						TurnLeft(12);
 					}
 		
 					break;
@@ -965,7 +999,7 @@ void CRobotMgr::onSignDetect(bool isdetected)
 	else
 		Assert_TrackMode(1);
 	m_signfailcount++;
-	this_thread::sleep(posix_time::millisec(100));
+	this_thread::sleep(posix_time::millisec(50));
 
 #if 0
 
@@ -1013,7 +1047,13 @@ Rect CRobotMgr::onLineDetect(vector<Rect> & linelist)
 				m_unrecognization++;
 				cout <<"no track "<< m_unrecognization<< " " << linelist.size()<<endl;
 				if (m_unrecognization>3)
+				{
+					m_lasttrack=Rect(m_trackregion.x ,m_trackregion.y,m_trackregion.width,m_trackregion.height);
+					m_lastx = m_trackregion.x + m_trackregion.width/2;
+				}
+				if (m_unrecognization>6)
 					Assert_TrackMode(3);
+					
 				return Rect(0,0,0,0);
 			}
 			else if (linelist.size() > 0)
@@ -1024,6 +1064,7 @@ Rect CRobotMgr::onLineDetect(vector<Rect> & linelist)
 				m_lastx = dest_pt;
 			}
 
+			cout<<"<< Line >>"<< linelist.size() <<" "<<templist.size()<<endl;
 
 
 			offsetfromcenter=1.0f - 2.0f*(float)m_lastx/(float)RBT_CAM_WIDTH;
@@ -1092,42 +1133,62 @@ Rect CRobotMgr::onStopBar(vector<Rect> & linelist)
 
 	if (linelist.size() < 1)
 	{
-		m_bRedbarDiscard=false;
+		if (m_redcount>=2 && m_bRedBar && !m_bRedbarDiscard && m_redbar.x != 0)
+		{
+			if ((m_redbar.x + m_redbar.width/2) < m_lastx-(LINE_WIDTH)/2)
+			{
+				cout<<" L "<<m_lasttrack<<" : "<<m_redbar<<endl;
+				SendMoveEvt(3);
+				DebugPrint(string(": Track dot : LEFT DOT"));
+				m_track_direction=RBT_LEFT;
+			}
+			if ((m_redbar.x + m_redbar.width/2) > m_lastx+(LINE_WIDTH)/2)
+			{
+				cout<<" R "<<m_lasttrack<<" : "<<m_redbar<<endl;
+				SendMoveEvt(2);
+				DebugPrint(string(": Track dot : RIGHT DOT"));
+				m_track_direction=RBT_RIGHT;
+			}
+		}
+		m_redcount=0;
+		m_bRedBar = false;
+		m_redbar=Rect(0,0,0,0);
+		if (m_bRedbarDiscard >0)
+			m_bRedbarDiscard--;
 		return Rect(0,0,0,0);
 	}
 	if (m_bRedbarDiscard)
 	{
 		return Rect(0,0,0,0);
 	}
+
+	m_bRedBar = true;
 	
+	m_redcount++;
+	cout<<"<< Red >>"<< linelist.size() <<endl;
 	for (i=0; i< linelist.size(); i++)
 	{
-		if (linelist[i].width<200 && linelist[i].width>90)
+		cout<<" all "<<m_lasttrack<<" : "<<linelist[i]<<endl;
+		if (((m_lasttrack&linelist[i]).width > 50 && m_redcount>2)|| (linelist[i].width>400))
 		{
-			if ((linelist[i].x + linelist[i].width/2) < m_lastx-(LINE_WIDTH)/2)
-			{
-				DebugPrint(string(": Track dot : LEFT DOT"));
-				m_track_direction=RBT_LEFT;
-			}
-			if ((linelist[i].x + linelist[i].width/2) > m_lastx+(LINE_WIDTH)/2)
-			{
-				DebugPrint(string(": Track dot : RIGHT DOT"));
-				m_track_direction=RBT_RIGHT;
-			}
-		}
-		else if (linelist[i].width>400)
-		{
-//			m_servo_ctrl.setWheelSpeed(ENUM_SERVO_LEFT_WHEEL, 5);
-//			m_servo_ctrl.setWheelSpeed(ENUM_SERVO_RIGHT_WHEEL, 5);
-//			this_thread::sleep(posix_time::millisec(300));
-			m_bRedbarDiscard=true;
+			m_bRedbarDiscard=5;
 			DebugPrint(string(": Track bar : STOP"));
 			CreateTrackModeThread(RBT_TRACK_SIGN);
 			return linelist[i];
 		}
+		else if (linelist[i].width<150 && linelist[i].width>90)
+		{
+			if (m_redbar.x == 0)
+				m_redbar=linelist[i];
+			m_redbar = m_redbar|linelist[i];
+			cout<<" Red dot "<<linelist[i]<<" : "<<m_redbar<<endl;
+		
+		}
+
 	}
 
 	
+	return Rect(0,0,0,0);
 }
 
 
@@ -1261,12 +1322,6 @@ void CRobotMgr::onReceiveCommand(YMessage msg)
 			break;
 		}
 
-		sendMsg = m_parser->getMessage(OP_SEND_MODE);
-		sendMsg.setOpcode(OP_SEND_MODE);
-		sendMsg.set("id", _id);
-		sendMsg.set("event", "mode_changed");
-		sendMsg.set("state", msg.getInt("state"));
-		m_eventSender->send(sendMsg);
 	break;
 
 	case OP_RECV_IMAGE_SEND:
@@ -1333,11 +1388,40 @@ void CRobotMgr::DebugPrint(string message)
 
 	if (_id == 0)
 		return;
-	
+	cout<<message<<endl;
 	sendMsg = m_parser->getMessage(OP_SEND_DEBUG);
 	sendMsg.setOpcode(OP_SEND_DEBUG);
 	sendMsg.set("id", _id);
 	sendMsg.set("debug_info", message);
 	sendMsg.set("state", 0);
-//	m_eventSender->send(sendMsg);
+	m_eventSender->send(sendMsg);
 }
+
+
+void CRobotMgr::SendModeChangeEvt(int type)
+{
+	YMessage sendMsg;
+
+	sendMsg = m_parser->getMessage(OP_SEND_MODE);
+	sendMsg.setOpcode(OP_SEND_MODE);
+	sendMsg.set("id", _id);
+	sendMsg.set("event", "mode_changed");
+	sendMsg.set("state", type);
+	m_eventSender->send(sendMsg);
+
+}
+
+
+void CRobotMgr::SendMoveEvt(int type)
+{
+	YMessage sendMsg;
+
+	sendMsg = m_parser->getMessage(OP_SEND_MODE);
+	sendMsg.setOpcode(OP_SEND_MODE);
+	sendMsg.set("id", _id);
+	sendMsg.set("event", "move_event");
+	sendMsg.set("state", type);
+	m_eventSender->send(sendMsg);
+
+}
+

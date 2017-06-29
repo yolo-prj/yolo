@@ -171,10 +171,11 @@ bool CRobotMgr::ChangeRobotMode(E_RBT_MODE mode)
 	break;
 	case RBT_TRACK_MODE:
  		
+		StopManualMove();
 		m_servo_ctrl.setCameraDirection(TRK_LINE_CAM_PAN,TRK_LINE_CAM_TILT);
 		m_servo_ctrl.setWheelSpeed(ENUM_SERVO_LEFT_WHEEL, 0);
 		m_servo_ctrl.setWheelSpeed(ENUM_SERVO_RIGHT_WHEEL, 0);
-		this_thread::sleep(posix_time::millisec(600));
+//		this_thread::sleep(posix_time::millisec(600));
 		
 		m_servo_ctrl.initPID(KP, KI, KD, RBT_AUTO_SPEED, BASESPEEDFUDGEFACTOR) ;
 
@@ -248,7 +249,7 @@ bool CRobotMgr::ChangeRobotTrackMode(E_RBT_TRACK_SUB mode)
 		m_servo_ctrl.setCameraDirection(TRK_LINE_CAM_PAN,TRK_LINE_CAM_TILT);
 		m_servo_ctrl.setWheelSpeed(ENUM_SERVO_LEFT_WHEEL, 0);
 		m_servo_ctrl.setWheelSpeed(ENUM_SERVO_RIGHT_WHEEL, 0);
-		this_thread::sleep(posix_time::millisec(200));
+//		this_thread::sleep(posix_time::millisec(200));
 
 		m_servo_ctrl.initPID(KP, KI, KD, RBT_AUTO_SPEED, BASESPEEDFUDGEFACTOR) ;
 
@@ -600,6 +601,7 @@ bool CRobotMgr::AvoidCanThread(int velocity)
 					else
 					{
 						TurnRight(2);
+						this_thread::sleep(posix_time::millisec(1));
 					}
 					break;
 		
@@ -614,13 +616,14 @@ bool CRobotMgr::AvoidCanThread(int velocity)
 					else
 					{
 						TurnRight(12);
+						this_thread::sleep(posix_time::millisec(1));
 					}
 				
 					break;
 				case 2:
 					clock_gettime(CLOCK_REALTIME, &currentTime);
 		
-					if(getPassTime(stratTime, currentTime) > 650)
+					if(getPassTime(stratTime, currentTime) > 700)
 					{
 						clock_gettime(CLOCK_REALTIME, &stratTime);
 						step++;
@@ -628,6 +631,7 @@ bool CRobotMgr::AvoidCanThread(int velocity)
 					else
 					{
 						MoveForward(12);
+						this_thread::sleep(posix_time::millisec(1));
 					}
 		
 					break;
@@ -646,6 +650,7 @@ bool CRobotMgr::AvoidCanThread(int velocity)
 							m_vision.ChangeVisionMode(VISION_TRACK,10);
 						m_servo_ctrl.setWheelSpeed(ENUM_SERVO_LEFT_WHEEL, 3);
 						m_servo_ctrl.setWheelSpeed(ENUM_SERVO_RIGHT_WHEEL, 12);
+						this_thread::sleep(posix_time::millisec(1));
 					}
 		
 					break;
@@ -660,13 +665,13 @@ bool CRobotMgr::AvoidCanThread(int velocity)
 					else
 					{
 						MoveForward(6);
+						this_thread::sleep(posix_time::millisec(1));
 					}
 					break;
 		
 				default:
 					break;
 			}
-			this_thread::sleep(posix_time::millisec(1));
 		}
 	}
 	
@@ -934,11 +939,16 @@ bool CRobotMgr::ManualMoveThread(E_RBT_MANUAL_MOVE move)
 
 bool CRobotMgr::CreateManualMove(E_RBT_MANUAL_MOVE move)
 {
+	if (m_current_mode != RBT_NORMAL_MODE)
+		return false;
+
 	StopManualMove();
 	if (move ==  RBT_MAN_TURN)
 		m_manual_thread = thread(&CRobotMgr::TurnAroundThread,this,6);
 	else
 		m_manual_thread = thread(&CRobotMgr::ManualMoveThread,this,move);
+
+	return true;
 }
 bool CRobotMgr::StopManualMove()
 {
@@ -947,6 +957,8 @@ bool CRobotMgr::StopManualMove()
 		m_manual_thread.interrupt();
 		m_manual_thread.join();
 	}
+
+	return true;
 }
 
 
@@ -1196,6 +1208,8 @@ void CRobotMgr::onSignAction(int id, string action)
 {
 
 	cout <<"OnSignAction "<<action<<" " << id<<endl;
+	m_servo_ctrl.setCameraDirection(TRK_LINE_CAM_PAN,TRK_LINE_CAM_TILT);
+	this_thread::sleep(posix_time::millisec(300));
 	switch(id)
 	{
 		case 0:
@@ -1312,6 +1326,10 @@ void CRobotMgr::onReceiveCommand(YMessage msg)
 		switch(msg.getInt("state"))
 		{
 			case 1:
+				m_servo_ctrl.setCameraDirection(TRK_LINE_CAM_PAN,TRK_LINE_CAM_TILT);
+				m_servo_ctrl.setWheelSpeed(ENUM_SERVO_LEFT_WHEEL, 0);
+				m_servo_ctrl.setWheelSpeed(ENUM_SERVO_RIGHT_WHEEL, 0);
+				this_thread::sleep(posix_time::millisec(700));
 				ChangeRobotMode(RBT_TRACK_MODE);
 			break;
 			case 2:
@@ -1342,7 +1360,23 @@ void CRobotMgr::onReceiveCommand(YMessage msg)
 	case OP_RECV_DEGUG:
 		cout << "[RobotManager] " << msg.getString("debug") << ", state : " << msg.getString("state") << endl;
 
-		DebugPrint(msg.getString("debug"));
+		{
+			string command = msg.getString("debug");
+			bool result=false;
+			DebugPrint(command);
+			if (command.compare("go") == 0) result = CreateManualMove(RBT_MAN_FORWARD);
+			else if (command.compare("back") == 0) result = CreateManualMove(RBT_MAN_BACKWARD);
+			else if (command.compare("left") == 0) result = CreateManualMove(RBT_MAN_LEFT);
+			else if (command.compare("right") == 0) result = CreateManualMove(RBT_MAN_RIGHT);
+			else if (command.compare("turn") == 0) result = CreateManualMove(RBT_MAN_TURN);
+			else if (command.compare("stop") == 0) result = StopManualMove();
+
+
+			if (result)
+				DebugPrint("OK : "+command);
+			else
+				DebugPrint("FAIL : "+command);
+		}
 	break;
 	}
 

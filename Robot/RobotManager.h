@@ -63,8 +63,8 @@ using namespace cv;
 #define OP_SEND_DEBUG               1300
 
 
-#define RBT_SIGN_RIGHT_PAN			(110)
-#define RBT_SIGN_LEFT_PAN			(120)
+#define RBT_SIGN_RIGHT_PAN			(105)
+#define RBT_SIGN_LEFT_PAN			(115)
 
 #define RBT_SIGN_LEFT_TILT			(SERVO_CENTER_OR_STOP-2)
 

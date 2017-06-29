@@ -781,7 +781,7 @@ bool CRobotMgr::AutoTurnAroundThread(int velocity)
 					if(getPassTime(stratTime, currentTime) > 800)
 						m_vision.ChangeVisionMode(VISION_TRACK,10);
 
-					if(getPassTime(stratTime, currentTime) > 1500)
+					if(getPassTime(stratTime, currentTime) > 1600)
 					{
 						cout<<"turn 2 end"<<endl;
 						step++;
@@ -1000,7 +1000,7 @@ void CRobotMgr::onSignDetect(bool isdetected)
 
 
 
-	right = RBT_SIGN_RIGHT_PAN-((m_signfailcount/2)*5);
+	right = RBT_SIGN_RIGHT_PAN-((m_signfailcount/3)*5);
 	left = RBT_SIGN_LEFT_PAN+(PAN_CAMERA_MIN-right);
 	
 

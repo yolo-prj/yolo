@@ -71,9 +71,9 @@ using namespace cv;
 
 #if 1
 
-#define RBT_AUTO_SPEED				(10)
+#define RBT_AUTO_SPEED				(12)
 #define TRK_LINE_CAM_PAN	156
-#define TRK_LINE_CAM_TILT	205
+#define TRK_LINE_CAM_TILT	204
 
 #else
 
